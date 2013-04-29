@@ -1,0 +1,11 @@
+IronArc
+Code Map
+
+Launcher: The launcher starts an instance of a virtual machine. The launcher has three tabs: "Launch", "Disks", and "Manage".
+
+The first tab allows users to create a new instance of the virtual machine. The user specifies the page size and the user/system memory size. The user/system memory size is rounded up to the next page boundary if the either amount isn't divisible by the page size. A console window, virtual console, or graphics window is then opened, indicating to the user that the machine has been started.
+
+A second tab on the launcher will allow the user to mount an unlimited number of disk files into the virtual machine.
+
+The third tab manages the current instance. The currently used memory is displayed (this is calculated by pages that have used), as well as other diagnostic information. The user can safely shut the instance down, suspend or resume execution, view the processor state when a button is pushed, and dump the system or user memory.
+

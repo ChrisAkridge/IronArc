@@ -1,0 +1,34 @@
+IronPlatform
+Binary Notes
+
+Data types:
+	- bool (1 bit)
+	- byte, sbyte (8 bits)
+	- short, ushort, char (16 bits)
+	- int, uint (32 bits)
+	- long, ulong (64 bits)
+	- BitArray
+	- BigInteger
+
+Conversions:
+	- bool to bool: return value
+	- bool to byte: 0x00 if false, 0x80 if true
+	- bool to sbyte: 0x00 if false, 0x80 if true
+	- bool to short: 0x0000 if false, 0x8000 if true
+	- bool to ushort: 0x0000 if false, 0x8000 if true
+	- bool to int: 0x00000000 if false, 0x80000000 if true
+	- bool to uint: 0x00000000 if false, 0x80000000 if true
+	- bool to long: 0x0000000000000000 if false, 0x8000000000000000 if true
+	- bool to BitArray: self-evident
+	- bool to BigInteger: 0 if false, 1 if true
+	
+	- byte to bool: if value > 127, true; else, false
+	- byte to bool[]: returns a bool[8] made from the bitwise mask
+	- byte to byte: return value
+	- byte to sbyte: returns sbyte cast with overflow check
+	- byte to sbyte (unsafe): value -> bool array -> sbyte by bit
+	- byte to short, ushort, int, uint, long, ulong: safe casts
+	- byte to BitArray: constructor exists
+	- byte to BigInteger: 
+	
+I need to research how signed types are stored.
