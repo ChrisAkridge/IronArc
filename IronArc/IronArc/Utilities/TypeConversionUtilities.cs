@@ -235,11 +235,10 @@ namespace IronArc.Utilities
         public static byte[] ToByteArray(ushort value)
         {
             byte[] result = new byte[2];
-            // The first byte of a ushort is actually a multiple of 256 (i.e. 0x0400 = 256 * 4 = 1024)
-            ushort nearestMultipleOf256 = (ushort)(Math.Truncate((value / 256f)) * 256);
-            result[0] = (byte)(nearestMultipleOf256 / 256);
-            result[1] = (byte)(value - nearestMultipleOf256);
-
+            byte high = (byte)(value >> 8);
+            byte low = (byte)(value & (byte)255);
+            result[0] = high;
+            result[1] = low;
             return result;
         }
 

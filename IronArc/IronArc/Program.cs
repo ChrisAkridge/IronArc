@@ -11,7 +11,8 @@ namespace IronArc
     {
         public static void Main(string[] args)
         {
-            Console.WriteLine(TypeConversionUtilities.ToDoubleBinary(45656).ToString());
+            Console.WriteLine(TypeConversionUtilities.ToByteArray(32769)[0].ToString());
+            Console.WriteLine(TypeConversionUtilities.ToByteArray(32769)[1].ToString());
             Console.ReadLine();
         }
     }
