@@ -1,0 +1,33 @@
+IronArc
+Technical Specification Outline
+
+1. Introduction
+	a. What is IronArc?
+	b. Who's working on IronArc?
+	c. What's the purpose of IronArc? Is it useful?
+2. Definitions
+3. IronArc Core Specification
+	a. The Processor
+		I. Simplified Execution Outline
+		II. Processor-Level Memory
+	b. The Stack
+	c. System Memory
+	d. The Diskfile
+		I. Loading a Diskfile
+		II. Reading to and Writing from a Diskfile
+	e. Addressing and Pointers
+4. IronArc Assembly Specification
+	a. Layout of an Assembly file
+	b. Labels
+5. The IronArc VM: An Implementation of IronArc
+	a. The Basics of the .NET Supersystem Implementation
+	b. The Launcher
+		I. The Launcher Tab
+		II. The System Information Tab
+		III. The Debugger Tab
+	c. The IronArc VM
+		I. The Processor Class and the Execution Cycle
+		II. Instructions in the Supersystem
+6. Instruction Listing
+	a. Instruction Block 0x00: Primary and Memory Management Instructions.
+	...
