@@ -1,0 +1,14 @@
+IronArc: Technical Specification:
+Section 1. Introduction
+
+A. What is IronArc?
+
+IronArc is a new, entirely virtual processor architecture and computer system. It contains its own instruction set, binary executable format, and methods of memory access. This project will define the specifications of an IronArc machine, and provide an implementation for a virtual machine, written in C# against the .Net Framework, version 4. A port to the Mono platform may also be written, allowing cross-platform IronArc VMs.
+
+B. Who's working on IronArc?
+
+The current team consists of members Celarix and tl-aram, both of which can be found via their respective GitHub profiles. We're sorry, but we're not accepting new team members at this time.
+
+C. What's the purpose of IronArc? Is it useful?
+
+IronArc is not meant as a platform for useful work - it is unlikely that any emulation layer running on top of managed code would be fast enough for most applications. The primary purpose of IronArc is to serve as an educational platform to inform both the developers and any interested parties in the low-level general nature of computers, such as registers, instructions and memory management.
