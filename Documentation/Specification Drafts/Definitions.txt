@@ -1,0 +1,9 @@
+IronArc Specification: Definitions
+
+DISKFILE: A file on the host machine that appears to the IronArc Virtual Machine as a form of long-term storage, such as a hard disk drive.
+
+HOST, HOST PROCESS, or HOST PROGRAM: The Win32 process, IronArc.exe, which emulates an IronArc Virtual Machine.
+
+HOST MACHINE: The actual, physical computer that the host process is running on.
+
+VIRTUAL MACHINE: The emulated computer, composed of processor registers, a block of memory, and an optional diskfile.

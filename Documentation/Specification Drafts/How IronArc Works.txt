@@ -1,0 +1,22 @@
+IronArc Specification: How IronArc Works
+
+IronArc is a virtual computer platform, complete with its own instruction set and method of interacting with the physical computer is running on. An instance of an IronArc computer is called an IronArc Virtual Machine, and it runs inside a host program, which is written in C# on top of the .NET Framework. This host program is capable of launching instances of IronArc VMs, displaying information about the memory usage and performance of an IronArc VM, and allowing the user to debug an IronArc VM.
+
+The processor is very simple in design. It has twelve general purpose registers, eight four-byte registers and four eight-byte extended registers. It has a four-byte Instruction Pointer that points to the next address for execution in memory. This memory is a byte array, and its size is determined by the user at the time of launching the VM.
+
+Another type of memory is a stack. This stack is not contained inside the allocated memory - it is stored in an instance of a stack class in the host program. The memory of the stack cannot be directly accessed by the VM, but individual items on the stack can be randomly accessed by the VM. Elements can be pushed onto or popped off of the stack at will, and many instructions work with the stack.
+
+An IronArc executable program consists of a series of instructions, which are composed of a two-byte opcode and zero or more arguments of varying lengths. The high byte of an opcode determines the instruction's "class" - instruction classes group related instructions together and reduces the time to determine what an instruction is. The low byte is the actual instruction itself. There are various instructions, all of which are listed in the Instruction Listing document.
+
+The execution cycle consists of the following steps:
+	1. Read two bytes at the instruction pointer and add 2 to it.
+	2. Determine which instruction class the first byte is.
+	3. Determine which instruction the second byte is.
+	4. Call a method in the Processor class that executes the instruction. This method will perform the execution and move the instruction pointer as needed.
+	5. Repeat.
+
+Long-term storage comes in the form of "diskfiles". A diskfile is a normal file on the host machine, but appears to the IronArc VM as a form of long-term storage which can be read from and written to. The host process might implement forms of disk caching in order to reduce the need to read to or write from the disk too often.
+
+The first versions of IronArc will not contain a dedicated hardware or interrupt system, but these will eventually be added. Rather, interaction with the host machine and the user is done through instructions, including console instructions and diskfile instructions.
+
+Error handling is also very simple. An error merely consists of a four-byte error code, and raising an error will immediately terminate execution and display an error message on the console. Individual instructions have the ability to raise errors, and there will be a dedicated instructions which raises errors.

@@ -1,0 +1,565 @@
+	[Instruction]
+		Opcode: 
+		Mnemonic: 
+		Arguments: 
+		Description: 
+		Errors:
+
+Control Flow
+	No Instruction
+		Opcode: 0x0000
+		Mnemonic: nop
+		Arguments: None
+		Description: Performs no meaningful operation. Fills space.
+		Errors: None
+		
+	End
+		Opcode: 0x0001
+		Mnemonic: end
+		Arguments: None
+		Description: Immediately and permanently halts execution. Used at the end of programs.
+		Errors: None
+		
+	Jump
+		Opcode: 0x0002
+		Mnemonic: jmp
+		Arguments: jmp <address>
+			<address>: An addressing block containing the memory address to jump to.
+		Description: Sets the program counter (PC) to the given address. This moves execution to the given address.
+		Errors:
+			InvalidAddressType: Raised if the given address block does not point to a memory address.
+			AddressOutOfRange: Raised if the given address points to a memory location beyond the bounds of the memory space.
+			
+	Call
+		Opcode: 0x0003
+		Mnemonic: call
+		Arguments: call <address>
+			<address>: An addresing block containing the memory address to call.
+		Description: Pushes the current processor state (registers, flags, PC) onto the Call Stack and then clears the processor state. The given address is jumped to, and upon a return instruction, the processor state on the top of the call stack is popped back into the current processor state, overwriting it.
+		Errors:
+			InvalidAddressType: Raised if the given address block does not point to a memory address.
+			AddressOutOfRange: Raised if the given address points to a memory location beyond the bounds of the memory space.
+			CallStackOverflow: Raised if the Call Stack is full and cannot have values pushed onto it.
+	
+	Return
+		Opcode: 0x0004
+		Mnemonic: ret
+		Arguments: None
+		Description: Used to return from a call instruction. This instruction pops the topmost processor state on the Call Stack into the current processor state.
+		Errors:
+			CallStackEmpty: Raised if the call stack has no processor states loaded onto it.
+			
+	Conditional Jump
+		Opcode: 0x0005
+		Mnemonic: cjmp
+		Arguments: cjmp <jump-address> <condition-address>
+			<jump-address>: An addressing block containing the memory address to jump to.
+			<condition-address>: An addressing block containing a pointer to some part of memory (processor, memory, diskfile) to test.
+		Description: Performs a jump to the specified address if the value at the condition address is nonzero (true).
+		Errors:
+			InvalidAddressType: Raised if the given jump address block does not point to a memory address.
+			AddressOutOfRange: Raised if the given jump address or condition address points to a memory location beyond the bounds of the memory space.
+			InvalidProcessorAddress: Raised if the given condition address points to an invalid processor memory area.
+			
+	Conditional Call
+		Opcode: 0x0006
+		Mmemonic: ccall
+		Arguments: ccall <call-address> <condition-address>
+			<jump-address>: An addressing block containing the memory address to jump to.
+			<condition-address>: An addressing block containing a pointer to some part of memory (processor, memory, diskfile) to test.
+		Description: Performs a call to the specified address if the value at the condition address is nonzero (true).
+		Errors:
+			InvalidAddressType: Raised if the given jump address block does not point to a memory address.
+			AddressOutOfRange: Raised if the given jump address or condition address points to a memory location beyond the bounds of the memory space.
+			InvalidProcessorAddress: Raised if the given condition address points to an invalid processor memory area.
+			
+Data Operations
+	Stack Addition
+		Opcode: 0x0100
+		Mnemonic: add
+		Arguments: None
+		Description: Pops the top two values off the stack, adds them together, and pushes their sum onto the stack.
+		Errors:
+			ArithmeticOverflow: Raised if the sum is higher than the maximum value of the datatype.
+			ArithmeticUnderflow: Raised if the sum is lower than the minimum value of the datatype.
+			
+	Stack Subtraction
+		Opcode: 0x0101
+		Mnemonic: sub
+		Arguments: None
+		Description: Pops the top two values off the stack, subtracts them, and pushes their difference onto the stack.
+		Errors:
+			ArithmeticOverflow: Raised if the difference is higher than the maximum value of the datatype.
+			ArithmeticUnderflow: Raised if the difference is lower than the minimum value of the datatype.
+	
+	Stack Multiplication
+		Opcode: 0x0102
+		Mnemonic: mult
+		Arguments: None
+		Description: Pops the top two values off the stack, multiplies them, and pushes their product onto the stack.
+		Errors:
+			ArithmeticOverflow: Raised if the product is higher than the maximum value of the datatype.
+			ArithmeticUnderflow: Raised if the product is lower than the minimum value of the datatype.
+	
+	Stack Division
+		Opcode: 0x0103
+		Mnemonic: div
+		Arguments: None
+		Description: Pops the top two values off the stack, divides them, and pushes their quotient onto the stack.
+		Errors:
+			ArithmeticOverflow: Raised if the quotient is higher than the maximum value of the datatype.
+			ArithmeticUnderflow: Raised if the quotient is lower than the minimum value of the datatype.
+	
+	Stack Modulus Division
+		Opcode: 0x0104
+		Mnemonic: mod
+		Arguments: None
+		Description: Pops the top two values off the stack, divides them, and pushes the remainder onto the stack.
+		Errors:
+			ArithmeticOverflow: Raised if the remainder is higher than the maximum value of the datatype.
+			ArithmeticUnderflow: Raised if the remainder is lower than the minimum value of the datatype.
+			
+	Stack Increment
+		Opcode: 0x0105
+		Mnemonic: inc
+		Arguments: None
+		Description: Pops the top value off the stack, increments it, and pushes it back onto the stack.
+		Errors:
+			ArithmeticOverflow: Raised if the value is higher than the maximum value of the datatype.
+	
+	Stack Decrement
+		Opcode: 0x0106
+		Mnemonic: dec
+		Arguments: None
+		Description: Pops the top value off the stack, decrements it, and pushes it back onto the stack.
+		Errors:
+			ArithmeticUnderflow: Raised if the value is lower than the maximum value of the datatype.
+			
+	Stack Arithmetic Inverse
+		Opcode: 0x0107
+		Mnemonic: inv
+		Arguments: None
+		Description: Pops the top value off the stack, inverts it, and pushes it back onto the stack.
+		Errors:
+			ArithmeticOverflow: Raised if the value is higher than the maximum value of the datatype.
+			
+	Stack Bitwise AND
+		Opcode: 0x0108
+		Mnemonic: bwand
+		Arguments: None
+		Description: Pops the top two values off the stack, performs a bitwise AND on them, and pushes the result onto the stack.
+		Errors:
+			InvalidBitwiseOperandSize: Raised if the two values are of different sizes.
+	
+	Stack Bitwise OR
+		Opcode: 0x0109
+		Mnemonic: bwor
+		Arguments: None
+		Description: Pops the top two values off the stack, performs a bitwise OR on them, and pushes the result onto the stack.
+		Errors:
+			InvalidBitwiseOperandSize: Raised if the two values are of different sizes.
+
+	Stack Bitwise XOR
+		Opcode: 0x010A
+		Mnemonic: bwxor
+		Arguments: None
+		Description: Pops the top two values off the stack, performs a bitwise XOR on them, and pushes the result onto the stack.
+		Errors:
+			InvalidBitwiseOperandSize: Raised if the two values are of different sizes.
+	
+	Stack Bitwise NOT
+		Opcode: 0x010B
+		Mnemonic: bwnot
+		Arguments: None
+		Description: Pops the top value off the stack, performs a bitwise NOT on it, and pushes the result onto the stack.
+		Errors: None
+		
+	Stack Bitwise Shift Left
+		Opcode: 0x010C
+		Mnemonic: lshift
+		Arguments: None
+		Description: Pops the top two values off the stack, shifts left the second value by the number of bits specified in the first value, and pushes the result on the stack.
+		Errors:
+			BitwiseShiftPositionsInvalid: Raised if the number of bits to shift is greater than 2,147,483,647 or less than 0.
+		
+	Stack Bitwise Shift Right
+		Opcode: 0x010D
+		Mnemonic: rshift
+		Arguments: None
+		Description: Pops the top two values off the stack, shifts right the second value by the number of bits specified in the first value, and pushes the result on the stack.
+		Errors:
+			BitwiseShiftPositionsInvalid: Raised if the number of bits to shift is greater than 2,147,483,647 or less than 0.
+			
+	Stack Logical AND
+		Opcode: 0x010E
+		Mnemonic: land
+		Arguments: None
+		Description: Pops the top two values off the stack. If they are both non-zero, the value 1 is pushed onto the stack. Else, the value of 0 is pushed onto the stack.
+		Errors: None
+	
+	Stack Logical OR
+		Opcode: 0x010F
+		Mnemonic: lor
+		Arguments: None
+		Description: Pops the top two values off the stack. If either or both of them are non-zero, the value 1 is pushed onto the stack. Else, the value of 0 is pushed onto the stack.
+		Errors: None
+		
+	Stack Logical XOR
+		Opcode: 0x0110
+		Mnemonic: lxor
+		Arguments: None
+		Description: Pops the top two values off the stack. If either (but not both) of them are non-zero, the value 1 is pushed onto the stack. Else, the value of 0 is pushed onto the stack.
+		Errors: None
+		
+	Stack Logical NOT
+		Opcode: 0x0111
+		Mnemonic: lnot
+		Arguments: None
+		Description: Pops the top value off the stack. If it's nonzero, the value of 0 is pushed onto the stack. Else, the value of 1 is pushed onto the stack.
+		Errors: None
+		
+	Stack Subtractive Comparison
+		Opcode: 0x0112
+		Mnemonic: scmp
+		Arguments: None
+		Description: Pops the top two values off the stack and subtracts them. If the result is non-zero, the value is set to 1 with its sign preserved (-12 would become -1, for example, and +37 would become +1). Else, the value is set to zero. The value is pushed onto the stack.
+		Errors:
+			ArithmeticOverflow: Raised if the difference is higher than the maximum value of the datatype.
+			ArithmeticUnderflow: Raised if the difference is lower than the minimum value of the datatype.
+			
+	Stack Equality
+		Opcode: 0x0113
+		Mnemonic: eq
+		Arguments: None
+		Description: Pops the top two values off the stack. If they're equal, the value of 1 is pushed onto the stack. Else, the value of 0 is pushed onto the stack.
+		Errors: None
+		
+	Stack Inequality
+		Opcode: 0x0114
+		Mnemonic: ineq
+		Arguments: None
+		Description: Pops the top two values off the stack. If they're not equal, the value of 1 is pushed onto the stack. Else, the value of 0 is pushed onto the stack.
+		Errors: None
+		
+	Stack Less Than
+		Opcode: 0x0115
+		Mnemonic: lt
+		Arguemnts: None
+		Description: Pops the top two values off the stack. If the second value is less than the first, the value of 1 is pushed onto the stack. Else, the value of 0 is pushed onto the stack.
+		Errors: None	
+		
+	Stack Greater Than
+		Opcode: 0x0116
+		Mnemonic: gt
+		Arguemnts: None
+		Description: Pops the top two values off the stack. If the second value is greater than the first, the value of 1 is pushed onto the stack. Else, the value of 0 is pushed onto the stack.
+		Errors: None
+				
+	Stack Less Than or Equal To
+		Opcode: 0x0117
+		Mnemonic: lte
+		Arguemnts: None
+		Description: Pops the top two values off the stack. If the second value is less than or equal to the first, the value of 1 is pushed onto the stack. Else, the value of 0 is pushed onto the stack.
+		Errors: None
+		
+	Stack Greater Than or Equal To
+		Opcode: 0x0118
+		Mnemonic: gte
+		Arguemnts: None
+		Description: Pops the top two values off the stack. If the second value is greater than or equal to the first, the value of 1 is pushed onto the stack. Else, the value of 0 is pushed onto the stack.
+		Errors: None
+		
+	Long Addition
+		Opcode: 0x0119
+		Mnemonic: addl
+		Arguments: addl <source1-address> <source2-address> <dest-address>
+			<source1-address>: An addressing block containing the first operand.
+			<source2-address>: An addressing block containing the second operand.
+			<dest-address>: The addressing block containing the destination of the sum.
+		Description: Using the two source address, two values are added and their sum is stored in the destination address.
+		Errors:
+			ArithmeticOverflow: Raised if the sum is higher than the maximum value of the datatype.
+			ArithmeticUnderflow: Raised if the sum is lower than the minimum value of the datatype.
+	
+	Long Subtraction
+		Opcode: 0x011A
+		Mnemonic: subl
+		Arguments: subl <source1-address> <source2-address> <dest-address>
+			<source1-address>: An addressing block containing the first operand.
+			<source2-address>: An addressing block containing the second operand.
+			<dest-address>: The addressing block containing the destination of the difference.
+		Description: Using the two source address, two values are subtracted and their difference is stored in the destination address.
+		Errors:
+			ArithmeticOverflow: Raised if the difference is higher than the maximum value of the datatype.
+			ArithmeticUnderflow: Raised if the difference is lower than the minimum value of the datatype.
+	
+	Long Multiplication
+		Opcode: 0x011B
+		Mnemonic: multl
+		Arguments: multl <source1-address> <source2-address> <dest-address>
+			<source1-address>: An addressing block containing the first operand.
+			<source2-address>: An addressing block containing the second operand.
+			<dest-address>: The addressing block containing the destination of the product.
+		Description: Using the two source address, two values are multiplied and their product is stored in the destination address.
+		Errors:
+			ArithmeticOverflow: Raised if the product is higher than the maximum value of the datatype.
+			ArithmeticUnderflow: Raised if the product is lower than the minimum value of the datatype.
+			
+	Long Division
+		Opcode: 0x011C
+		Mnemonic: divl
+		Arguments: divl <source1-address> <source2-address> <dest-address>
+			<source1-address>: An addressing block containing the first operand.
+			<source2-address>: An addressing block containing the second operand.
+			<dest-address>: The addressing block containing the destination of the quotient.
+		Description: Using the two source address, two values are divided and their quotient is stored in the destination address.
+		Errors:
+			ArithmeticOverflow: Raised if the quotient is higher than the maximum value of the datatype.
+			ArithmeticUnderflow: Raised if the quotient is lower than the minimum value of the datatype.
+			
+	Long Modulus Division
+		Opcode: 0x011D
+		Mnemonic: modl
+		Arguments: modl <source1-address> <source2-address> <dest-address>
+			<source1-address>: An addressing block containing the first operand.
+			<source2-address>: An addressing block containing the second operand.
+			<dest-address>: The addressing block containing the destination of the remainder.
+		Description: Using the two source address, two values are divided and their remainder is stored in the destination address.
+		Errors:
+			ArithmeticOverflow: Raised if the remainder is higher than the maximum value of the datatype.
+			ArithmeticUnderflow: Raised if the remainder is lower than the minimum value of the datatype.
+			
+	Long Increment
+		Opcode: 0x011E
+		Mnemonic: incl
+		Arguments: incl <source-address>
+			<source-address>: An addressing block containing the operand.
+		Description: The value at the source address is incremented.
+		Errors:
+			ArithmeticOverflow: Raised if the value is higher than the maximum value of the datatype.
+			
+	Long Decrement
+		Opcode: 0x011F
+		Mnemonic: decl
+		Arguments: decl <source-address>
+			<source-address>: An addressing block containing the operand.
+		Description: The value at the source address is decremented.
+		Errors:
+			ArithmeticUnderflow: Raised if the value is lower than the minimum value of the datatype.
+			
+	Long Arithmetic Inverse
+		Opcode: 0x0120
+		Mnemonic: invl
+		Arguments: invl <source-address> <dest-address>
+			<source-address>: An addressing block containing the operand.
+			<dest-address>: An addressing block containing the destination of the operation.
+		Description: Inverts the value at the source address and stores it in the destination address.
+		Errors:
+			ArithmeticOverflow: Raised if the value is higher than the maximum value of the datatype.
+			
+	Long Bitwise AND
+		Opcode: 0x0121
+		Mnemonic: bwandl
+		Arguments: bwandl <source1-address> <source2-address> <dest-address>
+			<source1-address>: An addressing block containing the first operand.
+			<source2-address>: An addressing block containing the second operand.
+			<dest-address>: The addressing block containing the destination of the result.
+		Description: Performs a bitwise AND on the values at the two source addresses and stores the result in the destination address.
+		Errors:
+			InvalidBitwiseOperandSize: Raised if the two values are of different sizes.
+			
+	Long Bitwise OR
+		Opcode: 0x0122
+		Mnemonic: bworl
+		Arguments: bworl <source1-address> <source2-address> <dest-address>
+			<source1-address>: An addressing block containing the first operand.
+			<source2-address>: An addressing block containing the second operand.
+			<dest-address>: The addressing block containing the destination of the result.
+		Description: Performs a bitwise OR on the values at the two source addresses and stores the result in the destination address.
+		Errors:
+			InvalidBitwiseOperandSize: Raised if the two values are of different sizes.
+			
+	Long Bitwise XOR
+		Opcode: 0x0123
+		Mnemonic: bwxorl
+		Arguments: bwxorl <source1-address> <source2-address> <dest-address>
+			<source1-address>: An addressing block containing the first operand.
+			<source2-address>: An addressing block containing the second operand.
+			<dest-address>: The addressing block containing the destination of the result.
+		Description: Performs a bitwise XOR on the values at the two source addresses and stores the result in the destination address.
+		Errors:
+			InvalidBitwiseOperandSize: Raised if the two values are of different sizes.
+	
+	Long Bitwise NOT
+		Opcode: 0x0124
+		Mnemonic: bwnotl
+		Arguments: bwnotrl <source-address> <dest-address>
+			<source-address>: An addressing block containing the operand.
+			<dest-address>: An addressing block containing the destination.
+		Description: Performs a bitwis NOT on the value at the source address and stores the result in the destination address.
+		Errors:
+			InvalidBitwiseOperandSize: Raised if the two values are of different sizes.
+			
+	Long Bitwise Shift Left
+		Opcode: 0x0125
+		Mnemonic: lshiftl
+		Arguments: lshiftl <operand-address> <positions-address> <dest-address>
+			<operand-address>: An addressing block containing the operand.
+			<positions-address>: An addressing block containing the number of positions to shift the value by.
+			<dest-address>: An addressing block containing the destination.
+		Description: Shifts left the value at the operand's address by the number of specified positions and stores the result in the destination address.
+		Errors:
+			BitwiseShiftPositionsInvalid: Raised if the number of bits to shift is greater than 2,147,483,647 or less than 0.
+			
+	Long Bitwise Shift Right
+		Opcode: 0x0126
+		Mnemonic: rshiftl
+		Arguments: rshiftl <operand-address> <positions-address> <dest-address>
+			<operand-address>: An addressing block containing the operand.
+			<positions-address>: An addressing block containing the number of positions to shift the value by.
+			<dest-address>: An addressing block containing the destination.
+		Description: Shifts right the value at the operand's address by the number of specified positions and stores the result in the destination address.
+		Errors:
+			BitwiseShiftPositionsInvalid: Raised if the number of bits to shift is greater than 2,147,483,647 or less than 0.
+			
+	Long Logical AND
+		Opcode: 0x0127
+		Mnemonic: landl
+		Arguments: landl <source1-address> <source2-address> <dest-address>
+			<source1-address>: An addressing block containing the first operand.
+			<source2-address>: An addressing block containing the second operand.
+			<dest-address>: The addressing block containing the destination of the result.
+		Description: If both of the source values are non-zero, the value of 1 is placed in the destination. Else, the value of 0 is placed in the destination.
+		Errors: None
+		
+	Long Logical OR
+		Opcode: 0x0128
+		Mnemonic: lorl
+		Arguments: lorl <source1-address> <source2-address> <dest-address>
+			<source1-address>: An addressing block containing the first operand.
+			<source2-address>: An addressing block containing the second operand.
+			<dest-address>: The addressing block containing the destination of the result.
+		Description: If either or both of the source values are non-zero, the value of 1 is placed in the destination. Else, the value of 0 is placed in the destination.
+		Errors: None
+		
+	Long Logical XOR
+		Opcode: 0x0129
+		Mnemonic: lxorl
+		Arguments: lxorl <source1-address> <source2-address> <dest-address>
+			<source1-address>: An addressing block containing the first operand.
+			<source2-address>: An addressing block containing the second operand.
+			<dest-address>: The addressing block containing the destination of the result.
+		Description: If either (but not both) of the source values are non-zero, the value of 1 is placed in the destination. Else, the value of 0 is placed in the destination.
+		Errors: None
+		
+	Long Logical NOT
+		Opcode: 0x012A
+		Mnemonic: lnotl
+		Arguments: lnotl <source-address> <dest-address>
+			<source-address>: An addressing block containing the operand.
+			<dest-address>: An addressing block containing the destination.
+		Description: If the source value is non-zero, the value of 0 is placed in the destination. Else, the value of 1 is placed in the destination.
+		Errors: None
+		
+	Long Subtractive Comparison
+		Opcode: 0x012B
+		Mnemonic: scmpl
+		Arguments: scmpl <source1-address> <source2-address> <dest-address>
+			<source1-address>: An addressing block containing the first operand.
+			<source2-address>: An addressing block containing the second operand.
+			<dest-address>: The addressing block containing the destination of the result.
+		Description: Subtracts the two source values. If the result is non-zero, the value of 1 (with the same sign as the result) is placed in the destination. Else, the value of 0 is placed in the destination.
+		Errors:
+			ArithmeticUnderflow: Raised if the difference is lower than the minimum value of the datatype.
+		
+	Long Equality
+		Opcode: 0x012C
+		Mnemonic: eql
+		Arguments: eql <source1-address> <source2-address> <dest-address>
+			<source1-address>: An addressing block containing the first operand.
+			<source2-address>: An addressing block containing the second operand.
+			<dest-address>: The addressing block containing the destination of the result.
+		Description: If the source values are equal, the value of 1 is placed in the destination. Else, the value of 0 is placed in the destination
+		Errors: None
+		
+	Long Inequality
+		Opcode: 0x012D
+		Mnemonic: ineql
+		Arguments: ineql <source1-address> <source2-address> <dest-address>
+			<source1-address>: An addressing block containing the first operand.
+			<source2-address>: An addressing block containing the second operand.
+			<dest-address>: The addressing block containing the destination of the result.
+		Description: If the source values are not equal, the value of 1 is placed in the destination. Else, the value of 0 is placed in the destination
+		Errors: None
+		
+	Long Less Than
+		Opcode: 0x012E
+		Mnemonic: ltl
+		Arguments: ltl <source1-address> <source2-address> <dest-address>
+			<source1-address>: An addressing block containing the first operand.
+			<source2-address>: An addressing block containing the second operand.
+			<dest-address>: The addressing block containing the destination of the result.
+		Description: If the first source value is less than the second, the value of 1 is placed in the destination. Else, the value of 0 is placed in the destination
+		Errors: None
+		
+	Long Greater Than
+		Opcode: 0x012F
+		Mnemonic: gtl
+		Arguments: gtl <source1-address> <source2-address> <dest-address>
+			<source1-address>: An addressing block containing the first operand.
+			<source2-address>: An addressing block containing the second operand.
+			<dest-address>: The addressing block containing the destination of the result.
+		Description: If the first source value is greater than the second, the value of 1 is placed in the destination. Else, the value of 0 is placed in the destination
+		Errors: None
+		
+	Long Less Than or Equal To
+		Opcode: 0x0130
+		Mnemonic: lteql
+		Arguments: lteql <source1-address> <source2-address> <dest-address>
+			<source1-address>: An addressing block containing the first operand.
+			<source2-address>: An addressing block containing the second operand.
+			<dest-address>: The addressing block containing the destination of the result.
+		Description: If the first source value is less than or equal to the second, the value of 1 is placed in the destination. Else, the value of 0 is placed in the destination
+		Errors: None
+	
+	Long Greater Than or Equal To
+		Opcode: 0x0131
+		Mnemonic: gteql
+		Arguments: gteql <source1-address> <source2-address> <dest-address>
+			<source1-address>: An addressing block containing the first operand.
+			<source2-address>: An addressing block containing the second operand.
+			<dest-address>: The addressing block containing the destination of the result.
+		Description: If the first source value is greater than or equal to the second, the value of 1 is placed in the destination. Else, the value of 0 is placed in the destination
+		Errors: None
+		
+Console Wrapper
+	Console Read Character
+		Opcode: 0x0200
+		Mnemonic: creadc
+		Arguments: creadc <destination-address>
+			<destination-address>: The addressing block where the pressed key will be.
+		Description: Halts execution until the user presses a key. When the user does, the key is passed to the destination as a UTF-16 character.
+	
+	Console Read Line
+		Opcode: 0x0201
+		Mnemonic: cread
+		Arguments: cread <destination-address> <pointer-destination>
+			<destination-address>: The addressing block where the line will be.
+		Description: Halts execution until the user presses Enter. When the user does, a UTF-16 string is created at the destination and the resulting line is placed in the string. Finally, a pointer to the string is stored at the pointer destination address.
+		
+	Console Write
+		Opcode: 0x0202
+		Mnemonic: cwrite
+		Arguments: cwrite <string>
+			<string>: The string or pointer to the string to write.
+		Description: Writes the string to the console.
+	
+	Console Write Line
+		Opcode: 0x0203
+		Mnemonic: cwritel
+		Arguments: cwritel <string>
+			<string>: The string or pointer to the string to write.
+		Description: Writes the string to the console, and then writes a new line.
+		
+System.Math Wrapper
+	

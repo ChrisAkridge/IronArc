@@ -1,0 +1,117 @@
+IronArc Simple Instruction Listing:
+
+Control Flow
+	No Operation
+	End
+	Jump
+	Call
+	Return
+	Conditional Jump
+	Conditional Call
+	
+Data Operations
+	Move Data
+	Stack-Based
+		Addition
+		Subtraction
+		Multiplication
+		Division
+		Modulus Division
+		Increment
+		Decrement
+		Arithmetic Inverse
+		Bitwise AND
+		Bitwise OR
+		Bitwise XOR
+		Bitwise NOT
+		Bitwise Shift Left
+		Bitwise Shift Right
+		Logical AND
+		Logical OR
+		Logical XOR
+		Logical NOT
+		Subtractive Comparison
+		Equality
+		Inequality
+		Less Than
+		Greater Than
+		Less Than or Equal To
+		Greater Than or Equal To
+	Long
+		Addition
+		Subtraction
+		Multiplication
+		Division
+		Modulus Division
+		Increment
+		Decrement
+		Arithmetic Inverse
+		Bitwise AND
+		Bitwise OR
+		Bitwise XOR
+		Bitwise NOT
+		Bitwise Shift Left
+		Bitwise Shift Right
+		Logical AND
+		Logical OR
+		Logical XOR
+		Logical NOT
+		Subtractive Comparison
+		Equality
+		Inequality
+		Less Than
+		Greater Than
+		Less Than or Equal To
+		Greater Than or Equal To
+		
+Console Instructions
+	Console Read Character
+	Console Write
+	Console Read Line
+	Console Write Line
+	
+System.Math Wrapper
+	Absolute Value
+	Angle from Cosine
+	Angle from Sine
+	Angle from Tangent
+	Angle from Tangent 2 (http://msdn.microsoft.com/en-us/library/system.math.atan2.aspx)
+	Ceiling
+	Cosine
+	Hyperbolic Cosine
+	Exp (e raised to a power)
+	Floor
+	Log (base e)
+	Log (specified base)
+	Log (base 10)
+	Max
+	Min
+	Power
+	Round
+	Sign
+	Sine
+	Hyperbolic Sine
+	Square Root
+	Tangent
+	Hyperbolic Tangent
+	Truncate
+	Push E
+	Push Pi
+	
+System.String Wrapper (operates on having pointers to strings on the stack):
+	Create String
+	Compare (2 string args)
+	Compare Ignore Case (2 string args)
+	Concat (specify number of string args)
+	Contains (2 string args)
+	Copy (1 string arg)
+	Ends With (2 string args)
+	Index Of (2 string args)
+	Insert (2 string args)
+	IsNullOrEmpty
+	Split (2 string args)
+	StartsWith (2 string args)
+	Substring (1 string arg)
+	To Lower (1 string arg)
+	To Upper (1 string arg)
+	Trim (1 string arg)
