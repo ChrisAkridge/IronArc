@@ -6,7 +6,7 @@
     <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{8CE75941-A5DE-4155-AB10-DE82AFE001FB}</ProjectGuid>
-    <OutputType>Exe</OutputType>
+    <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>IronArc</RootNamespace>
     <AssemblyName>IronArc</AssemblyName>
@@ -33,6 +33,9 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject />
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Drawing" />
@@ -41,7 +44,12 @@
     <Reference Include="System.Xml.Linq" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Diskfile.cs" />
+    <Compile Include="Processor.cs" />
     <Compile Include="Program.cs" />
+    <Compile Include="StandardStreams.cs" />
+    <Compile Include="Stream.cs" />
+    <Compile Include="SystemError.cs" />
     <Compile Include="Utilities\NumericUtilities.cs" />
     <Compile Include="Utilities\TypeConversionUtilities.cs" />
   </ItemGroup>
