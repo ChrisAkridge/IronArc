@@ -216,6 +216,94 @@ namespace IronArc
             return System.Text.Encoding.UTF8.GetString(bytes, 0, length);
         }
 
+        public byte[] Peek(int length)
+        {
+            if (length > 0x7FFFFFFF) 
+            {
+                throw new Exception("Cannot peek byte array from stream - length is too large.");
+            }
+
+            if (length > this.bufferTop)
+            {
+                throw new Exception("Cannot peek byte array from stream - buffer not large enough.");
+            }
+
+            int startIndex = this.bufferTop - length;
+            int i = 0;
+            byte[] result = new byte[length];
+
+            while (length > 0)
+            {
+                result[i] = this.buffer[startIndex];
+                startIndex++;
+                length--;
+                i++;
+            }
+
+            return result;
+        }
+
+        public byte PeekByte()
+        {
+            return this.Peek(1)[0];
+        }
+
+        public sbyte PeekSByte()
+        {
+            return (sbyte)this.Peek(1)[0];
+        }
+
+        public short PeekShort()
+        {
+            byte[] bytes = this.Peek(2);
+            return (short)(bytes[0]<<8 + bytes[1]);
+        }
+
+        public ushort PeekUShort()
+        {
+            return (ushort)this.PeekShort();
+        }
+
+        public int PeekInt()
+        {
+            byte[] bytes = this.Peek(4);
+            return (int)(bytes[0] << 24 + bytes[1] << 16 + bytes[2] << 8 + bytes[3]);
+        }
+
+        public uint PeekUInt()
+        {
+            return (uint)this.PeekInt();
+        }
+
+        public long PeekLong()
+        {
+            byte[] bytes = this.Peek(8);
+            long result = 0L;
+
+            for (int i = 56; i >= 0; i -= 8)
+            {
+                result += bytes[7 - (i / 8)] << i;
+            }
+            return result;
+        }
+
+        public ulong PeekULong()
+        {
+            return (ulong)PeekLong();
+        }
+
+        public float PeekFloat()
+        {
+            byte[] bytes = Peek(4);
+            return BitConverter.ToSingle(bytes, 0);
+        }
+
+        public double PeekDouble()
+        {
+            byte[] bytes = Peek(8);
+            return BitConverter.ToDouble(bytes, 0);
+        }
+
         public void Write(byte[] bytes)
         {
             this.ThrowIfWriteCausesOverflow(bytes.Length);
