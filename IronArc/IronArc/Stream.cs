@@ -304,6 +304,22 @@ namespace IronArc
             return BitConverter.ToDouble(bytes, 0);
         }
 
+        public char PeekChar()
+        {
+            return (char)this.PeekShort();
+        }
+
+        public string PeekString(int length)
+        {
+            if (length > 0x7FFFFFFF)
+            {
+                throw new Exception("Cannot read string from stream - length is too large.");
+            }
+
+            byte[] bytes = this.Peek(length);
+            return System.Text.Encoding.UTF8.GetString(bytes, 0, length);
+        }
+
         public void Write(byte[] bytes)
         {
             this.ThrowIfWriteCausesOverflow(bytes.Length);
