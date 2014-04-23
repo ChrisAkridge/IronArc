@@ -8,25 +8,54 @@ namespace IronArc
     public sealed class Processor
     {
         // Registers
-        public long EAX { get; set; }
-        public long EBX { get; set; }
-        public long ECX { get; set; }
-        public long EDX { get; set; }
-        public long EEX { get; set; }
-        public long EFX { get; set; }
-        public long EGX { get; set; }
-        public long EHX { get; set; }
+        public ByteBlock EAX { get; set; }
+        public ByteBlock EBX { get; set; }
+        public ByteBlock ECX { get; set; }
+        public ByteBlock EDX { get; set; }
+        public ByteBlock EEX { get; set; }
+        public ByteBlock EFX { get; set; }
+        public ByteBlock EGX { get; set; }
+        public ByteBlock EHX { get; set; }
 
         // System memory
-        public byte[] Memory { get; set; }
+        public ByteBlock Memory { get; set; }
 
         // System stack
         public Stack<long> Stack { get; set; }
 
         // Instruction pointer
-        public ulong InstructionPointer { get; set; }
+        public int InstructionPointer { get; set; }
 
         // Diskfile
         public Diskfile Diskfile { get; set; }
+
+        // Call stack
+        public Stack<int> CallStack { get; set; }
+
+        public Processor(int memorySize)
+        {
+            this.EAX = ByteBlock.FromLength(8);
+            this.EBX = ByteBlock.FromLength(8);
+            this.ECX = ByteBlock.FromLength(8);
+            this.EDX = ByteBlock.FromLength(8);
+            this.EEX = ByteBlock.FromLength(8);
+            this.EFX = ByteBlock.FromLength(8);
+            this.EGX = ByteBlock.FromLength(8);
+            this.EHX = ByteBlock.FromLength(8);
+
+            this.Memory = ByteBlock.FromLength(memorySize);
+            this.Stack = new Stack<long>();
+            this.CallStack = new Stack<int>();
+        }
+
+        public byte ReadByte()
+        {
+            return this.Memory[this.InstructionPointer++];
+        }
+
+        public sbyte ReadSByte()
+        {
+            return (sbyte)this.ReadByte();
+        }
     }
 }

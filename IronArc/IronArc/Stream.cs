@@ -330,6 +330,8 @@ namespace IronArc
                 this.buffer[bufferTop] = bytes[i];
                 this.bufferTop++;
             }
+
+            this.OnNewData();
         }
 
         public void WriteBool(bool value)
@@ -342,6 +344,8 @@ namespace IronArc
             {
                 this.WriteByte(0);
             }
+
+            this.OnNewData();
         }
 
         public void WriteByte(byte value)
@@ -350,6 +354,8 @@ namespace IronArc
 
             this.bufferTop++;
             this.buffer[this.bufferTop] = value;
+
+            this.OnNewData();
         }
 
         public void WriteSByte(sbyte value)
@@ -418,6 +424,14 @@ namespace IronArc
             if (this.bufferTop + dataLength > this.buffer.Length - 1)
             {
                 throw new Exception(string.Format("Stream buffer overflow. Current buffer size is {0}, max buffer size is {1}, input size is {2}.", this.bufferTop + 1, this.buffer.Length, dataLength));
+            }
+        }
+
+        protected void OnNewData()
+        {
+            if (this.NewData != null)
+            {
+                this.NewData(this);
             }
         }
     }
