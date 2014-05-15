@@ -5,6 +5,9 @@ using System.Text;
 
 namespace IronArc
 {
+    /// <summary>
+    /// Represents a stream of bytes that can be written to or read from.
+    /// </summary>
     public class Stream
     {
         private byte[] buffer;
@@ -29,9 +32,9 @@ namespace IronArc
             {
                 throw new Exception("Cannot read empty stream.");
             }
-            else if (bufferTop < length - 1)
+            else if (this.bufferTop < length - 1)
             {
-                throw new Exception(string.Format("Tried to read past end of stream. Stream size: {0}, Read length: {1}.", bufferTop + 1, length));
+                throw new Exception(string.Format("Tried to read past end of stream. Stream size: {0}, Read length: {1}.", this.bufferTop + 1, length));
             }
 
             int startIndex = this.bufferTop - (length - 1);
@@ -79,8 +82,8 @@ namespace IronArc
                 throw new Exception("Cannot read empty stream.");
             }
 
-            byte result = this.buffer[bufferTop];
-            this.buffer[bufferTop] = 0x00;
+            byte result = this.buffer[this.bufferTop];
+            this.buffer[this.bufferTop] = 0x00;
             this.bufferTop--;
             return result;
         }
@@ -256,7 +259,7 @@ namespace IronArc
         public short PeekShort()
         {
             byte[] bytes = this.Peek(2);
-            return (short)(bytes[0]<<8 + bytes[1]);
+            return (short)((bytes[0] << 8) + bytes[1]);
         }
 
         public ushort PeekUShort()
@@ -267,7 +270,7 @@ namespace IronArc
         public int PeekInt()
         {
             byte[] bytes = this.Peek(4);
-            return (int)(bytes[0] << 24 + bytes[1] << 16 + bytes[2] << 8 + bytes[3]);
+            return (int)((bytes[0] << 24) + (bytes[1] << 16) + (bytes[2] << 8) + bytes[3]);
         }
 
         public uint PeekUInt()
@@ -284,23 +287,24 @@ namespace IronArc
             {
                 result += bytes[7 - (i / 8)] << i;
             }
+
             return result;
         }
 
         public ulong PeekULong()
         {
-            return (ulong)PeekLong();
+            return (ulong)this.PeekLong();
         }
 
         public float PeekFloat()
         {
-            byte[] bytes = Peek(4);
+            byte[] bytes = this.Peek(4);
             return BitConverter.ToSingle(bytes, 0);
         }
 
         public double PeekDouble()
         {
-            byte[] bytes = Peek(8);
+            byte[] bytes = this.Peek(8);
             return BitConverter.ToDouble(bytes, 0);
         }
 
@@ -327,7 +331,7 @@ namespace IronArc
             this.bufferTop++;
             for (int i = 0; i < bytes.Length; i++)
             {
-                this.buffer[bufferTop] = bytes[i];
+                this.buffer[this.bufferTop] = bytes[i];
                 this.bufferTop++;
             }
 

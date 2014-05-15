@@ -5,6 +5,9 @@ using System.Text;
 
 namespace IronArc
 {
+    /// <summary>
+    /// Represents an array of bytes with several helper functions.
+    /// </summary>
     public sealed class ByteBlock
     {
         private byte[] bytes;
@@ -25,6 +28,7 @@ namespace IronArc
                 Assert.IsTrue(index >= 0 && index < this.Length);
                 return this.bytes[index];
             }
+
             set
             {
                 Assert.IsTrue(index >= 0 && index < this.Length);
@@ -33,11 +37,21 @@ namespace IronArc
         }
 
         #region Constructors
+        /// <summary>
+        /// Initializes a new instance of this <see cref="ByteBlock"/> class.
+        /// </summary>
+        /// <param name="value">An array of bytes used to initialize this byte block.</param>
         public ByteBlock(byte[] value)
         {
             this.bytes = value;
         }
 
+        /// <summary>
+        /// Initializes a new instance of this <see cref="ByteBlock"/> class.
+        /// </summary>
+        /// <param name="length">The number of bytes from the array to use.</param>
+        /// <param name="value">An array of bytes of which a portion is used to initialize this byte block.</param>
+        /// <param name="startIndex">The index at which to start reading bytes in the array.</param>
         public ByteBlock(int length, byte[] value, int startIndex)
         {
             this.bytes = new byte[length];
@@ -45,13 +59,17 @@ namespace IronArc
 
             while (length > 0)
             {
-                bytes[i] = value[startIndex];
+                this.bytes[i] = value[startIndex];
                 i++;
                 startIndex++;
                 length--;
             }
         }
 
+        /// <summary>
+        /// Initializes a new instance of this <see cref="ByteBlock"/> class.
+        /// </summary>
+        /// <param name="value">A Boolean value. True becomes 0xFF and false becomes 0x00.</param>
         public ByteBlock(bool value)
         {
             if (value)
@@ -64,16 +82,28 @@ namespace IronArc
             }
         }
 
+        /// <summary>
+        /// Initializes a new instance of this <see cref="ByteBlock"/> class.
+        /// </summary>
+        /// <param name="value">A byte value.</param>
         public ByteBlock(byte value)
         {
             this.bytes = new byte[] { value };
         }
 
+        /// <summary>
+        /// Initializes a new instance of this <see cref="ByteBlock"/> class.
+        /// </summary>
+        /// <param name="value">A signed byte value.</param>
         public ByteBlock(sbyte value)
             : this((byte)value)
         {
         }
 
+        /// <summary>
+        /// Initializes a new instance of this <see cref="ByteBlock"/> class.
+        /// </summary>
+        /// <param name="value">A signed 16-bit integer value.</param>
         public ByteBlock(short value)
         {
             this.bytes = new byte[2];
@@ -81,11 +111,19 @@ namespace IronArc
             this.bytes[1] = (byte)((value << 8) >> 8);
         }
 
+        /// <summary>
+        /// Initializes a new instance of this <see cref="ByteBlock"/> class.
+        /// </summary>
+        /// <param name="value">An unsigned 16-bit integer value.</param>
         public ByteBlock(ushort value)
             : this((short)value)
         {
         }
 
+        /// <summary>
+        /// Initializes a new instance of this <see cref="ByteBlock"/> class.
+        /// </summary>
+        /// <param name="value">A signed 32-bit integer value.</param>
         public ByteBlock(int value)
         {
             this.bytes = new byte[4];
@@ -96,11 +134,19 @@ namespace IronArc
             }
         }
 
+        /// <summary>
+        /// Initializes a new instance of this <see cref="ByteBlock"/> class.
+        /// </summary>
+        /// <param name="value">An unsigned 32-bit integer value.</param>
         public ByteBlock(uint value)
             : this((int)value)
         {
         }
 
+        /// <summary>
+        /// Initializes a new instance of this <see cref="ByteBlock"/> class.
+        /// </summary>
+        /// <param name="value">A signed 64-bit integer value.</param>
         public ByteBlock(long value)
         {
             this.bytes = new byte[8];
@@ -111,33 +157,190 @@ namespace IronArc
             }
         }
 
+        /// <summary>
+        /// Initializes a new instance of this <see cref="ByteBlock"/> class.
+        /// </summary>
+        /// <param name="value">An unsigned 64-bit integer value.</param>
         public ByteBlock(ulong value)
             : this((long)value)
         {
         }
 
+        /// <summary>
+        /// Initializes a new instance of this <see cref="ByteBlock"/> class.
+        /// </summary>
+        /// <param name="value">A single-precision floating point value.</param>
         public ByteBlock(float value) : this(BitConverter.ToInt32(BitConverter.GetBytes(value), 0))
         {
         }
 
+        /// <summary>
+        /// Initializes a new instance of this <see cref="ByteBlock"/> class.
+        /// </summary>
+        /// <param name="value">A double-precision floating point value.</param>
         public ByteBlock(double value) : this(BitConverter.ToInt64(BitConverter.GetBytes(value), 0))
         {
         }
 
+        /// <summary>
+        /// Initializes a new instance of this <see cref="ByteBlock"/> class.
+        /// </summary>
+        /// <param name="value">A UTF-16 character value.</param>
         public ByteBlock(char value) : this((short)value)
         { }
 
+        /// <summary>
+        /// Initializes a new instance of this <see cref="ByteBlock"/> class.
+        /// </summary>
+        /// <param name="value">A string value which will be converted to UTF-8 bytes.</param>
         public ByteBlock(string value)
         {
             this.bytes = System.Text.Encoding.UTF8.GetBytes(value);
         }
 
+        /// <summary>
+        /// Returns an empty ByteBlock instance initialized to a given length.
+        /// </summary>
+        /// <param name="length">The length of the ByteBlock.</param>
+        /// <returns>An empty ByteBlock of the given length.</returns>
         public static ByteBlock FromLength(int length)
         {
             byte[] bytes = new byte[length];
             ByteBlock result = new ByteBlock(0);
             result.bytes = bytes;
             return result;
+        }
+        #endregion
+
+        #region Implicit Conversions
+        /// <summary>
+        /// Converts a byte array into a ByteBlock.
+        /// </summary>
+        /// <param name="value">An array of bytes.</param>
+        /// <returns>A ByteBlock containing the bytes of the array.</returns>
+        public static implicit operator ByteBlock(byte[] value)
+        {
+            return new ByteBlock(value);
+        }
+
+        public static implicit operator ByteBlock(bool value)
+        {
+            return new ByteBlock(value);
+        }
+
+        public static implicit operator ByteBlock(byte value)
+        {
+            return new ByteBlock(value);
+        }
+
+        public static implicit operator ByteBlock(sbyte value)
+        {
+            return new ByteBlock(value);
+        }
+
+        public static implicit operator ByteBlock(short value)
+        {
+            return new ByteBlock(value);
+        }
+
+        public static implicit operator ByteBlock(ushort value)
+        {
+            return new ByteBlock(value);
+        }
+
+        public static implicit operator ByteBlock(int value)
+        {
+            return new ByteBlock(value);
+        }
+
+        public static implicit operator ByteBlock(uint value)
+        {
+            return new ByteBlock(value);
+        }
+
+        public static implicit operator ByteBlock(long value)
+        {
+            return new ByteBlock(value);
+        }
+
+        public static implicit operator ByteBlock(ulong value)
+        {
+            return new ByteBlock(value);
+        }
+
+        public static implicit operator ByteBlock(float value)
+        {
+            return new ByteBlock(value);
+        }
+
+        public static implicit operator ByteBlock(double value)
+        {
+            return new ByteBlock(value);
+        }
+
+        public static implicit operator ByteBlock(char value)
+        {
+            return new ByteBlock(value);
+        }
+
+        public static implicit operator ByteBlock(string value)
+        {
+            return new ByteBlock(value);
+        }
+
+        public static implicit operator bool(ByteBlock value)
+        {
+            return value.ToBool();
+        }
+
+        public static implicit operator byte(ByteBlock value)
+        {
+            return value.ToByte();
+        }
+
+        public static implicit operator sbyte(ByteBlock value)
+        {
+            return value.ToSByte();
+        }
+
+        public static implicit operator short(ByteBlock value)
+        {
+            return value.ToShort();
+        }
+
+        public static implicit operator ushort(ByteBlock value)
+        {
+            return value.ToUShort();
+        }
+
+        public static implicit operator int(ByteBlock value)
+        {
+            return value.ToInt();
+        }
+
+        public static implicit operator uint(ByteBlock value)
+        {
+            return value.ToUInt();
+        }
+
+        public static implicit operator long(ByteBlock value)
+        {
+            return value.ToLong();
+        }
+
+        public static implicit operator ulong(ByteBlock value)
+        {
+            return value.ToULong();
+        }
+
+        public static implicit operator char(ByteBlock value)
+        {
+            return value.ToChar();
+        }
+
+        public static implicit operator string(ByteBlock value)
+        {
+            return value.ToString();
         }
         #endregion
 
@@ -225,7 +428,7 @@ namespace IronArc
         #region Read Methods
         public byte[] Read(int length)
         {
-            Assert.IsTrue(location - this.Length >= length);
+            Assert.IsTrue(this.location - this.Length >= length);
 
             byte[] result = new byte[length];
 
@@ -386,6 +589,7 @@ namespace IronArc
         {
             return (ulong)this.ReadLongAt(address);
         }
+
         public float ReadFloatAt(int address)
         {
             return BitConverter.ToSingle(this.ReadAt(4, address), 0);
@@ -513,6 +717,18 @@ namespace IronArc
             }
         }
 
+        public void WriteAt(ByteBlock bytes, int address)
+        {
+            Assert.IsTrue(address >= 0 && address < this.Length);
+            Assert.IsTrue(address + bytes.Length < this.Length);
+
+            for (int i = 0; i < bytes.Length; i++)
+            {
+                this.bytes[address] = bytes[i];
+                address++;
+            }
+        }
+
         public void WriteBoolAt(bool value, int address)
         {
             Assert.IsTrue(address >= 0 && address < this.Length);
@@ -587,138 +803,6 @@ namespace IronArc
         public void WriteStringAt(string value, int address)
         {
             this.WriteAt(System.Text.Encoding.UTF8.GetBytes(value), address);
-        }
-        #endregion
-
-        #region Implicit Conversions
-        public static implicit operator ByteBlock(byte[] value)
-        {
-            return new ByteBlock(value);
-        }
-
-        public static implicit operator ByteBlock(bool value)
-        {
-            return new ByteBlock(value);
-        }
-
-        public static implicit operator ByteBlock(byte value)
-        {
-            return new ByteBlock(value);
-        }
-
-        public static implicit operator ByteBlock(sbyte value)
-        {
-            return new ByteBlock(value);
-        }
-
-        public static implicit operator ByteBlock(short value)
-        {
-            return new ByteBlock(value);
-        }
-
-        public static implicit operator ByteBlock(ushort value)
-        {
-            return new ByteBlock(value);
-        }
-
-        public static implicit operator ByteBlock(int value)
-        {
-            return new ByteBlock(value);
-        }
-
-        public static implicit operator ByteBlock(uint value)
-        {
-            return new ByteBlock(value);
-        }
-
-        public static implicit operator ByteBlock(long value)
-        {
-            return new ByteBlock(value);
-        }
-
-        public static implicit operator ByteBlock(ulong value)
-        {
-            return new ByteBlock(value);
-        }
-
-        public static implicit operator ByteBlock(float value)
-        {
-            return new ByteBlock(value);
-        }
-
-        public static implicit operator ByteBlock(double value)
-        {
-            return new ByteBlock(value);
-        }
-
-        public static implicit operator ByteBlock(char value)
-        {
-            return new ByteBlock(value);
-        }
-
-        public static implicit operator ByteBlock(string value)
-        {
-            return new ByteBlock(value);
-        }
-
-        public static implicit operator byte[](ByteBlock value)
-        {
-            return value.bytes;
-        }
-
-        public static implicit operator bool(ByteBlock value)
-        {
-            return value.ToBool();
-        }
-
-        public static implicit operator byte(ByteBlock value)
-        {
-            return value.ToByte();
-        }
-
-        public static implicit operator sbyte(ByteBlock value)
-        {
-            return value.ToSByte();
-        }
-
-        public static implicit operator short(ByteBlock value)
-        {
-            return value.ToShort();
-        }
-
-        public static implicit operator ushort(ByteBlock value)
-        {
-            return value.ToUShort();
-        }
-
-        public static implicit operator int(ByteBlock value)
-        {
-            return value.ToInt();
-        }
-
-        public static implicit operator uint(ByteBlock value)
-        {
-            return value.ToUInt();
-        }
-
-        public static implicit operator long(ByteBlock value)
-        {
-            return value.ToLong();
-        }
-
-        public static implicit operator ulong(ByteBlock value)
-        {
-            return value.ToULong();
-        }
-
-        public static implicit operator char(ByteBlock value)
-        {
-            return value.ToChar();
-        }
-
-        public static implicit operator string(ByteBlock value)
-        {
-            return value.ToString();
         }
         #endregion
     }

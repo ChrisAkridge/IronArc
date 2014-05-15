@@ -1,22 +1,25 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
-using System.IO;
 
 namespace IronArc
 {
+    /// <summary>
+    /// Represents a virtual form of long-term storage.
+    /// </summary>
     public sealed class Diskfile
     {
         private string filePath;
         private int length;
-        private byte[] file;
+        private byte[] File;
 
         public byte this[int index]
         {
             get
             {
-                if (filePath == null)
+                if (this.filePath == null)
                 {
                     new SystemError("DiskfileNotLoaded", "Tried to read from a diskfile that was not loaded.").WriteToError();
                 }
@@ -24,11 +27,13 @@ namespace IronArc
                 {
                     new SystemError("DiskfileReadIndexOutOfRange", "Tried to read a byte above the range of the diskfile.").WriteToError();
                 }
-                return this.file[index];
+
+                return this.File[index];
             }
+
             set
             {
-                if (filePath == null)
+                if (this.filePath == null)
                 {
                     new SystemError("DiskfileNotLoaded", "Tried to read from a diskfile that was not loaded.").WriteToError();
                 }
@@ -36,7 +41,8 @@ namespace IronArc
                 {
                     new SystemError("DiskfileReadIndexOutOfRange", "Tried to read a byte above the range of the diskfile.").WriteToError();
                 }
-                this.file[index] = value;
+
+                this.File[index] = value;
             }
         }
 
@@ -48,13 +54,13 @@ namespace IronArc
             }
 
             this.filePath = filePath;
-            this.file = File.ReadAllBytes(filePath);
-            this.length = this.file.Length;
+            this.File = File.ReadAllBytes(filePath);
+            this.length = this.File.Length;
         }
 
         public void SaveToDisk()
         {
-            File.WriteAllBytes(this.filePath, this.file);
+            File.WriteAllBytes(this.filePath, this.File);
         }
     }
 }

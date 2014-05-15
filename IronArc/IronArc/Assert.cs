@@ -5,6 +5,9 @@ using System.Text;
 
 namespace IronArc
 {
+    /// <summary>
+    /// A helper class allowing less verbose error creation.
+    /// </summary>
     public static class Assert
     {
         public static void IsTrue(bool condition, string errorType)

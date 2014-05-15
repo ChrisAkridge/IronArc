@@ -5,6 +5,9 @@ using System.Text;
 
 namespace IronArc
 {
+    /// <summary>
+    /// The type for errors that occur in the VM's processor.
+    /// </summary>
     public sealed class SystemError
     {
         public string Type { get; private set; }

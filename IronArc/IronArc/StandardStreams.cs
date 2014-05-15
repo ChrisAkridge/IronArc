@@ -5,6 +5,9 @@ using System.Text;
 
 namespace IronArc
 {
+    /// <summary>
+    /// Contains the three standard console streams: in, out, and error.
+    /// </summary>
     public static class StandardStreams
     {
         public static Stream StreamIn { get; private set; }

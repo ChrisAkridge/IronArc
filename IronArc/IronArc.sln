@@ -21,7 +21,6 @@ Global
 		{8CE75941-A5DE-4155-AB10-DE82AFE001FB}.Debug|Mixed Platforms.ActiveCfg = Debug|x86
 		{8CE75941-A5DE-4155-AB10-DE82AFE001FB}.Debug|Mixed Platforms.Build.0 = Debug|x86
 		{8CE75941-A5DE-4155-AB10-DE82AFE001FB}.Debug|x86.ActiveCfg = Debug|x86
-		{8CE75941-A5DE-4155-AB10-DE82AFE001FB}.Debug|x86.Build.0 = Debug|x86
 		{8CE75941-A5DE-4155-AB10-DE82AFE001FB}.Release|Any CPU.ActiveCfg = Release|x86
 		{8CE75941-A5DE-4155-AB10-DE82AFE001FB}.Release|Mixed Platforms.ActiveCfg = Release|x86
 		{8CE75941-A5DE-4155-AB10-DE82AFE001FB}.Release|Mixed Platforms.Build.0 = Release|x86
