@@ -75,7 +75,7 @@ Control Flow
 			
 Data Operations
 	Move Data
-		Opcode: 0x100
+		Opcode: 0x1000
 		Mnemonic: mov
 		Arguments: <source-addr> <dest-addr>
 			<source-addr>: An addressing block containing the value to move.
@@ -582,4 +582,207 @@ Console Wrapper
 		Description: Writes the string to the console, and then writes a new line.
 		
 System.Math Wrapper
-	
+	Absolute Value
+		Opcode: 0x0300
+		Mnemonic: abs
+		Arguments: abs <source-address> <dest-address>
+			<source-address>: Address of numeric operand.
+			<dest-address>: Address to place result.
+		Description: Returns the absolute value of a number.
+
+	Angle from Cosine
+		Opcode: 0x0301
+		Mnemonic: acos
+		Arguments: acos <source-address> <dest-address>
+			<source-address>: Address of cosine value.
+			<dest-address>: Adress to place angle.
+		Description: Given a cosine, returns the angle that corresponds to it.
+
+	Angle from Sine
+		Opcode: 0x0302
+		Mnemonic: asin
+		Arguments: asin <source-address> <dest-address>
+			<source-address>: Address of sine value.
+			<dest-address>: Adress to place angle.
+		Description: Given a sine, returns the angle that corresponds to it.
+
+	Angle from Tangent
+		Opcode: 0x0303
+		Mnemonic: atan
+		Arguments: atan <source-address> <dest-address>
+			<source-address>: Address of tangent value.
+			<dest-address>: Adress to place angle.
+		Description: Given a tangent value, returns the angle that corresponds to it.
+
+	Angle from Tangent 2
+		Opcode: 0x0304
+		Mnemonic: atan2
+		Arguments: atan2 <x> <y> <dest-address>
+			<x>, <y>: Addresses of values.
+			<dest-address>: Adress to place angle
+		Description: Given numeric x and y, returns the arctan(y / x) (if x != 0) that corresponds to it.
+		             See http://msdn.microsoft.com/en-us/library/system.math.atan2.aspx for details.
+
+	Ceiling
+		Opcode: 0x0305
+		Mnemonic: ceil
+		Arguments: ceil <source-address> <dest-address>
+			<source-address>: Address of floating point value.
+			<dest-address>: Adress to place result.
+		Description: Given a number, returns the nearest integer larger than it.
+
+	Cosine
+		Opcode: 0x0306
+		Mnemonic: cos
+		Arguments: cos <source-address> <dest-address>
+			<source-address>: Address of angle.
+			<dest-address>: Adress to place cosine.
+		Description: Given an angle, returns its cosine.
+
+	Hyperbolic Cosine
+		Opcode: 0x0307
+		Mnemonic: cosh
+		Arguments: cosh <source-address> <dest-address>
+			<source-address>: Address of value.
+			<dest-address>: Adress to place result.
+		Description: Given a value, returns its hyperbolic cosine.
+
+	Exp (e raised to a power)
+		Opcode: 0x0308
+		Mnemonic: exp
+		Arguments: exp <source-address> <dest-address>
+			<source-address>: Address of value.
+			<dest-address>: Adress to place exponential.
+		Description: Given a value, returns e raised to its power.
+
+	Floor
+		Opcode: 0x0309
+		Mnemonic: floor
+		Arguments: floor <source-address> <dest-address>
+			<source-address>: Address of floating point value.
+			<dest-address>: Adress to place result.
+		Description: Given a floating point value, returns the nearest integer lower than it.
+
+	Log (base e)
+		Opcode: 0x030A
+		Mnemonic: ln
+		Arguments: ln <source-address> <dest-address>
+			<source-address>: Address of positive number.
+			<dest-address>: Adress to place logarithm.
+		Description: Given a value, returns its natural logarithm.  Inverse of the exp instruction.
+
+	Log (specified base)
+		Opcode: 0x030B
+		Mnemonic: logb
+		Arguments: logb <b> <source-address> <dest-address>
+			<source-address>: Address of positive number.
+			<b>: Base.
+			<dest-address>: Adress to place result.
+		Description: Given a value, returns its logarithm to the base b.
+
+	Log (base 10)
+		Opcode: 0x030C
+		Mnemonic: log
+		Arguments: log <source-address> <dest-address>
+			<source-address>: Address of positive number.
+			<dest-address>: Adress to place result.
+		Description: Given a floating point value, returns its common logarithm.
+
+	Max
+		Opcode: 0x030D
+		Mnemonic: max
+		Arguments: max <value1> <value2> <dest-address>
+			<value1>, <value2>: Addresses of values to compare.
+			<dest-address>: Adress to place result.
+		Description: Given two values, returns the larger of the two. (Specify).
+
+	Min
+		Opcode: 0x030E
+		Mnemonic: min
+		Arguments: max <value1> <value2> <dest-address>
+			<value1>, <value2>: Addresses of values to compare.
+			<dest-address>: Adress to place result.
+		Description: Given two values, returns the smaller of the two. (Specify).
+
+	Power
+		Opcode: 0x030F
+		Mnemonic: pow
+		Arguments: pow <value1> <value2> <dest-address>
+			<value1>, <value2>: Addresses of operands.
+			<dest-address>: Adress to place result.
+		Description: Given two values, returns the first raised to the power of the second.
+
+	Round
+		Opcode: 0x0310
+		Mnemonic: round
+		Arguments: (Specify).
+		Description: (Specify).
+
+	Sign
+		Opcode: 0x0311
+		Mnemonic: sgn
+		Arguments: sgn <source-address> <dest-address>
+			<source-address>: Address of value
+			<dest-address>: Adress to place result.
+		Description: Given a value, returns an integer that tells its sign.
+
+	Sine
+		Opcode: 0x0312
+		Mnemonic: sin
+		Arguments: sin <source-address> <dest-address>
+			<source-address>: Address of angle
+			<dest-address>: Adress to place sine.
+		Description: Given an angle, returns its sine.
+
+	Hyperbolic Sine
+		Opcode: 0x0313
+		Mnemonic: sinh
+		Arguments: sinh <source-address> <dest-address>
+			<source-address>: Address of value
+			<dest-address>: Adress to place result.
+		Description: Given a value, returns its hyperbolic sine.
+
+	Square Root
+		Opcode: 0x0314
+		Mnemonic: sqrt
+		Arguments: sqrt <source-address> <dest-address>
+			<source-address>: Address of value
+			<dest-address>: Adress to place root.
+		Description: Given a non-negative number, returns its square root.
+
+	Tangent
+		Opcode: 0x0315
+		Mnemonic: tan
+		Arguments: tan <source-address> <dest-address>
+			<source-address>: Address of angle
+			<dest-address>: Adress to place tangent.
+		Description: Given an angle, returns its tangent.
+
+	Hyperbolic Tangent
+		Opcode: 0x0316
+		Mnemonic: tanh
+		Arguments: tanh <source-address> <dest-address>
+			<source-address>: Address of value
+			<dest-address>: Adress to place result.
+		Description: Given a value, returns its hpyerbolic tangent.
+
+	Truncate
+		Opcode: 0x0317
+		Mnemonic: trunc
+		Arguments: trunc <source-address> <dest-address>
+			<source-address>: Address of value
+			<dest-address>: Adress to place result.
+		Description: Given a value, returns the next lowest integer. (Same as floor?)
+		
+	Push E
+		Opcode: 0x0318
+		Mnemonic: push e
+		Arguments: None.
+		Description: Pushes the most important transcendental number onto the stack. (Specify).
+
+	Push Pi
+		Opcode: 0x0319
+		Mnemonic: push pi
+		Arguments: None.
+		Description: Pushes pi onto the stack. (Specify).
+

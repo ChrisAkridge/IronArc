@@ -428,7 +428,7 @@ namespace IronArc
         #region Read Methods
         public byte[] Read(int length)
         {
-            Assert.IsTrue(this.location - this.Length >= length);
+            Assert.IsTrue(this.Length - this.location >= length);
 
             byte[] result = new byte[length];
 
