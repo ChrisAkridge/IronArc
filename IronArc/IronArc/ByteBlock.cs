@@ -36,6 +36,11 @@ namespace IronArc
             }
         }
 
+        public byte[] ToByteArray()
+        {
+            return this.bytes;
+        }
+
         #region Constructors
         /// <summary>
         /// Initializes a new instance of this <see cref="ByteBlock"/> class.

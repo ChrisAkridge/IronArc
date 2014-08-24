@@ -13,7 +13,7 @@ namespace IronArc
     {
         private string filePath;
         private int length;
-        private byte[] File;
+        public ByteBlock File { get; private set; }
 
         public byte this[int index]
         {
@@ -48,19 +48,19 @@ namespace IronArc
 
         public Diskfile(string filePath)
         {
-            if (!File.Exists(filePath))
+            if (!System.IO.File.Exists(filePath))
             {
                 new SystemError("DiskfileDoesntExist", string.Format("The diskfile at {0} does not exist.")).WriteToError();
             }
 
             this.filePath = filePath;
-            this.File = File.ReadAllBytes(filePath);
+            this.File = System.IO.File.ReadAllBytes(filePath);
             this.length = this.File.Length;
         }
 
         public void SaveToDisk()
         {
-            File.WriteAllBytes(this.filePath, this.File);
+            System.IO.File.WriteAllBytes(this.filePath, this.File.ToByteArray());
         }
     }
 }

@@ -20,6 +20,39 @@ namespace IronArc
         public AddressType Type { get; private set; }
         public int Length { get; private set; }
 
+        public ByteBlock Value
+        {
+            get
+            {
+                switch (this.Type)
+                {
+                    case AddressType.NumericLiteral:
+                    case AddressType.StringLiteral:
+                        return this.internalValue;
+                    case AddressType.ProcessorRegister:
+                        return this.owner.ReadRegister(this.internalValue);
+                    case AddressType.MemoryAddress:
+                        return this.owner.Memory.ReadAt(this.Length, this.internalValue);
+                    case AddressType.DiskfileAddress:
+                        return this.owner.Diskfile.File.ReadAt(this.Length, this.internalValue);
+                    case AddressType.ConsoleStream:
+                        return StandardStreams.GetStream(this.internalValue).Read(this.Length);
+                    case AddressType.MemoryPointer:
+                        break;
+                    case AddressType.DiskfilePointer:
+                        break;
+                    case AddressType.ShortPointer:
+                        break;
+                    case AddressType.StackObject:
+                        break;
+                    case AddressType.StackByte:
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
+
         /// <summary>
         /// Initializes a new instance of the <see cref="AddressBlock"/> class.
         /// </summary>
@@ -64,6 +97,14 @@ namespace IronArc
                     this.Length = processor.ReadInt();
                     break;
                 case AddressType.MemoryPointer:
+                    break;
+                case AddressType.DiskfilePointer:
+                    break;
+                case AddressType.ShortPointer:
+                    break;
+                case AddressType.StackObject:
+                    break;
+                case AddressType.StackByte:
                     break;
             }
         }
