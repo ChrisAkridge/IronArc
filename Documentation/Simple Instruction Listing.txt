@@ -1,117 +1,85 @@
-IronArc Simple Instruction Listing:
-
-Control Flow
-	No Operation
-	End
-	Jump
-	Call
-	Return
-	Conditional Jump
-	Conditional Call
-	
-Data Operations
-	Move Data
-	Stack-Based
-		Addition
-		Subtraction
-		Multiplication
-		Division
-		Modulus Division
-		Increment
-		Decrement
-		Arithmetic Inverse
-		Bitwise AND
-		Bitwise OR
-		Bitwise XOR
-		Bitwise NOT
-		Bitwise Shift Left
-		Bitwise Shift Right
-		Logical AND
-		Logical OR
-		Logical XOR
-		Logical NOT
-		Subtractive Comparison
-		Equality
-		Inequality
-		Less Than
-		Greater Than
-		Less Than or Equal To
-		Greater Than or Equal To
-	Long
-		Addition
-		Subtraction
-		Multiplication
-		Division
-		Modulus Division
-		Increment
-		Decrement
-		Arithmetic Inverse
-		Bitwise AND
-		Bitwise OR
-		Bitwise XOR
-		Bitwise NOT
-		Bitwise Shift Left
-		Bitwise Shift Right
-		Logical AND
-		Logical OR
-		Logical XOR
-		Logical NOT
-		Subtractive Comparison
-		Equality
-		Inequality
-		Less Than
-		Greater Than
-		Less Than or Equal To
-		Greater Than or Equal To
+IronArc Instruction Set:
+	Control Flow:
+		0x0000 No Operation						NOP
+		0x0001 Jump								JMP {addr}
+		0x0002 Jump Absolute					JMPA {addr}
+		0x0003 Jump if Equal					JE {lopr} {ropr} {addr}
+		0x0004 Jump if Not Equal				JNE {lopr} {ropr} {addr}
+		0x0005 Jump if Less Than				JLT {lopr} {ropr} {addr}
+		0x0006 Jump if Greater Than				JGT {lopr} {ropr} {addr}
+		0x0007 Jump if Less Than or Equal To	JLTE {lopr} {ropr} {addr}
+		0x0008 Jump if Greater Than or Equal To	JGTE {lopr} {ropr} {addr}
+		0x0009 Jump if Zero						JZ {opr} {addr}
+		0x000A Jump if Not Zero					JNZ {opr} {addr}
+		0x000B Call								CALL {addr}
+		0x000C Call Absolute					CALLA {addr}
+		0x000D Return							RET
+		0x000E End								END
 		
-Console Instructions
-	Console Read Character
-	Console Write
-	Console Read Line
-	Console Write Line
-	
-System.Math Wrapper
-	Absolute Value
-	Angle from Cosine
-	Angle from Sine
-	Angle from Tangent
-	Angle from Tangent 2 (http://msdn.microsoft.com/en-us/library/system.math.atan2.aspx)
-	Ceiling
-	Cosine
-	Hyperbolic Cosine
-	Exp (e raised to a power)
-	Floor
-	Log (base e)
-	Log (specified base)
-	Log (base 10)
-	Max
-	Min
-	Power
-	Round
-	Sign
-	Sine
-	Hyperbolic Sine
-	Square Root
-	Tangent
-	Hyperbolic Tangent
-	Truncate
-	Push E
-	Push Pi
-	
-System.String Wrapper (operates on having pointers to strings on the stack):
-	Create String
-	Compare (2 string args)
-	Compare Ignore Case (2 string args)
-	Concat (specify number of string args)
-	Contains (2 string args)
-	Copy (1 string arg)
-	Ends With (2 string args)
-	Index Of (2 string args)
-	Insert (2 string args)
-	IsNullOrEmpty
-	Split (2 string args)
-	StartsWith (2 string args)
-	Substring (1 string arg)
-	To Lower (1 string arg)
-	To Upper (1 string arg)
-	Trim (1 string arg)
+	Data:
+		0x0100 Move Data						MOV {source} {dest}
+		0x0101 Add								ADD
+		0x0102 Subtract							SUB
+		0x0103 Multiply							MULT
+		0x0104 Divide							DIV
+		0x0105 Modulus Divide					MOD
+		0x0106 Inverse							INV
+		0x0107 Equals							EQ
+		0x0108 Not Equals						INEQ
+		0x0109 Less Than						LT
+		0x010A Greater Than						GT
+		0x010B Less Than or Equal To			LTEQ
+		0x010C Greater Than or Equal To			GTEQ
+		0x010D Logical AND						AND
+		0x010E Logical OR						OR
+		0x010F Logical NOT						NOT
+		0x0110 Bitwise Complement				BWNOT
+		0x0111 Bitwise AND						BWAND
+		0x0112 Bitwise OR						BWOR
+		0x0113 Bitwise XOR						BWXOR
+		0x0114 Bitwise Shift Left				BWLSHIFT
+		0x0115 Bitwise Shift Right				BWRSHIFT
+		0x0140 Long Add							ADDL {loper} {roper} {dest}
+		0x0141 Long Subtract					SUBL {loper} {roper} {dest}
+		0x0142 Long Multiply					MULTL {loper} {roper} {dest}
+		0x0143 Long Divide						DIVL {loper} {roper} {dest}
+		0x0144 Long Modulus Divide				MODL {loper} {roper} {dest}
+		0x0145 Long Inverse						INVL {oper} {dest}
+		0x0146 Long Equals						EQL {loper} {roper} {dest}
+		0x0147 Long Not Equals					INEQL  {loper} {roper} {dest}
+		0x0148 Long Less Than					LTL {loper} {roper} {dest}
+		0x0149 Long Greater Than				GTL {loper} {roper} {dest}
+		0x014A Long Less Than or Equal To		LTEQL {loper} {roper} {dest}
+		0x014B Long Greater Than or Equal To	GTEQL {loper} {roper} {dest}
+		0x014C Long Logical AND					ANDL {loper} {roper} {dest}
+		0x014D Long Logical OR					ORL {loper} {roper} {dest}
+		0x014E Long Logical NOT					NOTL {oper} {dest}
+		0x014F Long Bitwise Complement			BWNOTL {oper} {dest}
+		0x0150 Long Bitwise AND					BWANDL {loper} {roper} {dest}
+		0x0151 Long Bitwise OR					BWORL {loper} {roper} {dest}
+		0x0152 Long Bitwise XOR					BWXORL {loper} {roper} {dest}
+		0x0153 Long Bitwise Shift Left			BWLSHIFTL {loper} {roper} {dest}
+		0x0154 Long Bitwise Shift Right			BWRSHIFTL {loper} {roper} {dest}
+		0x0180 Push								PUSH {source}
+		0x0181 Pop								POP {dest}
+		0x0182 Peek								PEEK {dest}
+		0x0183 Stack Allocate					STACKALLOC {size}
+		0x0184 Array Allocate					ARRAYALLOC {size} {count}
+		0x0185 Stack Dereference				DEREF {index}
+		0x0186 Array Access						ARRAYACCESS {arraytop} {element} {size}
+		0x01A0 Convert to Byte					CBYTE {source} {dest}
+		0x01A1 Convert to SByte					CSBYTE {source} {dest}
+		0x01A2 Convert to Short					CSHORT {source} {dest}
+		0x01A3 Convert to UShort				CUSHORT {source} {dest}
+		0x01A4 Convert to Int					CINT {source} {dest}
+		0x01A5 Convert to UInt					CUINT {source} {dest}
+		0x01A6 Convert to Long					CLONG {source} {dest}
+		0x01A7 Convert to ULong					CULONG {source} {dest}
+		0x01A8 Convert to Single				CSING {source} {dest}
+		0x01A9 Convert to Double				CDOUBLE {source} {dest}
+	System Instructions:
+		0x0200 Hardware Call					HWCALL {string}
+		0x0210 Set EFLAG						SETFLAG {flagnum}
+		0x0211 Clear EFLAG						CLEARFLAG {flagnum}
+		0x0212 Test EFLAG						TESTFLAG {flagnum}
+		0x0213 Toggle EFLAG						TOGGLEFLAG {flagnum}
