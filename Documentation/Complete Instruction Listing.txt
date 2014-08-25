@@ -75,7 +75,7 @@ Control Flow
 			
 Data Operations
 	Move Data
-		Opcode: 0x1000
+		Opcode: 0x0100
 		Mnemonic: mov
 		Arguments: <source-addr> <dest-addr>
 			<source-addr>: An addressing block containing the value to move.
