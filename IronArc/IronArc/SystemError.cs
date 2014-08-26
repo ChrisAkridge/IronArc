@@ -8,6 +8,7 @@ namespace IronArc
     /// <summary>
     /// The type for errors that occur in the VM's processor.
     /// </summary>
+	[Obsolete]
     public sealed class SystemError
     {
         public string Type { get; private set; }
