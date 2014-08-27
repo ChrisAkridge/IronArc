@@ -431,7 +431,7 @@ namespace IronArc
         #endregion
 
         #region Read Methods
-        public byte[] Read(int length)
+        public byte[] Read(uint length)
         {
             Assert.IsTrue(this.Length - this.location >= length);
 
@@ -526,14 +526,14 @@ namespace IronArc
             return (char)this.ReadShort();
         }
 
-        public string ReadString(int length)
+        public string ReadString(uint length)
         {
             return System.Text.Encoding.UTF8.GetString(this.Read(length));
         }
         #endregion
 
         #region Read At Methods
-        public byte[] ReadAt(int length, int address)
+        public byte[] ReadAt(uint length, uint address)
         {
             Assert.IsTrue(address >= 0 && this.Length - address > length);
 
@@ -553,64 +553,64 @@ namespace IronArc
             return this.bytes[address] != 0;
         }
 
-        public byte ReadByteAt(int address)
+        public byte ReadByteAt(uint address)
         {
             Assert.IsTrue(address >= 0 && address < this.Length);
 
             return this.bytes[address];
         }
 
-        public sbyte ReadSByteAt(int address)
+        public sbyte ReadSByteAt(uint address)
         {
             return (sbyte)this.ReadByteAt(address);
         }
 
-        public short ReadShortAt(int address)
+        public short ReadShortAt(uint address)
         {
             return BitConverter.ToInt16(this.ReadAt(2, address), 0);
         }
 
-        public ushort ReadUShortAt(int address)
+        public ushort ReadUShortAt(uint address)
         {
             return (ushort)this.ReadShortAt(address);
         }
 
-        public int ReadIntAt(int address)
+        public int ReadIntAt(uint address)
         {
             return BitConverter.ToInt32(this.ReadAt(4, address), 0);
         }
 
-        public uint ReadUIntAt(int address)
+        public uint ReadUIntAt(uint address)
         {
             return (uint)this.ReadIntAt(address);
         }
 
-        public long ReadLongAt(int address)
+        public long ReadLongAt(uint address)
         {
             return BitConverter.ToInt64(this.ReadAt(8, address), 0);
         }
 
-        public ulong ReadULongAt(int address)
+        public ulong ReadULongAt(uint address)
         {
             return (ulong)this.ReadLongAt(address);
         }
 
-        public float ReadFloatAt(int address)
+        public float ReadFloatAt(uint address)
         {
             return BitConverter.ToSingle(this.ReadAt(4, address), 0);
         }
 
-        public double ReadDoubleAt(int address)
+        public double ReadDoubleAt(uint address)
         {
             return BitConverter.ToDouble(this.ReadAt(8, address), 0);
         }
 
-        public char ReadCharAt(int address)
+        public char ReadCharAt(uint address)
         {
             return (char)this.ToShort();
         }
 
-        public string ReadStringAt(int length, int address)
+        public string ReadStringAt(uint length, uint address)
         {
             byte[] bytes = this.ReadAt(length, address);
             return System.Text.Encoding.UTF8.GetString(bytes);

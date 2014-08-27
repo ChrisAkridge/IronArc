@@ -27,7 +27,7 @@ namespace IronArc
         public Stack<long> Stack { get; set; }
 
         // Instruction pointer
-        public int InstructionPointer { get; set; }
+        public uint InstructionPointer { get; set; }
 
         // Flags register
 
@@ -60,7 +60,7 @@ namespace IronArc
         #region Memory Read Methods
         public byte ReadByte()
         {
-            return this.Memory[this.InstructionPointer++];
+            return this.Memory[(int)this.InstructionPointer++]; // fix
         }
 
         public sbyte ReadSByte()
@@ -123,7 +123,7 @@ namespace IronArc
             return (char)this.ReadShort();
         }
 
-        public ByteBlock Read(int length)
+        public ByteBlock Read(uint length)
         {
             ByteBlock result = this.Memory.ReadAt(length, this.InstructionPointer);
             this.InstructionPointer += length;
@@ -216,7 +216,7 @@ namespace IronArc
                     this.EHX.WriteAt(value, 8 - value.Length);
                     break;
                 case 0x08:
-                    this.InstructionPointer = value.ToInt();
+                    this.InstructionPointer = value.ToUInt();
                     break;
                 case 0x09:
                     break;
@@ -365,13 +365,23 @@ namespace IronArc
                             if (dopcode == DataOpcode.MOV) { arity = 2; }
                             break;
                         case (DataOpcode)0x40: // long arithmetic
-                            if (dopcode == DataOpcode.INVL || dopcode == DataOpcode.NOTL || dopcode == DataOpcode.BWNOTL)
+                            switch (dopcode)
                             {
-                                arity = 2;
-                            }
-                            else
-                            {
-                                arity = 3;
+                                case DataOpcode.INVL:
+                                case DataOpcode.NOTL:
+                                case DataOpcode.BWNOTL:
+                                    arity = 2;
+                                    break;
+                                default:
+                                    if (dopcode > (DataOpcode)0x54) 
+                                    {
+                                        throw new ArgumentOutOfRangeException();
+                                    }
+                                    else
+                                    {
+                                        arity = 3;
+                                        break;
+                                    }
                             }
                             break;
                         case (DataOpcode)0x80: // stack operations
@@ -398,7 +408,7 @@ namespace IronArc
             }
             if (arity > 0)
             {
-                object[] operands = new object[3];
+                Operand[] operands = {null, null, null};
                 byte flags = this.ReadByte();
                 int i;
                 for (i = 1; i <= arity; i++)
@@ -409,68 +419,205 @@ namespace IronArc
                             operands[i] = new AddressBlock(this); // addressblock code to be redone
                             break;
                         case 1: // register
-                            byte register = this.ReadByte();
-                            if ((register & 0x80) != 0x00)
-                            {
-                                // add later
-                            }
-                            else
-                            {
-                                if (register > 0x0A) { throw new ArgumentOutOfRangeException(); }
-                                operands[i] = register;
-                            }
+                            operands[i] = new Operand(this, Operand.OperandType.Register);
                             break;
                         case 2: // stack index
-                            operands[i] = this.ReadUInt();
+                            operands[i] = new Operand(this, Operand.OperandType.StackIndex);
                             break;
                         case 3: // literal
                             byte type = this.ReadByte();
-                            switch (type)
-                            {
-                                case 0x00:
-                                    operands[i] = this.ReadByte();
-                                    break;
-                                case 0x01:
-                                    operands[i] = this.ReadSByte();
-                                    break;
-                                case 0x02:
-                                    operands[i] = this.ReadShort();
-                                    break;
-                                case 0x03:
-                                    operands[i] = this.ReadUShort();
-                                    break;
-                                case 0x04:
-                                    operands[i] = this.ReadInt();
-                                    break;
-                                case 0x05:
-                                    operands[i] = this.ReadUInt();
-                                    break;
-                                case 0x06:
-                                    operands[i] = this.ReadLong();
-                                    break;
-                                case 0x07:
-                                    operands[i] = this.ReadULong();
-                                    break;
-                                case 0x08:
-                                    operands[i] = this.ReadFloat();
-                                    break;
-                                case 0x09:
-                                    operands[i] = this.ReadDouble();
-                                    break;
-                                case 0x0A:
-                                    int size = this.ReadInt();
-                                    operands[i] = (string)this.Read(size);
-                                    break;
-                                default:
-                                    throw new ArgumentOutOfRangeException();
-                            }
+                            operands[i] = new Operand(this, (Operand.OperandType)(type - 3));
                             break;
                     }
                     flags <<= 2;
                 }
                 // check operand types
+                
+            }
+        }
+
+        private void LongArithmeticInstruction(byte opcode, Operand left, Operand right, Operand dest)
+        {
+            if (left.Type == Operand.OperandType.LPString || right.Type == Operand.OperandType.LPString)
+            {
+                throw new ArgumentException("can't do arithmetic on strings");
+            }
+            if (dest.Type != Operand.OperandType.AddressBlock && dest.Type != Operand.OperandType.Register && dest.Type != Operand.OperandType.StackIndex)
+            {
+                throw new ArgumentException("can't assign to a literal");
+            }
+            if (left.Type == Operand.OperandType.AddressBlock)
+            {
+                AddressBlock addr = (AddressBlock)left.Value;
+                // add later
+            }
+            else if (left.Type == Operand.OperandType.StackIndex)
+            {
+                // add later
+            }
+            if (right.Type == Operand.OperandType.AddressBlock)
+            {
+                AddressBlock addr = (AddressBlock)right.Value;
+                // add later
+            }
+            else if (right.Type == Operand.OperandType.StackIndex)
+            {
+                // add later
+            }
+
+            long result; // only ints for now
+            bool comp;
+            switch (opcode)
+            {
+                case 0x40:
+                    result = left + right;
+                    break;
+                case 0x41:
+                    result = left - right;
+                    break;
+                case 0x42:
+                    result = left * right;
+                    break;
+                case 0x43:
+                    result = left / right;
+                    break;
+                case 0x44:
+                    result = left % right;
+                    break;
+                case 0x46:
+                    comp = left == right ? true : false;
+                    break;
+                case 0x47:
+                    comp = left == right ? false : true;
+                    break;
+                case 0x48:
+                    comp = left < right ? true : false;
+                    break;
+                case 0x49:
+                    comp = left > right ? true : false;
+                    break;
+                case 0x4A:
+                    comp = left > right ? false : true;
+                    break;
+                case 0x4B:
+                    comp = left < right ? false : true;
+                    break;
+                case 0x4C:
+                    break;
+                case 0x4D:
+                    break;
+                case 0x4E:
+                    break; // have to ask what logical &, etc is
+                case 0x50:
+                    result = left & right;
+                    break;
+                case 0x51:
+                    result = left | right;
+                    break;
+                case 0x52:
+                    result = left ^ right;
+                    break;
+                case 0x53:
+                    result = left << right;
+                    break;
+                case 0x54:
+                    result = left >> right;
+                    break;
+                default:
+                    break;
             }
         }
         #endregion
+    }
+
+    class Operand
+    {
+        public enum OperandType : byte
+        {
+            AddressBlock,
+            Register,
+            StackIndex,
+            NumericByte,
+            NumericSByte,
+            NumericShort,
+            NumericUShort,
+            NumericInt,
+            NumericUInt,
+            NumericLong,
+            NumericULong,
+            NumericFloat,
+            NumericDouble,
+            LPString
+        };
+        public OperandType Type;
+        public object Value; // maybe change
+        public uint Length;
+
+        public Operand(Processor cpu, OperandType optype)
+        {
+            Type = optype;
+            switch (Type)
+            {
+                case OperandType.AddressBlock:
+                    Length = 8;
+                    // add later
+                    break;
+                case OperandType.Register:
+                    Length = 1;
+                    Value = cpu.ReadByte();
+                    break;
+                case OperandType.StackIndex:
+                    Length = 4;
+                    Value = cpu.ReadUInt();
+                    break;
+                case OperandType.NumericByte:
+                    Length = 1;
+                    Value = cpu.ReadByte();
+                    break;
+                case OperandType.NumericSByte:
+                    Length = 1;
+                    Value = cpu.ReadSByte();
+                    break;
+                case OperandType.NumericShort:
+                    Length = 2;
+                    Value = cpu.ReadShort();
+                    break;
+                case OperandType.NumericUShort:
+                    Length = 2;
+                    Value = cpu.ReadUShort();
+                    break;
+                case OperandType.NumericInt:
+                    Length = 4;
+                    Value = cpu.ReadInt();
+                    break;
+                case OperandType.NumericUInt:
+                    Length = 4;
+                    Value = cpu.ReadUInt();
+                    break;
+                case OperandType.NumericLong:
+                    Length = 8;
+                    Value = cpu.ReadLong();
+                    break;
+                case OperandType.NumericULong:
+                    Length = 8;
+                    Value = cpu.ReadULong();
+                    break;
+                case OperandType.NumericFloat:
+                    Length = 4;
+                    Value = cpu.ReadFloat();
+                    break;
+                case OperandType.NumericDouble:
+                    Length = 8;
+                    Value = cpu.ReadDouble();
+                    break;
+                case OperandType.LPString:
+                    Length = cpu.ReadUInt();
+                    ByteBlock bytes = cpu.Read(Length);
+                    Value = System.Text.Encoding.UTF8.GetString(bytes.ToByteArray());
+                    break;
+                default:
+                    break;
+            }
+        }
     }
 }
