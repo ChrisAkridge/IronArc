@@ -8,6 +8,7 @@ namespace IronArc
     /// <summary>
     /// An address to a part of various memory sources available to the VM.
     /// </summary>
+	[Obsolete]
     public sealed class AddressBlock
     {
         private const byte LengthOneMask = 0x00;
@@ -50,6 +51,8 @@ namespace IronArc
                     default:
                         break;
                 }
+
+				return null;
             }
         }
 

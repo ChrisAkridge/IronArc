@@ -9,6 +9,7 @@ namespace IronArc
     /// <summary>
     /// Represents a virtual form of long-term storage.
     /// </summary>
+	[Obsolete]
     public sealed class Diskfile
     {
         private string filePath;
