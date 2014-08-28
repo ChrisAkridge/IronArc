@@ -505,6 +505,7 @@ namespace IronArc
             ulong uresult;
             long sresult;
             double fresult;
+            ByteBlock result;
             if ((left.Type == Operand.OperandType.NumericByte || left.Type == Operand.OperandType.NumericUShort ||
                  left.Type == Operand.OperandType.NumericUInt || left.Type == Operand.OperandType.NumericULong ||
                  left.Type == Operand.OperandType.Register || left.Type == Operand.OperandType.AddressBlock) &&
@@ -515,11 +516,12 @@ namespace IronArc
                 uresult = UnsignedArithmetic(opcode, op1.ToULong(), op2.ToULong());
                 if (dest.Type == Operand.OperandType.Register)
                 {
-                    // add
+                    result = new ByteBlock(uresult);
+                    WriteRegister((byte)dest.Value, result);
                 }
                 else
                 {
-                    // add
+                    this.Memory.WriteULongAt(uresult, (int)(((AddressBlock)dest.Value).Address));
                 }
             } else if ((left.Type == Operand.OperandType.NumericSByte || left.Type == Operand.OperandType.NumericShort ||
                         left.Type == Operand.OperandType.NumericInt || left.Type == Operand.OperandType.NumericLong) &&
@@ -529,27 +531,31 @@ namespace IronArc
                 sresult = SignedArithmetic(opcode, op1.ToLong(), op2.ToLong());
                 if (dest.Type == Operand.OperandType.Register)
                 {
-                    // add
+                    result = new ByteBlock(sresult);
+                    WriteRegister((byte)dest.Value, result);
                 }
                 else
                 {
-                    // add
+                    this.Memory.WriteLongAt(sresult, (int)(((AddressBlock)dest.Value).Address));
                 }
             }
             else
             {
-                // add
+                fresult = FPArithmetic(opcode, op1.ToDouble(), op2.ToDouble());
                 if (dest.Type == Operand.OperandType.Register)
                 {
-                    // add
+                    result = new ByteBlock(fresult);
+                    WriteRegister((byte)dest.Value, result);
                 }
                 else
                 {
-                    // add
+                    this.Memory.WriteDoubleAt(fresult, (int)(((AddressBlock)dest.Value).Address));
                 }
             }
         }
+        #endregion
 
+        #region Instruction Implementations
         private ulong UnsignedArithmetic(DataOpcode opcode, ulong left, ulong right)
         {
             ulong result;
@@ -810,6 +816,126 @@ namespace IronArc
             }
             return result;
         }
+
+        private double FPArithmetic(DataOpcode opcode, double left, double right)
+        {
+            double result;
+            switch (opcode)
+            {
+                case DataOpcode.MOV:
+                    break;
+                case DataOpcode.ADD:
+                case DataOpcode.ADDL:
+                    result = left + right;
+                    break;
+                case DataOpcode.SUB:
+                case DataOpcode.SUBL:
+                    result = left - right;
+                    break;
+                case DataOpcode.MULT:
+                case DataOpcode.MULTL:
+                    result = left * right;
+                    break;
+                case DataOpcode.DIV:
+                case DataOpcode.DIVL:
+                    result = left / right;
+                    break;
+                case DataOpcode.MOD:
+                case DataOpcode.MODL:
+                    result = left % right;
+                    break;
+                case DataOpcode.INV:
+                case DataOpcode.INVL:
+                    result = -left;
+                    break;
+                case DataOpcode.EQ:
+                case DataOpcode.EQL:
+                    result = left == right ? 1.0 : 0.0;
+                    break;
+                case DataOpcode.INEQ:
+                case DataOpcode.INEQL:
+                    result = left == right ? 0.0 : 1.0;
+                    break;
+                case DataOpcode.LT:
+                case DataOpcode.LTL:
+                    result = left < right ? 1.0 : 0.0;
+                    break;
+                case DataOpcode.GT:
+                case DataOpcode.GTL:
+                    result = left > right ? 1.0 : 0.0;
+                    break;
+                case DataOpcode.LTEQ:
+                case DataOpcode.LTEQL:
+                    result = left > right ? 0.0 : 1.0;
+                    break;
+                case DataOpcode.GTEQ:
+                case DataOpcode.GTEQL:
+                    result = left < right ? 0.0 : 1.0;
+                    break;
+                case DataOpcode.AND:
+                case DataOpcode.ANDL:
+                    result = (left != 0.0 && right != 0.0) ? 1.0 : 0.0;
+                    break;
+                case DataOpcode.OR:
+                case DataOpcode.ORL:
+                    result = (left != 0.0 && right != 0.0) ? 1.0 : 0.0;
+                    break;
+                case DataOpcode.NOT:
+                case DataOpcode.NOTL:
+                    result = (left != 0.0) ? 0.0 : 1.0;
+                    break;
+                case DataOpcode.BWNOT:
+                case DataOpcode.BWNOTL:
+                case DataOpcode.BWAND:
+                case DataOpcode.BWANDL:
+                case DataOpcode.BWOR:
+                case DataOpcode.BWORL:
+                case DataOpcode.BWXOR:
+                case DataOpcode.BWXORL:
+                case DataOpcode.BWLSHIFT:
+                case DataOpcode.BWLSHIFTL:
+                case DataOpcode.BWRSHIFT:
+                case DataOpcode.BWRSHIFTL:
+                    throw new ArgumentException("can't do Boolean operations on floating-point values");
+                case DataOpcode.PUSH:
+                    break;
+                case DataOpcode.POP:
+                    break;
+                case DataOpcode.PEEK:
+                    break;
+                case DataOpcode.STACKALLOC:
+                    break;
+                case DataOpcode.ARRAYALLOC:
+                    break;
+                case DataOpcode.DEREF:
+                    break;
+                case DataOpcode.ARRAYACCESS:
+                    break;
+                case DataOpcode.CBYTE:
+                    break;
+                case DataOpcode.CSBYTE:
+                    break;
+                case DataOpcode.CSHORT:
+                    break;
+                case DataOpcode.CUSHORT:
+                    break;
+                case DataOpcode.CINT:
+                    break;
+                case DataOpcode.CUINT:
+                    break;
+                case DataOpcode.CLONG:
+                    break;
+                case DataOpcode.CULONG:
+                    break;
+                case DataOpcode.CSING:
+                    break;
+                case DataOpcode.CDOUBLE:
+                    break;
+                default:
+                    break;
+            }
+            return result;
+        }
         #endregion
     }
 
@@ -843,7 +969,7 @@ namespace IronArc
             {
                 case OperandType.AddressBlock:
                     Length = 8;
-                    // add later
+                    Value = new AddressBlock(cpu, cpu.ReadULong());
                     break;
                 case OperandType.Register:
                     Length = 1;
