@@ -65,7 +65,7 @@ IronArc Instruction Set:
 		0x0182 Peek								PEEK {dest}
 		0x0183 Stack Allocate					STACKALLOC {size}
 		0x0184 Array Allocate					ARRAYALLOC {size} {count}
-		0x0185 Stack Dereference				DEREF {index}
+		0x0185 Stack Dereference				DEREF {index} {dest}
 		0x0186 Array Access						ARRAYACCESS {arraytop} {element} {size}
 		0x01A0 Convert to Byte					CBYTE {source} {dest}
 		0x01A1 Convert to SByte					CSBYTE {source} {dest}

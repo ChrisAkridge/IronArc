@@ -1,11 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Express 2013 for Windows Desktop
-VisualStudioVersion = 12.0.21005.1
+VisualStudioVersion = 12.0.30723.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IronArc", "IronArc\IronArc.csproj", "{8CE75941-A5DE-4155-AB10-DE82AFE001FB}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IronArcHost", "IronArcHost\IronArcHost.csproj", "{7632530B-84C0-4927-942F-0EAEB3724EBF}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HexControlLibrary", "SimpleHexViewControl\HexControlLibrary\HexControlLibrary.csproj", "{02DF89C8-A523-4A0F-A7C5-20DD043652CC}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -37,6 +39,16 @@ Global
 		{7632530B-84C0-4927-942F-0EAEB3724EBF}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{7632530B-84C0-4927-942F-0EAEB3724EBF}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{7632530B-84C0-4927-942F-0EAEB3724EBF}.Release|x86.ActiveCfg = Release|Any CPU
+		{02DF89C8-A523-4A0F-A7C5-20DD043652CC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{02DF89C8-A523-4A0F-A7C5-20DD043652CC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{02DF89C8-A523-4A0F-A7C5-20DD043652CC}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{02DF89C8-A523-4A0F-A7C5-20DD043652CC}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{02DF89C8-A523-4A0F-A7C5-20DD043652CC}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{02DF89C8-A523-4A0F-A7C5-20DD043652CC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{02DF89C8-A523-4A0F-A7C5-20DD043652CC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{02DF89C8-A523-4A0F-A7C5-20DD043652CC}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{02DF89C8-A523-4A0F-A7C5-20DD043652CC}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{02DF89C8-A523-4A0F-A7C5-20DD043652CC}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
