@@ -64,6 +64,7 @@
     <Reference Include="System.Xml.Linq" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AddressBlock.cs" />
     <Compile Include="Assert.cs" />
     <Compile Include="ByteBlock.cs" />
     <Compile Include="Diskfile.cs" />
