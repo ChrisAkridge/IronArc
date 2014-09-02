@@ -125,7 +125,7 @@ namespace IronArc
 
         public ByteBlock Read(uint length)
         {
-            ByteBlock result = this.Memory.ReadAt(length, this.InstructionPointer);
+			ByteBlock result = this.Memory.ReadAt((uint)length, this.InstructionPointer);
             this.InstructionPointer += length;
             return result;
         }
@@ -416,7 +416,7 @@ namespace IronArc
                     switch (flags >> 6)
                     {
                         case 0: // memory addr
-                            operands[i] = new AddressBlock(this); // addressblock code to be redone
+							//operands[i] = new AddressBlock(this); // addressblock code to be redone
                             break;
                         case 1: // register
                             operands[i] = new Operand(this, Operand.OperandType.Register);
@@ -448,7 +448,7 @@ namespace IronArc
             }
             if (left.Type == Operand.OperandType.AddressBlock)
             {
-                AddressBlock addr = (AddressBlock)left.Value;
+				//AddressBlock addr = (AddressBlock)left.Value;
                 // add later
             }
             else if (left.Type == Operand.OperandType.StackIndex)
@@ -457,7 +457,7 @@ namespace IronArc
             }
             if (right.Type == Operand.OperandType.AddressBlock)
             {
-                AddressBlock addr = (AddressBlock)right.Value;
+				//AddressBlock addr = (AddressBlock)right.Value;
                 // add later
             }
             else if (right.Type == Operand.OperandType.StackIndex)
@@ -469,155 +469,66 @@ namespace IronArc
             bool comp;
             switch (opcode)
             {
-                case 0x40:
-                    result = left + right;
-                    break;
-                case 0x41:
-                    result = left - right;
-                    break;
-                case 0x42:
-                    result = left * right;
-                    break;
-                case 0x43:
-                    result = left / right;
-                    break;
-                case 0x44:
-                    result = left % right;
-                    break;
-                case 0x46:
-                    comp = left == right ? true : false;
-                    break;
-                case 0x47:
-                    comp = left == right ? false : true;
-                    break;
-                case 0x48:
-                    comp = left < right ? true : false;
-                    break;
-                case 0x49:
-                    comp = left > right ? true : false;
-                    break;
-                case 0x4A:
-                    comp = left > right ? false : true;
-                    break;
-                case 0x4B:
-                    comp = left < right ? false : true;
-                    break;
-                case 0x4C:
-                    break;
-                case 0x4D:
-                    break;
-                case 0x4E:
-                    break; // have to ask what logical &, etc is
-                case 0x50:
-                    result = left & right;
-                    break;
-                case 0x51:
-                    result = left | right;
-                    break;
-                case 0x52:
-                    result = left ^ right;
-                    break;
-                case 0x53:
-                    result = left << right;
-                    break;
-                case 0x54:
-                    result = left >> right;
-                    break;
-                default:
-                    break;
+					// mathmetical operations not yet implemented
+					// commented out henceforth
+				//case 0x40:
+				//	result = left + right;
+				//	break;
+				//case 0x41:
+				//	result = left - right;
+				//	break;
+				//case 0x42:
+				//	result = left * right;
+				//	break;
+				//case 0x43:
+				//	result = left / right;
+				//	break;
+				//case 0x44:
+				//	result = left % right;
+				//	break;
+				//case 0x46:
+				//	comp = left == right ? true : false;
+				//	break;
+				//case 0x47:
+				//	comp = left == right ? false : true;
+				//	break;
+				//case 0x48:
+				//	comp = left < right ? true : false;
+				//	break;
+				//case 0x49:
+				//	comp = left > right ? true : false;
+				//	break;
+				//case 0x4A:
+				//	comp = left > right ? false : true;
+				//	break;
+				//case 0x4B:
+				//	comp = left < right ? false : true;
+				//	break;
+				//case 0x4C:
+				//	break;
+				//case 0x4D:
+				//	break;
+				//case 0x4E:
+				//	break; // have to ask what logical &, etc is // it's && and || but with 0/1 in place of true/false
+				//case 0x50:
+				//	result = left & right;
+				//	break;
+				//case 0x51:
+				//	result = left | right;
+				//	break;
+				//case 0x52:
+				//	result = left ^ right;
+				//	break;
+				//case 0x53:
+				//	result = left << right;
+				//	break;
+				//case 0x54:
+				//	result = left >> right;
+				//	break;
+				//default:
+				//	break;
             }
         }
         #endregion
-    }
-
-    class Operand
-    {
-        public enum OperandType : byte
-        {
-            AddressBlock,
-            Register,
-            StackIndex,
-            NumericByte,
-            NumericSByte,
-            NumericShort,
-            NumericUShort,
-            NumericInt,
-            NumericUInt,
-            NumericLong,
-            NumericULong,
-            NumericFloat,
-            NumericDouble,
-            LPString
-        };
-        public OperandType Type;
-        public object Value; // maybe change
-        public uint Length;
-
-        public Operand(Processor cpu, OperandType optype)
-        {
-            Type = optype;
-            switch (Type)
-            {
-                case OperandType.AddressBlock:
-                    Length = 8;
-                    // add later
-                    break;
-                case OperandType.Register:
-                    Length = 1;
-                    Value = cpu.ReadByte();
-                    break;
-                case OperandType.StackIndex:
-                    Length = 4;
-                    Value = cpu.ReadUInt();
-                    break;
-                case OperandType.NumericByte:
-                    Length = 1;
-                    Value = cpu.ReadByte();
-                    break;
-                case OperandType.NumericSByte:
-                    Length = 1;
-                    Value = cpu.ReadSByte();
-                    break;
-                case OperandType.NumericShort:
-                    Length = 2;
-                    Value = cpu.ReadShort();
-                    break;
-                case OperandType.NumericUShort:
-                    Length = 2;
-                    Value = cpu.ReadUShort();
-                    break;
-                case OperandType.NumericInt:
-                    Length = 4;
-                    Value = cpu.ReadInt();
-                    break;
-                case OperandType.NumericUInt:
-                    Length = 4;
-                    Value = cpu.ReadUInt();
-                    break;
-                case OperandType.NumericLong:
-                    Length = 8;
-                    Value = cpu.ReadLong();
-                    break;
-                case OperandType.NumericULong:
-                    Length = 8;
-                    Value = cpu.ReadULong();
-                    break;
-                case OperandType.NumericFloat:
-                    Length = 4;
-                    Value = cpu.ReadFloat();
-                    break;
-                case OperandType.NumericDouble:
-                    Length = 8;
-                    Value = cpu.ReadDouble();
-                    break;
-                case OperandType.LPString:
-                    Length = cpu.ReadUInt();
-                    ByteBlock bytes = cpu.Read(Length);
-                    Value = System.Text.Encoding.UTF8.GetString(bytes.ToByteArray());
-                    break;
-                default:
-                    break;
-            }
-        }
     }
 }

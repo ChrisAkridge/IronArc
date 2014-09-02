@@ -1,0 +1,63 @@
+IronArc Host
+UI and Worker Messages
+
+class CrossThreadMessage
+{
+	WorkerMessage WorkerMessage;
+	UIMessage UIMessage;
+	int WParam;
+	long LParam;
+	object Data;
+}
+
+class VMCreationParameters
+{
+	string ProgramPath;
+	string SystemProgramPath;
+	int TotalMemory;
+	int StackMemory;
+	int ProgramLoadAddress;
+	List<HardwareDevice> Hardware;
+}
+
+Messages to Worker Thread:
+	None
+		Used to indicate that there is no message for the worker; this message is to the UI thread.
+		WParam: ignored, LParam: ignored, Data: ignored.
+	AddVM
+		Instructs the worker to create a new virtual machine.
+		WParam: ignored, LParam: ignored, Data: A reference to a valid VMCreationParameters instance.
+	RemoveVM
+		Instructs the worker to remove a virtual machine.
+		WParam: The ID of the VM to remove. LParam: ignored, Data: ignored
+	QueryVMState
+		Requests the state of a virtual machine from the worker.
+		WParam: The ID of the VM to query. LParam: ignored, Data: ignored
+	SetVMState
+		Instructs the worker to change the state of a virtual machine.
+		WParam: The ID of the VM to change. LParam: A VMState instance cast to long. Data: ignored
+	AddHardwareDevice
+		Instructs the worker to add a hardware device to a VM.
+		WParam: The ID of the VM to add the device to. LParam: ignored, Data: The instance of the hardware device to add.
+	RemoveHardwareDevice
+		Instructs the worker to remove a hardware device from a VM.
+		WParam: The ID of the VM to remove the device from. LParam: ignored, Data: The instance of the hardware device to remove.
+	DebugYieldVM
+		Instructs the worker to give the reference of a virtual machine to the UI so it can be used in the debugger.
+		WParam: The ID of the VM to yield. LParam: ignored, Data: ignored.
+	DebugResumeVM
+		Gives a VM being debugged back to the worker temporarily so it can continue execution until a breakpoint is reached or the VM finishes.
+		WParam: ignored, LParam: ignored, Data: The instance of the VM to resume.
+	DebugPauseVM
+		Instructs the worker to give back the reference of a VM being debugged to the UI.
+		WParam: The ID of the VM to pause. LParam: ignored, Data: ignored.
+	DebugAnimateVM
+		Gives a VM being debugged back to the worker and sets it to animate through the instructions.
+		WParam: ignored, LParam: ignored, Data: The instance of the VM to animate.
+
+Messages to UI Thread:
+	None
+		Used to indicate that there is no message for the UI; this message is to the worker thread.
+		WParam: ignored, LParam: ignored, Data: ignored.
+	VMAdded
+		Informs the UI that the creation of the VM succeeded.

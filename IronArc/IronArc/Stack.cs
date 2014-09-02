@@ -31,12 +31,12 @@ namespace IronArc
         {
             objectIndex = this.objectSizes.Count - objectIndex;
 
-            int objectStartPointer = 0;
-            int objectSize = this.objectSizes.ElementAt(objectIndex);
+            uint objectStartPointer = 0u;
+            uint objectSize = (uint)this.objectSizes.ElementAt(objectIndex);
 
             for (int i = 0; i < objectIndex; i++)
             {
-                objectStartPointer += this.objectSizes.ElementAt(i);
+                objectStartPointer += (uint)this.objectSizes.ElementAt(i);
             }
 
             return this.bytes.ReadAt(objectSize, objectStartPointer);
@@ -174,7 +174,7 @@ namespace IronArc
         {
             this.objectSizes.Pop();
             this.stackPointer--;
-            byte result = this.bytes.ReadByteAt(this.stackPointer);
+            byte result = this.bytes.ReadByteAt((uint)this.stackPointer);
             this.bytes.WriteByteAt(0, this.stackPointer);
             return result;
         }
@@ -188,7 +188,7 @@ namespace IronArc
         {
             this.objectSizes.Pop();
             this.stackPointer -= 2;
-            short result = this.bytes.ReadShortAt(this.stackPointer);
+			short result = this.bytes.ReadShortAt((uint)this.stackPointer);
             this.bytes.WriteShortAt(0, this.stackPointer);
             return result;
         }
@@ -202,7 +202,7 @@ namespace IronArc
         {
             this.objectSizes.Pop();
             this.stackPointer -= 4;
-            int result = this.bytes.ReadIntAt(this.stackPointer);
+			int result = this.bytes.ReadIntAt((uint)this.stackPointer);
             this.bytes.WriteIntAt(0, this.stackPointer);
             return result;
         }
@@ -216,7 +216,7 @@ namespace IronArc
         {
             this.objectSizes.Pop();
             this.stackPointer -= 8;
-            long result = this.bytes.ReadLongAt(this.stackPointer);
+			long result = this.bytes.ReadLongAt((uint)this.stackPointer);
             this.bytes.WriteLongAt(0L, this.stackPointer);
             return result;
         }
@@ -230,7 +230,7 @@ namespace IronArc
         {
             this.objectSizes.Pop();
             this.stackPointer -= 4;
-            float result = this.bytes.ReadFloatAt(this.stackPointer);
+			float result = this.bytes.ReadFloatAt((uint)this.stackPointer);
             this.bytes.WriteIntAt(0, this.stackPointer);
             return result;
         }
@@ -239,7 +239,7 @@ namespace IronArc
         {
             this.objectSizes.Pop();
             this.stackPointer -= 8;
-            double result = this.bytes.ReadDoubleAt(this.stackPointer);
+			double result = this.bytes.ReadDoubleAt((uint)this.stackPointer);
             this.bytes.WriteLongAt(0L, this.stackPointer);
             return result;
         }
@@ -261,7 +261,7 @@ namespace IronArc
         {
             int objectSize = this.objectSizes.Peek();
             int startPointer = this.stackPointer - objectSize;
-            return this.bytes.ReadAt(objectSize, startPointer);
+			return this.bytes.ReadAt((uint)objectSize, (uint)startPointer);
         }
 
         public ByteBlock PeekByteBlock()
@@ -276,7 +276,7 @@ namespace IronArc
 
         public byte PeekByte()
         {
-            return this.bytes.ReadByteAt(this.stackPointer - 1);
+			return this.bytes.ReadByteAt((uint)this.stackPointer - 1);
         }
 
         public sbyte PeekSByte()
@@ -286,7 +286,7 @@ namespace IronArc
 
         public short PeekShort()
         {
-            return this.bytes.ReadShortAt(this.stackPointer - 2);
+			return this.bytes.ReadShortAt((uint)this.stackPointer - 2);
         }
 
         public ushort PeekUShort()
@@ -296,7 +296,7 @@ namespace IronArc
 
         public int PeekInt()
         {
-            return this.bytes.ReadIntAt(this.stackPointer - 4);
+			return this.bytes.ReadIntAt((uint)this.stackPointer - 4);
         }
 
         public uint PeekUInt()
@@ -306,7 +306,7 @@ namespace IronArc
 
         public long PeekLong()
         {
-            return this.bytes.ReadLongAt(this.stackPointer - 8);
+			return this.bytes.ReadLongAt((uint)this.stackPointer - 8);
         }
 
         public ulong PeekULong()
@@ -316,12 +316,12 @@ namespace IronArc
 
         public float PeekFloat()
         {
-            return this.bytes.ReadFloatAt(this.stackPointer - 4);
+			return this.bytes.ReadFloatAt((uint)this.stackPointer - 4);
         }
 
         public double PeekDouble()
         {
-            return this.bytes.ReadDoubleAt(this.stackPointer - 8);
+			return this.bytes.ReadDoubleAt((uint)this.stackPointer - 8);
         }
 
         public char PeekChar()
@@ -332,7 +332,7 @@ namespace IronArc
         public string PeekString()
         {
             int stringSize = this.objectSizes.Peek();
-            return this.bytes.ReadStringAt(stringSize, this.stackPointer - stringSize);
+			return this.bytes.ReadStringAt((uint)stringSize, (uint)(this.stackPointer - stringSize));
         }
         #endregion
     }

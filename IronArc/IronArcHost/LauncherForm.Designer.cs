@@ -30,17 +30,18 @@
 		{
 			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(LauncherForm));
 			this.toolStrip1 = new System.Windows.Forms.ToolStrip();
-			this.ListVMs = new System.Windows.Forms.ListView();
-			this.LVCState = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-			this.LVCMemory = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-			this.LVCStackMemory = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-			this.LVCHardwareDeviceCount = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
 			this.TSBAddVM = new System.Windows.Forms.ToolStripButton();
 			this.TSBRemoveVM = new System.Windows.Forms.ToolStripButton();
 			this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
 			this.TSBToggleVMState = new System.Windows.Forms.ToolStripButton();
 			this.TSBShowTerminal = new System.Windows.Forms.ToolStripButton();
 			this.TSBShowDebugger = new System.Windows.Forms.ToolStripButton();
+			this.ListVMs = new System.Windows.Forms.ListView();
+			this.LVCState = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+			this.LVCMemory = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+			this.LVCStackMemory = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+			this.LVCHardwareDeviceCount = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+			this.TSBHardware = new System.Windows.Forms.ToolStripButton();
 			this.toolStrip1.SuspendLayout();
 			this.SuspendLayout();
 			// 
@@ -52,47 +53,13 @@
             this.toolStripSeparator1,
             this.TSBToggleVMState,
             this.TSBShowTerminal,
-            this.TSBShowDebugger});
+            this.TSBShowDebugger,
+            this.TSBHardware});
 			this.toolStrip1.Location = new System.Drawing.Point(0, 0);
 			this.toolStrip1.Name = "toolStrip1";
 			this.toolStrip1.Size = new System.Drawing.Size(566, 25);
 			this.toolStrip1.TabIndex = 0;
 			this.toolStrip1.Text = "toolStrip1";
-			// 
-			// ListVMs
-			// 
-			this.ListVMs.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
-            this.LVCState,
-            this.LVCMemory,
-            this.LVCStackMemory,
-            this.LVCHardwareDeviceCount});
-			this.ListVMs.Dock = System.Windows.Forms.DockStyle.Fill;
-			this.ListVMs.Font = new System.Drawing.Font("Segoe UI", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-			this.ListVMs.Location = new System.Drawing.Point(0, 25);
-			this.ListVMs.Name = "ListVMs";
-			this.ListVMs.Size = new System.Drawing.Size(566, 323);
-			this.ListVMs.TabIndex = 1;
-			this.ListVMs.UseCompatibleStateImageBehavior = false;
-			this.ListVMs.View = System.Windows.Forms.View.Details;
-			// 
-			// LVCState
-			// 
-			this.LVCState.Text = "State";
-			this.LVCState.Width = 65;
-			// 
-			// LVCMemory
-			// 
-			this.LVCMemory.Text = "Memory";
-			// 
-			// LVCStackMemory
-			// 
-			this.LVCStackMemory.Text = "Stack Memory";
-			this.LVCStackMemory.Width = 94;
-			// 
-			// LVCHardwareDeviceCount
-			// 
-			this.LVCHardwareDeviceCount.Text = "HW Device Count";
-			this.LVCHardwareDeviceCount.Width = 105;
 			// 
 			// TSBAddVM
 			// 
@@ -143,6 +110,50 @@
 			this.TSBShowDebugger.Size = new System.Drawing.Size(88, 22);
 			this.TSBShowDebugger.Text = "&Debugger...";
 			// 
+			// ListVMs
+			// 
+			this.ListVMs.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
+            this.LVCState,
+            this.LVCMemory,
+            this.LVCStackMemory,
+            this.LVCHardwareDeviceCount});
+			this.ListVMs.Dock = System.Windows.Forms.DockStyle.Fill;
+			this.ListVMs.Font = new System.Drawing.Font("Segoe UI", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+			this.ListVMs.Location = new System.Drawing.Point(0, 25);
+			this.ListVMs.Name = "ListVMs";
+			this.ListVMs.Size = new System.Drawing.Size(566, 323);
+			this.ListVMs.TabIndex = 1;
+			this.ListVMs.UseCompatibleStateImageBehavior = false;
+			this.ListVMs.View = System.Windows.Forms.View.Details;
+			// 
+			// LVCState
+			// 
+			this.LVCState.Text = "State";
+			this.LVCState.Width = 65;
+			// 
+			// LVCMemory
+			// 
+			this.LVCMemory.Text = "Memory";
+			// 
+			// LVCStackMemory
+			// 
+			this.LVCStackMemory.Text = "Stack Memory";
+			this.LVCStackMemory.Width = 94;
+			// 
+			// LVCHardwareDeviceCount
+			// 
+			this.LVCHardwareDeviceCount.Text = "HW Device Count";
+			this.LVCHardwareDeviceCount.Width = 105;
+			// 
+			// TSBHardware
+			// 
+			this.TSBHardware.Enabled = false;
+			this.TSBHardware.Image = ((System.Drawing.Image)(resources.GetObject("TSBHardware.Image")));
+			this.TSBHardware.ImageTransparentColor = System.Drawing.Color.Magenta;
+			this.TSBHardware.Name = "TSBHardware";
+			this.TSBHardware.Size = new System.Drawing.Size(87, 22);
+			this.TSBHardware.Text = "&Hardware...";
+			// 
 			// LauncherForm
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -173,5 +184,6 @@
 		private System.Windows.Forms.ColumnHeader LVCMemory;
 		private System.Windows.Forms.ColumnHeader LVCStackMemory;
 		private System.Windows.Forms.ColumnHeader LVCHardwareDeviceCount;
+		private System.Windows.Forms.ToolStripButton TSBHardware;
 	}
 }

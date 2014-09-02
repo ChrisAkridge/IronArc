@@ -546,7 +546,7 @@ namespace IronArc
             return result;
         }
 
-        public bool ReadBoolAt(int address)
+        public bool ReadBoolAt(uint address)
         {
             Assert.IsTrue(address >= 0 && address < this.Length);
 
@@ -612,7 +612,7 @@ namespace IronArc
 
         public string ReadStringAt(uint length, uint address)
         {
-            byte[] bytes = this.ReadAt(length, address);
+			byte[] bytes = this.ReadAt((uint)length, address);
             return System.Text.Encoding.UTF8.GetString(bytes);
         }
         #endregion
