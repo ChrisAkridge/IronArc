@@ -325,7 +325,7 @@ namespace IronArc
             ushort fullopcode = this.ReadUShort();
             byte opcode = (byte)((fullopcode << 8) >> 8);
             ushort arity = 0;
-            switch (fullopcode>>8)
+            switch (fullopcode >> 8)
             {
                 case 0x00: // Control flow instruction
                     CFOpcode cfopcode = (CFOpcode)opcode;
@@ -416,7 +416,11 @@ namespace IronArc
                     switch (flags >> 6)
                     {
                         case 0: // memory addr
+<<<<<<< HEAD
 							//operands[i] = new AddressBlock(this); // addressblock code to be redone
+=======
+                            operands[i] = new Operand(this, Operand.OperandType.AddressBlock); // addressblock code to be redone
+>>>>>>> origin/master
                             break;
                         case 1: // register
                             operands[i] = new Operand(this, Operand.OperandType.Register);
@@ -436,7 +440,58 @@ namespace IronArc
             }
         }
 
-        private void LongArithmeticInstruction(byte opcode, Operand left, Operand right, Operand dest)
+        private ByteBlock GetValue(Operand op)
+        {
+            ByteBlock result;
+            switch (op.Type)
+            {
+                case Operand.OperandType.AddressBlock:
+                    break;
+                case Operand.OperandType.Register:
+                    result = this.ReadRegister((byte)op.Value);
+                    break;
+                case Operand.OperandType.StackIndex:
+                    break;
+                case Operand.OperandType.NumericByte:
+                    result = new ByteBlock((byte)op.Value);
+                    break;
+                case Operand.OperandType.NumericSByte:
+                    result = new ByteBlock((sbyte)op.Value);
+                    break;
+                case Operand.OperandType.NumericShort:
+                    result = new ByteBlock((short)op.Value);
+                    break;
+                case Operand.OperandType.NumericUShort:
+                    result = new ByteBlock((ushort)op.Value);
+                    break;
+                case Operand.OperandType.NumericInt:
+                    result = new ByteBlock((int)op.Value);
+                    break;
+                case Operand.OperandType.NumericUInt:
+                    result = new ByteBlock((uint)op.Value);
+                    break;
+                case Operand.OperandType.NumericLong:
+                    result = new ByteBlock((long)op.Value);
+                    break;
+                case Operand.OperandType.NumericULong:
+                    result = new ByteBlock((ulong)op.Value);
+                    break;
+                case Operand.OperandType.NumericFloat:
+                    result = new ByteBlock((float)op.Value);
+                    break;
+                case Operand.OperandType.NumericDouble:
+                    result = new ByteBlock((double)op.Value);
+                    break;
+                case Operand.OperandType.LPString:
+                    result = new ByteBlock((string)op.Value);
+                    break;
+                default:
+                    throw new ArgumentException();
+            }
+            return result;
+        }
+
+        private void LongArithmeticInstruction(DataOpcode opcode, Operand left, Operand right, Operand dest)
         {
             if (left.Type == Operand.OperandType.LPString || right.Type == Operand.OperandType.LPString)
             {
@@ -446,29 +501,213 @@ namespace IronArc
             {
                 throw new ArgumentException("can't assign to a literal");
             }
-            if (left.Type == Operand.OperandType.AddressBlock)
+
+            ByteBlock op1 = GetValue(left);
+            ByteBlock op2 = GetValue(right);
+
+
+            ulong uresult;
+            long sresult;
+            double fresult;
+            ByteBlock result;
+            if ((left.Type == Operand.OperandType.NumericByte || left.Type == Operand.OperandType.NumericUShort ||
+                 left.Type == Operand.OperandType.NumericUInt || left.Type == Operand.OperandType.NumericULong ||
+                 left.Type == Operand.OperandType.Register || left.Type == Operand.OperandType.AddressBlock) &&
+                (right.Type == Operand.OperandType.NumericByte || right.Type == Operand.OperandType.NumericUShort ||
+                 right.Type == Operand.OperandType.NumericUInt || right.Type == Operand.OperandType.NumericULong ||
+                 right.Type == Operand.OperandType.Register || right.Type == Operand.OperandType.AddressBlock)) // for now, register & memory values are only treated as ulongs.  Fix
             {
+<<<<<<< HEAD
 				//AddressBlock addr = (AddressBlock)left.Value;
                 // add later
             }
             else if (left.Type == Operand.OperandType.StackIndex)
+=======
+                uresult = UnsignedArithmetic(opcode, op1.ToULong(), op2.ToULong());
+                if (dest.Type == Operand.OperandType.Register)
+                {
+                    result = new ByteBlock(uresult);
+                    WriteRegister((byte)dest.Value, result);
+                }
+                else
+                {
+                    this.Memory.WriteULongAt(uresult, (int)(((AddressBlock)dest.Value).Address));
+                }
+            } else if ((left.Type == Operand.OperandType.NumericSByte || left.Type == Operand.OperandType.NumericShort ||
+                        left.Type == Operand.OperandType.NumericInt || left.Type == Operand.OperandType.NumericLong) &&
+                       (right.Type == Operand.OperandType.NumericSByte || right.Type == Operand.OperandType.NumericShort ||
+                        right.Type == Operand.OperandType.NumericInt || right.Type == Operand.OperandType.NumericLong))
+>>>>>>> origin/master
             {
-                // add later
+                sresult = SignedArithmetic(opcode, op1.ToLong(), op2.ToLong());
+                if (dest.Type == Operand.OperandType.Register)
+                {
+                    result = new ByteBlock(sresult);
+                    WriteRegister((byte)dest.Value, result);
+                }
+                else
+                {
+                    this.Memory.WriteLongAt(sresult, (int)(((AddressBlock)dest.Value).Address));
+                }
             }
-            if (right.Type == Operand.OperandType.AddressBlock)
+            else
             {
+<<<<<<< HEAD
 				//AddressBlock addr = (AddressBlock)right.Value;
                 // add later
+=======
+                fresult = FPArithmetic(opcode, op1.ToDouble(), op2.ToDouble());
+                if (dest.Type == Operand.OperandType.Register)
+                {
+                    result = new ByteBlock(fresult);
+                    WriteRegister((byte)dest.Value, result);
+                }
+                else
+                {
+                    this.Memory.WriteDoubleAt(fresult, (int)(((AddressBlock)dest.Value).Address));
+                }
+>>>>>>> origin/master
             }
-            else if (right.Type == Operand.OperandType.StackIndex)
-            {
-                // add later
-            }
+        }
+        #endregion
 
-            long result; // only ints for now
-            bool comp;
+        #region Instruction Implementations
+        private ulong UnsignedArithmetic(DataOpcode opcode, ulong left, ulong right)
+        {
+            ulong result;
             switch (opcode)
             {
+                case DataOpcode.MOV:
+                    break;
+                case DataOpcode.ADD:
+                case DataOpcode.ADDL:
+                    result = left + right;
+                    break;
+                case DataOpcode.SUB:
+                case DataOpcode.SUBL:
+                    result = left - right;
+                    break;
+                case DataOpcode.MULT:
+                case DataOpcode.MULTL:
+                    result = left * right;
+                    break;
+                case DataOpcode.DIV:
+                case DataOpcode.DIVL:
+                    result = left / right;
+                    break;
+                case DataOpcode.MOD:
+                case DataOpcode.MODL:
+                    result = left % right;
+                    break;
+                case DataOpcode.INV:
+                case DataOpcode.INVL:
+                    throw new ArgumentException("can't invert an unsigned number"); //maybe use something other than ArgumentException
+                case DataOpcode.EQ:
+                case DataOpcode.EQL:
+                    result = left == right ? 1UL : 0UL;
+                    break;
+                case DataOpcode.INEQ:
+                case DataOpcode.INEQL:
+                    result = left == right ? 0UL : 1UL;
+                    break;
+                case DataOpcode.LT:
+                case DataOpcode.LTL:
+                    result = left < right ? 1UL : 0UL;
+                    break;
+                case DataOpcode.GT:
+                case DataOpcode.GTL:
+                    result = left > right ? 1UL : 0UL;
+                    break;
+                case DataOpcode.LTEQ:
+                case DataOpcode.LTEQL:
+                    result = left > right ? 0UL : 1UL;
+                    break;
+                case DataOpcode.GTEQ:
+                case DataOpcode.GTEQL:
+                    result = left < right ? 0UL : 1UL;
+                    break;
+                case DataOpcode.AND:
+                case DataOpcode.ANDL:
+                    result = (left != 0UL && right != 0UL) ? 1UL : 0UL;
+                    break;
+                case DataOpcode.OR:
+                case DataOpcode.ORL:
+                    result = (left != 0UL && right != 0UL) ? 1UL : 0UL;
+                    break;
+                case DataOpcode.NOT:
+                case DataOpcode.NOTL:
+                    result = (left != 0UL) ? 0UL : 1UL;
+                    break;
+                case DataOpcode.BWNOT:
+                case DataOpcode.BWNOTL:
+                    result = ~left;
+                    break;
+                case DataOpcode.BWAND:
+                case DataOpcode.BWANDL:
+                    result = left & right;
+                    break;
+                case DataOpcode.BWOR:
+                case DataOpcode.BWORL:
+                    result = left | right;    
+                    break;
+                case DataOpcode.BWXOR:
+                case DataOpcode.BWXORL:
+                    result = left ^ right;
+                    break;
+                case DataOpcode.BWLSHIFT:
+                case DataOpcode.BWLSHIFTL:
+                    result = left << (int)right; // max 63 bits
+                    break;
+                case DataOpcode.BWRSHIFT:
+                case DataOpcode.BWRSHIFTL:
+                    result = left >> (int)right;
+                    break;
+                case DataOpcode.PUSH:
+                    break;
+                case DataOpcode.POP:
+                    break;
+                case DataOpcode.PEEK:
+                    break;
+                case DataOpcode.STACKALLOC:
+                    break;
+                case DataOpcode.ARRAYALLOC:
+                    break;
+                case DataOpcode.DEREF:
+                    break;
+                case DataOpcode.ARRAYACCESS:
+                    break;
+                case DataOpcode.CBYTE:
+                    break;
+                case DataOpcode.CSBYTE:
+                    break;
+                case DataOpcode.CSHORT:
+                    break;
+                case DataOpcode.CUSHORT:
+                    break;
+                case DataOpcode.CINT:
+                    break;
+                case DataOpcode.CUINT:
+                    break;
+                case DataOpcode.CLONG:
+                    break;
+                case DataOpcode.CULONG:
+                    break;
+                case DataOpcode.CSING:
+                    break;
+                case DataOpcode.CDOUBLE:
+                    break;
+                default:
+                    break;
+            }
+            return result;
+        }
+
+        private long SignedArithmetic(DataOpcode opcode, long left, long right) // I don't like this repetition
+        {
+            long result;
+            switch (opcode)
+            {
+<<<<<<< HEAD
 					// mathmetical operations not yet implemented
 					// commented out henceforth
 				//case 0x40:
@@ -527,8 +766,348 @@ namespace IronArc
 				//	break;
 				//default:
 				//	break;
+=======
+                case DataOpcode.MOV:
+                    break;
+                case DataOpcode.ADD:
+                case DataOpcode.ADDL:
+                    result = left + right;
+                    break;
+                case DataOpcode.SUB:
+                case DataOpcode.SUBL:
+                    result = left - right;
+                    break;
+                case DataOpcode.MULT:
+                case DataOpcode.MULTL:
+                    result = left * right;
+                    break;
+                case DataOpcode.DIV:
+                case DataOpcode.DIVL:
+                    result = left / right;
+                    break;
+                case DataOpcode.MOD:
+                case DataOpcode.MODL:
+                    result = left % right;
+                    break;
+                case DataOpcode.INV:
+                case DataOpcode.INVL:
+                    result = -left;
+                    break;
+                case DataOpcode.EQ:
+                case DataOpcode.EQL:
+                    result = left == right ? 1L : 0L;
+                    break;
+                case DataOpcode.INEQ:
+                case DataOpcode.INEQL:
+                    result = left == right ? 0L : 1L;
+                    break;
+                case DataOpcode.LT:
+                case DataOpcode.LTL:
+                    result = left < right ? 1L : 0L;
+                    break;
+                case DataOpcode.GT:
+                case DataOpcode.GTL:
+                    result = left > right ? 1L : 0L;
+                    break;
+                case DataOpcode.LTEQ:
+                case DataOpcode.LTEQL:
+                    result = left > right ? 0L : 1L;
+                    break;
+                case DataOpcode.GTEQ:
+                case DataOpcode.GTEQL:
+                    result = left < right ? 0L : 1L;
+                    break;
+                case DataOpcode.AND:
+                case DataOpcode.ANDL:
+                    result = (left != 0L && right != 0L) ? 1L : 0L;
+                    break;
+                case DataOpcode.OR:
+                case DataOpcode.ORL:
+                    result = (left != 0L && right != 0L) ? 1L : 0L;
+                    break;
+                case DataOpcode.NOT:
+                case DataOpcode.NOTL:
+                    result = (left != 0L) ? 0L : 1L;
+                    break;
+                case DataOpcode.BWNOT:
+                case DataOpcode.BWNOTL:
+                    result = ~left;
+                    break;
+                case DataOpcode.BWAND:
+                case DataOpcode.BWANDL:
+                    result = left & right;
+                    break;
+                case DataOpcode.BWOR:
+                case DataOpcode.BWORL:
+                    result = left | right;
+                    break;
+                case DataOpcode.BWXOR:
+                case DataOpcode.BWXORL:
+                    result = left ^ right;
+                    break;
+                case DataOpcode.BWLSHIFT:
+                case DataOpcode.BWLSHIFTL:
+                    result = left << (int)right; // max 63 bits
+                    break;
+                case DataOpcode.BWRSHIFT:
+                case DataOpcode.BWRSHIFTL:
+                    result = left >> (int)right;
+                    break;
+                case DataOpcode.PUSH:
+                    break;
+                case DataOpcode.POP:
+                    break;
+                case DataOpcode.PEEK:
+                    break;
+                case DataOpcode.STACKALLOC:
+                    break;
+                case DataOpcode.ARRAYALLOC:
+                    break;
+                case DataOpcode.DEREF:
+                    break;
+                case DataOpcode.ARRAYACCESS:
+                    break;
+                case DataOpcode.CBYTE:
+                    break;
+                case DataOpcode.CSBYTE:
+                    break;
+                case DataOpcode.CSHORT:
+                    break;
+                case DataOpcode.CUSHORT:
+                    break;
+                case DataOpcode.CINT:
+                    break;
+                case DataOpcode.CUINT:
+                    break;
+                case DataOpcode.CLONG:
+                    break;
+                case DataOpcode.CULONG:
+                    break;
+                case DataOpcode.CSING:
+                    break;
+                case DataOpcode.CDOUBLE:
+                    break;
+                default:
+                    break;
             }
+            return result;
+        }
+
+        private double FPArithmetic(DataOpcode opcode, double left, double right)
+        {
+            double result;
+            switch (opcode)
+            {
+                case DataOpcode.MOV:
+                    break;
+                case DataOpcode.ADD:
+                case DataOpcode.ADDL:
+                    result = left + right;
+                    break;
+                case DataOpcode.SUB:
+                case DataOpcode.SUBL:
+                    result = left - right;
+                    break;
+                case DataOpcode.MULT:
+                case DataOpcode.MULTL:
+                    result = left * right;
+                    break;
+                case DataOpcode.DIV:
+                case DataOpcode.DIVL:
+                    result = left / right;
+                    break;
+                case DataOpcode.MOD:
+                case DataOpcode.MODL:
+                    result = left % right;
+                    break;
+                case DataOpcode.INV:
+                case DataOpcode.INVL:
+                    result = -left;
+                    break;
+                case DataOpcode.EQ:
+                case DataOpcode.EQL:
+                    result = left == right ? 1.0 : 0.0;
+                    break;
+                case DataOpcode.INEQ:
+                case DataOpcode.INEQL:
+                    result = left == right ? 0.0 : 1.0;
+                    break;
+                case DataOpcode.LT:
+                case DataOpcode.LTL:
+                    result = left < right ? 1.0 : 0.0;
+                    break;
+                case DataOpcode.GT:
+                case DataOpcode.GTL:
+                    result = left > right ? 1.0 : 0.0;
+                    break;
+                case DataOpcode.LTEQ:
+                case DataOpcode.LTEQL:
+                    result = left > right ? 0.0 : 1.0;
+                    break;
+                case DataOpcode.GTEQ:
+                case DataOpcode.GTEQL:
+                    result = left < right ? 0.0 : 1.0;
+                    break;
+                case DataOpcode.AND:
+                case DataOpcode.ANDL:
+                    result = (left != 0.0 && right != 0.0) ? 1.0 : 0.0;
+                    break;
+                case DataOpcode.OR:
+                case DataOpcode.ORL:
+                    result = (left != 0.0 && right != 0.0) ? 1.0 : 0.0;
+                    break;
+                case DataOpcode.NOT:
+                case DataOpcode.NOTL:
+                    result = (left != 0.0) ? 0.0 : 1.0;
+                    break;
+                case DataOpcode.BWNOT:
+                case DataOpcode.BWNOTL:
+                case DataOpcode.BWAND:
+                case DataOpcode.BWANDL:
+                case DataOpcode.BWOR:
+                case DataOpcode.BWORL:
+                case DataOpcode.BWXOR:
+                case DataOpcode.BWXORL:
+                case DataOpcode.BWLSHIFT:
+                case DataOpcode.BWLSHIFTL:
+                case DataOpcode.BWRSHIFT:
+                case DataOpcode.BWRSHIFTL:
+                    throw new ArgumentException("can't do Boolean operations on floating-point values");
+                case DataOpcode.PUSH:
+                    break;
+                case DataOpcode.POP:
+                    break;
+                case DataOpcode.PEEK:
+                    break;
+                case DataOpcode.STACKALLOC:
+                    break;
+                case DataOpcode.ARRAYALLOC:
+                    break;
+                case DataOpcode.DEREF:
+                    break;
+                case DataOpcode.ARRAYACCESS:
+                    break;
+                case DataOpcode.CBYTE:
+                    break;
+                case DataOpcode.CSBYTE:
+                    break;
+                case DataOpcode.CSHORT:
+                    break;
+                case DataOpcode.CUSHORT:
+                    break;
+                case DataOpcode.CINT:
+                    break;
+                case DataOpcode.CUINT:
+                    break;
+                case DataOpcode.CLONG:
+                    break;
+                case DataOpcode.CULONG:
+                    break;
+                case DataOpcode.CSING:
+                    break;
+                case DataOpcode.CDOUBLE:
+                    break;
+                default:
+                    break;
+>>>>>>> origin/master
+            }
+            return result;
         }
         #endregion
     }
+<<<<<<< HEAD
 }
+=======
+
+    private class Operand
+    {
+        public enum OperandType : byte
+        {
+            AddressBlock,
+            Register,
+            StackIndex,
+            NumericByte,
+            NumericSByte,
+            NumericShort,
+            NumericUShort,
+            NumericInt,
+            NumericUInt,
+            NumericLong,
+            NumericULong,
+            NumericFloat,
+            NumericDouble,
+            LPString
+        };
+        public OperandType Type;
+        public object Value; // maybe change
+        public uint Length;
+
+        public Operand(Processor cpu, OperandType optype)
+        {
+            Type = optype;
+            switch (Type)
+            {
+                case OperandType.AddressBlock:
+                    Length = 8;
+                    Value = new AddressBlock(cpu, cpu.ReadULong());
+                    break;
+                case OperandType.Register:
+                    Length = 1;
+                    Value = cpu.ReadByte();
+                    break;
+                case OperandType.StackIndex:
+                    Length = 4;
+                    Value = cpu.ReadUInt();
+                    break;
+                case OperandType.NumericByte:
+                    Length = 1;
+                    Value = cpu.ReadByte();
+                    break;
+                case OperandType.NumericSByte:
+                    Length = 1;
+                    Value = cpu.ReadSByte();
+                    break;
+                case OperandType.NumericShort:
+                    Length = 2;
+                    Value = cpu.ReadShort();
+                    break;
+                case OperandType.NumericUShort:
+                    Length = 2;
+                    Value = cpu.ReadUShort();
+                    break;
+                case OperandType.NumericInt:
+                    Length = 4;
+                    Value = cpu.ReadInt();
+                    break;
+                case OperandType.NumericUInt:
+                    Length = 4;
+                    Value = cpu.ReadUInt();
+                    break;
+                case OperandType.NumericLong:
+                    Length = 8;
+                    Value = cpu.ReadLong();
+                    break;
+                case OperandType.NumericULong:
+                    Length = 8;
+                    Value = cpu.ReadULong();
+                    break;
+                case OperandType.NumericFloat:
+                    Length = 4;
+                    Value = cpu.ReadFloat();
+                    break;
+                case OperandType.NumericDouble:
+                    Length = 8;
+                    Value = cpu.ReadDouble();
+                    break;
+                case OperandType.LPString:
+                    Length = cpu.ReadUInt();
+                    ByteBlock bytes = cpu.Read(Length);
+                    Value = System.Text.Encoding.UTF8.GetString(bytes.ToByteArray());
+                    break;
+                default:
+                    break;
+            }
+        }
+    }
+}
+>>>>>>> origin/master
