@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 
 namespace IronArc
@@ -8,37 +9,41 @@ namespace IronArc
     /// <summary>
     /// Represents an array of bytes with several helper functions.
     /// </summary>
-    public sealed class ByteBlock
+    public unsafe struct ByteBlock : IDisposable
     {
-        private byte[] bytes;
+		private byte* pointer;
         private int location = 0;
 
-        public int Length
-        {
-            get
-            {
-                return this.bytes.Length;
-            }
-        }
+
+		public int Length { get; private set; }
 
         public byte this[int index]
         {
             get
             {
-                Assert.IsTrue(index >= 0 && index < this.Length);
-                return this.bytes[index];
+				byte* resultPointer = this.pointer + index;
+				return *resultPointer;
             }
 
             set
             {
-                Assert.IsTrue(index >= 0 && index < this.Length);
-                this.bytes[index] = value;
+				byte* resultPointer = this.pointer + index;
+				*resultPointer = value;
             }
         }
 
         public byte[] ToByteArray()
         {
-            return this.bytes;
+			byte[] result = new byte[this.Length];
+			byte* current = this.pointer;
+
+			for (int i = 0; i < this.Length; i++)
+			{
+				result[i] = *current;
+				current++;
+			}
+
+			return result;
         }
 
         #region Constructors
@@ -48,7 +53,10 @@ namespace IronArc
         /// <param name="value">An array of bytes used to initialize this byte block.</param>
         public ByteBlock(byte[] value)
         {
-            this.bytes = value;
+			this.pointer = (byte*)Marshal.AllocHGlobal(value.Length);
+			this.Length = value.Length;
+
+			Marshal.Copy(value, 0, (IntPtr)this.pointer, value.Length);
         }
 
         /// <summary>
@@ -59,16 +67,10 @@ namespace IronArc
         /// <param name="startIndex">The index at which to start reading bytes in the array.</param>
         public ByteBlock(int length, byte[] value, int startIndex)
         {
-            this.bytes = new byte[length];
-            int i = 0;
+			this.pointer = (byte*)Marshal.AllocHGlobal(length);
+			this.Length = length;
 
-            while (length > 0)
-            {
-                this.bytes[i] = value[startIndex];
-                i++;
-                startIndex++;
-                length--;
-            }
+			Marshal.Copy(value, startIndex, (IntPtr)this.pointer, length);
         }
 
         /// <summary>
@@ -77,14 +79,8 @@ namespace IronArc
         /// <param name="value">A Boolean value. True becomes 0xFF and false becomes 0x00.</param>
         public ByteBlock(bool value)
         {
-            if (value)
-            {
-                this.bytes = new byte[] { 0xFF };
-            }
-            else
-            {
-                this.bytes = new byte[] { 0x00 };
-            }
+			this = ByteBlock.FromLength(1);
+			*this.pointer = (value) ? (byte)1 : (byte)0;
         }
 
         /// <summary>
@@ -93,7 +89,8 @@ namespace IronArc
         /// <param name="value">A byte value.</param>
         public ByteBlock(byte value)
         {
-            this.bytes = new byte[] { value };
+			this = ByteBlock.FromLength(1);
+			*this.pointer = value;
         }
 
         /// <summary>
@@ -111,9 +108,8 @@ namespace IronArc
         /// <param name="value">A signed 16-bit integer value.</param>
         public ByteBlock(short value)
         {
-            this.bytes = new byte[2];
-            this.bytes[0] = (byte)(value >> 8);
-            this.bytes[1] = (byte)((value << 8) >> 8);
+			this = ByteBlock.FromLength(2);
+			*(short*)this.pointer = value;
         }
 
         /// <summary>
@@ -131,12 +127,8 @@ namespace IronArc
         /// <param name="value">A signed 32-bit integer value.</param>
         public ByteBlock(int value)
         {
-            this.bytes = new byte[4];
-
-            for (int i = 0; i < 3; i++)
-            {
-                this.bytes[i] = (byte)((value << (8 * i)) >> 24);
-            }
+			this = ByteBlock.FromLength(4);
+			*(int*)this.pointer = value;
         }
 
         /// <summary>
@@ -154,12 +146,8 @@ namespace IronArc
         /// <param name="value">A signed 64-bit integer value.</param>
         public ByteBlock(long value)
         {
-            this.bytes = new byte[8];
-
-            for (int i = 0; i < 7; i++)
-            {
-                this.bytes[i] = (byte)((value << (8 * i)) >> 56);
-            }
+			this = ByteBlock.FromLength(8);
+			*(long*)this.pointer = value;
         }
 
         /// <summary>
@@ -175,16 +163,20 @@ namespace IronArc
         /// Initializes a new instance of this <see cref="ByteBlock"/> class.
         /// </summary>
         /// <param name="value">A single-precision floating point value.</param>
-        public ByteBlock(float value) : this(BitConverter.ToInt32(BitConverter.GetBytes(value), 0))
+        public ByteBlock(float value)
         {
+			this = ByteBlock.FromLength(4);
+			*(float*)this.pointer = value;
         }
 
         /// <summary>
         /// Initializes a new instance of this <see cref="ByteBlock"/> class.
         /// </summary>
         /// <param name="value">A double-precision floating point value.</param>
-        public ByteBlock(double value) : this(BitConverter.ToInt64(BitConverter.GetBytes(value), 0))
+        public ByteBlock(double value)
         {
+			this = ByteBlock.FromLength(8);
+			*(double*)this.pointer = value;
         }
 
         /// <summary>
@@ -200,20 +192,17 @@ namespace IronArc
         /// <param name="value">A string value which will be converted to UTF-8 bytes.</param>
         public ByteBlock(string value)
         {
-            this.bytes = System.Text.Encoding.UTF8.GetBytes(value);
-        }
+			byte[] utf8 = Encoding.UTF8.GetBytes(value);
+			this = ByteBlock.FromLength(4 + utf8.Length);
 
-        /// <summary>
-        /// Returns an empty ByteBlock instance initialized to a given length.
-        /// </summary>
-        /// <param name="length">The length of the ByteBlock.</param>
-        /// <returns>An empty ByteBlock of the given length.</returns>
-        public static ByteBlock FromLength(int length)
-        {
-            byte[] bytes = new byte[length];
-            ByteBlock result = new ByteBlock(0);
-            result.bytes = bytes;
-            return result;
+			*(int*)this.pointer = utf8.Length;
+			byte* stringPointer = this.pointer + 4;
+
+			for (int i = 0; i < utf8.Length; i++)
+			{
+				*stringPointer = utf8[i];
+				stringPointer++;
+			}
         }
         #endregion
 
@@ -352,16 +341,22 @@ namespace IronArc
         #region Conversions
         public bool ToBool()
         {
-            Assert.IsTrue(this.Length == 1);
+			if (this.Length != 1)
+			{
+				throw new InvalidCastException(string.Format("Cannot convert a ByteBlock of length {0} to bool (length 1).", this.Length));
+			}
 
-            return this.bytes[0] != 0x00;
+			return *this.pointer != 0;
         }
 
         public byte ToByte()
         {
-            Assert.IsTrue(this.Length == 1);
+			if (this.Length != 1)
+			{
+				throw new InvalidCastException(string.Format("Cannot convert a ByteBlock of length {0} to byte/sbyte (length 1).", this.Length));
+			}
 
-            return this.bytes[0];
+			return *this.pointer;
         }
 
         public sbyte ToSByte()
@@ -371,9 +366,12 @@ namespace IronArc
 
         public short ToShort()
         {
-            Assert.IsTrue(this.Length == 2);
+			if (this.Length != 2)
+			{
+				throw new InvalidCastException(string.Format("Cannot convert a ByteBlock of length {0} to short/ushort (length 2).", this.Length));
+			}
 
-            return BitConverter.ToInt16(this.bytes, 0);
+			return *(short*)this.pointer;
         }
 
         public ushort ToUShort()
@@ -383,9 +381,12 @@ namespace IronArc
 
         public int ToInt()
         {
-            Assert.IsTrue(this.Length == 4);
+			if (this.Length != 4)
+			{
+				throw new InvalidCastException(string.Format("Cannot convert a ByteBlock of length {0} to int/uint (length 4).", this.Length));
+			}
 
-            return BitConverter.ToInt32(this.bytes, 0);
+			return *(int*)this.pointer;
         }
 
         public uint ToUInt()
@@ -395,9 +396,12 @@ namespace IronArc
 
         public long ToLong()
         {
-            Assert.IsTrue(this.Length == 8);
+			if (this.Length != 8)
+			{
+				throw new InvalidCastException(string.Format("Cannot convert a ByteBlock of length {0} to long/ulong (length 8).", this.Length));
+			}
 
-            return BitConverter.ToInt64(this.bytes, 0);
+			return *(long*)this.pointer;
         }
 
         public ulong ToULong()
@@ -407,16 +411,22 @@ namespace IronArc
 
         public float ToFloat()
         {
-            Assert.IsTrue(this.Length == 4);
+			if (this.Length != 4)
+			{
+				throw new InvalidCastException(string.Format("Cannot convert a ByteBlock of length {0} to float (length 4).", this.Length));
+			}
 
-            return BitConverter.ToSingle(this.bytes, 0);
+			return *(float*)this.pointer;
         }
 
         public double ToDouble()
         {
-            Assert.IsTrue(this.Length == 8);
+			if (this.Length != 8)
+			{
+				throw new InvalidCastException(string.Format("Cannot convert a ByteBlock of length {0} to double (length 8).", this.Length));
+			}
 
-            return BitConverter.ToDouble(this.bytes, 0);
+			return *(double*)this.pointer;
         }
 
         public char ToChar()
@@ -426,112 +436,24 @@ namespace IronArc
 
         public override string ToString()
         {
-            return System.Text.Encoding.UTF8.GetString(this.bytes);
+			if (this.Length < 4)
+			{
+				throw new InvalidCastException(string.Format("Cannot convert a ByteBlock of length {0} to string (at least length 4).", this.Length));
+			}
+
+			int stringLength = *(int*)this.pointer;
+			byte[] utf8 = new byte[stringLength];
+
+			for (int i = 0; i < stringLength; i++)
+			{
+				utf8[i] = *(this.pointer + i);
+			}
+
+			return Encoding.UTF8.GetString(utf8);
         }
         #endregion
 
-        #region Read Methods
-        public byte[] Read(uint length)
-        {
-            Assert.IsTrue(this.Length - this.location >= length);
-
-            byte[] result = new byte[length];
-
-            for (int i = 0; i < length; i++)
-            {
-                result[i] = this.bytes[this.location];
-                this.location++;
-            }
-
-            return result;
-        }
-
-        public bool ReadBool()
-        {
-            Assert.IsTrue(this.location != this.Length);
-
-            byte resultByte = this.bytes[this.location];
-            this.location++;
-            return resultByte != 0;
-        }
-
-        public byte ReadByte()
-        {
-            Assert.IsTrue(this.location != this.Length);
-
-            byte result = this.bytes[this.location];
-            this.location++;
-            return result;
-        }
-
-        public sbyte ReadSByte()
-        {
-            return (sbyte)this.ReadByte();
-        }
-
-        public short ReadShort()
-        {
-            Assert.IsTrue(this.Length - this.location >= 2);
-
-            short result = BitConverter.ToInt16(this.bytes, this.location);
-            this.location += 2;
-            return result;
-        }
-
-        public ushort ReadUShort()
-        {
-            return (ushort)this.ReadUShort();
-        }
-
-        public int ReadInt()
-        {
-            Assert.IsTrue(this.Length - this.location >= 4);
-
-            int result = BitConverter.ToInt32(this.bytes, this.location);
-            this.location += 4;
-            return result;
-        }
-
-        public uint ReadUInt()
-        {
-            return (uint)this.ReadInt();
-        }
-
-        public long ReadLong()
-        {
-            Assert.IsTrue(this.Length - this.location >= 8);
-
-            long result = BitConverter.ToInt64(this.bytes, this.location);
-            this.location += 8;
-            return result;
-        }
-
-        public ulong ReadULong()
-        {
-            return (ulong)this.ReadLong();
-        }
-        
-        public float ReadFloat()
-        {
-            return BitConverter.ToSingle(this.Read(4), 0);
-        }
-
-        public double ReadDouble()
-        {
-            return BitConverter.ToDouble(this.Read(8), 0);
-        }
-
-        public char ReadChar()
-        {
-            return (char)this.ReadShort();
-        }
-
-        public string ReadString(uint length)
-        {
-            return System.Text.Encoding.UTF8.GetString(this.Read(length));
-        }
-        #endregion
-
+		// Where you left off: fix the read at methods
         #region Read At Methods
         public byte[] ReadAt(uint length, uint address)
         {
@@ -614,98 +536,6 @@ namespace IronArc
         {
 			byte[] bytes = this.ReadAt((uint)length, address);
             return System.Text.Encoding.UTF8.GetString(bytes);
-        }
-        #endregion
-
-        #region Write Methods
-        public void Write(byte[] bytes)
-        {
-            Assert.IsTrue(bytes.Length + this.location < this.Length);
-
-            for (int i = 0; i < bytes.Length; i++)
-            {
-                this.bytes[this.location] = bytes[i];
-                this.location++;
-            }
-        }
-
-        public void WriteBool(bool value)
-        {
-            Assert.IsTrue(this.location + 1 < this.Length);
-
-            if (value)
-            {
-                this.bytes[this.location] = 0xFF;
-            }
-            else
-            {
-                this.bytes[this.location] = 0x00;
-            }
-
-            this.location++;
-        }
-
-        public void WriteByte(byte value)
-        {
-            Assert.IsTrue(this.location + 1 < this.Length);
-
-            this.bytes[this.location] = value;
-            this.location++;
-        }
-
-        public void WriteSByte(sbyte value)
-        {
-            this.WriteByte((byte)value);
-        }
-
-        public void WriteShort(short value)
-        {
-            this.Write(BitConverter.GetBytes(value));
-        }
-
-        public void WriteUShort(ushort value)
-        {
-            this.WriteShort((short)value);
-        }
-
-        public void WriteInt(int value)
-        {
-            this.Write(BitConverter.GetBytes(value));
-        }
-
-        public void WriteUInt(uint value)
-        {
-            this.WriteInt((int)value);
-        }
-
-        public void WriteLong(long value)
-        {
-            this.Write(BitConverter.GetBytes(value));
-        }
-
-        public void WriteULong(ulong value)
-        {
-            this.WriteLong((long)value);
-        }
-
-        public void WriteFloat(float value)
-        {
-            this.Write(BitConverter.GetBytes(value));
-        }
-
-        public void WriteDouble(double value)
-        {
-            this.Write(BitConverter.GetBytes(value));
-        }
-
-        public void WriteChar(char value)
-        {
-            this.WriteShort((short)value);
-        }
-
-        public void WriteString(string value)
-        {
-            this.Write(System.Text.Encoding.UTF8.GetBytes(value));
         }
         #endregion
 
@@ -810,5 +640,19 @@ namespace IronArc
             this.WriteAt(System.Text.Encoding.UTF8.GetBytes(value), address);
         }
         #endregion
+
+		public static ByteBlock FromLength(int length)
+		{
+			ByteBlock result = new ByteBlock();
+			result.pointer = (byte*)Marshal.AllocHGlobal(length);
+			result.Length = length;
+
+			for (int i = 0; i < length; i++)
+			{
+				*(result.pointer + i) = 0;
+			}
+
+			return result;
+		}
     }
 }
