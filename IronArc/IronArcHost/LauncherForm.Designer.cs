@@ -36,12 +36,12 @@
 			this.TSBToggleVMState = new System.Windows.Forms.ToolStripButton();
 			this.TSBShowTerminal = new System.Windows.Forms.ToolStripButton();
 			this.TSBShowDebugger = new System.Windows.Forms.ToolStripButton();
+			this.TSBHardware = new System.Windows.Forms.ToolStripButton();
 			this.ListVMs = new System.Windows.Forms.ListView();
 			this.LVCState = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
 			this.LVCMemory = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
 			this.LVCStackMemory = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
 			this.LVCHardwareDeviceCount = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-			this.TSBHardware = new System.Windows.Forms.ToolStripButton();
 			this.toolStrip1.SuspendLayout();
 			this.SuspendLayout();
 			// 
@@ -85,7 +85,6 @@
 			// 
 			// TSBToggleVMState
 			// 
-			this.TSBToggleVMState.Enabled = false;
 			this.TSBToggleVMState.Image = ((System.Drawing.Image)(resources.GetObject("TSBToggleVMState.Image")));
 			this.TSBToggleVMState.ImageTransparentColor = System.Drawing.Color.Magenta;
 			this.TSBToggleVMState.Name = "TSBToggleVMState";
@@ -94,7 +93,6 @@
 			// 
 			// TSBShowTerminal
 			// 
-			this.TSBShowTerminal.Enabled = false;
 			this.TSBShowTerminal.Image = ((System.Drawing.Image)(resources.GetObject("TSBShowTerminal.Image")));
 			this.TSBShowTerminal.ImageTransparentColor = System.Drawing.Color.Magenta;
 			this.TSBShowTerminal.Name = "TSBShowTerminal";
@@ -103,12 +101,19 @@
 			// 
 			// TSBShowDebugger
 			// 
-			this.TSBShowDebugger.Enabled = false;
 			this.TSBShowDebugger.Image = ((System.Drawing.Image)(resources.GetObject("TSBShowDebugger.Image")));
 			this.TSBShowDebugger.ImageTransparentColor = System.Drawing.Color.Magenta;
 			this.TSBShowDebugger.Name = "TSBShowDebugger";
 			this.TSBShowDebugger.Size = new System.Drawing.Size(88, 22);
 			this.TSBShowDebugger.Text = "&Debugger...";
+			// 
+			// TSBHardware
+			// 
+			this.TSBHardware.Image = ((System.Drawing.Image)(resources.GetObject("TSBHardware.Image")));
+			this.TSBHardware.ImageTransparentColor = System.Drawing.Color.Magenta;
+			this.TSBHardware.Name = "TSBHardware";
+			this.TSBHardware.Size = new System.Drawing.Size(87, 22);
+			this.TSBHardware.Text = "&Hardware...";
 			// 
 			// ListVMs
 			// 
@@ -144,15 +149,6 @@
 			// 
 			this.LVCHardwareDeviceCount.Text = "HW Device Count";
 			this.LVCHardwareDeviceCount.Width = 105;
-			// 
-			// TSBHardware
-			// 
-			this.TSBHardware.Enabled = false;
-			this.TSBHardware.Image = ((System.Drawing.Image)(resources.GetObject("TSBHardware.Image")));
-			this.TSBHardware.ImageTransparentColor = System.Drawing.Color.Magenta;
-			this.TSBHardware.Name = "TSBHardware";
-			this.TSBHardware.Size = new System.Drawing.Size(87, 22);
-			this.TSBHardware.Text = "&Hardware...";
 			// 
 			// LauncherForm
 			// 

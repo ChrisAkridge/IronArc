@@ -12,8 +12,6 @@ namespace IronArc
     public unsafe struct ByteBlock : IDisposable
     {
 		private byte* pointer;
-        private int location = 0;
-
 
 		public int Length { get; private set; }
 

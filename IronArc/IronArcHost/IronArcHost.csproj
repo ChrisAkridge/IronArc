@@ -34,6 +34,26 @@
   <PropertyGroup>
     <StartupObject>IronArcHost.Program</StartupObject>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\x86\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>ManagedMinimumRules.ruleset</CodeAnalysisRuleSet>
+    <Prefer32Bit>true</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
+    <OutputPath>bin\x86\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>ManagedMinimumRules.ruleset</CodeAnalysisRuleSet>
+    <Prefer32Bit>true</Prefer32Bit>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -52,6 +72,12 @@
     </Compile>
     <Compile Include="DebuggerForm.Designer.cs">
       <DependentUpon>DebuggerForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="HardwareForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="HardwareForm.Designer.cs">
+      <DependentUpon>HardwareForm.cs</DependentUpon>
     </Compile>
     <Compile Include="LauncherForm.cs">
       <SubType>Form</SubType>
@@ -81,6 +107,9 @@
     </Compile>
     <EmbeddedResource Include="DebuggerForm.resx">
       <DependentUpon>DebuggerForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="HardwareForm.resx">
+      <DependentUpon>HardwareForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="LauncherForm.resx">
       <DependentUpon>LauncherForm.cs</DependentUpon>

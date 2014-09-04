@@ -68,6 +68,8 @@
     <Compile Include="Assert.cs" />
     <Compile Include="ByteBlock.cs" />
     <Compile Include="Diskfile.cs" />
+    <Compile Include="Enums.cs" />
+    <Compile Include="HardwareDevice.cs" />
     <Compile Include="Operand.cs" />
     <Compile Include="Processor.cs" />
     <Compile Include="Stack.cs" />
