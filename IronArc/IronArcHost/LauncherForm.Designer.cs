@@ -68,6 +68,7 @@
 			this.TSBAddVM.Name = "TSBAddVM";
 			this.TSBAddVM.Size = new System.Drawing.Size(79, 22);
 			this.TSBAddVM.Text = "&Add VM...";
+			this.TSBAddVM.Click += new System.EventHandler(this.TSBAddVM_Click);
 			// 
 			// TSBRemoveVM
 			// 
@@ -90,6 +91,7 @@
 			this.TSBToggleVMState.Name = "TSBToggleVMState";
 			this.TSBToggleVMState.Size = new System.Drawing.Size(88, 22);
 			this.TSBToggleVMState.Text = "&Pause VM...";
+			this.TSBToggleVMState.Click += new System.EventHandler(this.TSBToggleVMState_Click);
 			// 
 			// TSBShowTerminal
 			// 
@@ -98,6 +100,7 @@
 			this.TSBShowTerminal.Name = "TSBShowTerminal";
 			this.TSBShowTerminal.Size = new System.Drawing.Size(83, 22);
 			this.TSBShowTerminal.Text = "&Terminal...";
+			this.TSBShowTerminal.Click += new System.EventHandler(this.TSBShowTerminal_Click);
 			// 
 			// TSBShowDebugger
 			// 
@@ -106,6 +109,7 @@
 			this.TSBShowDebugger.Name = "TSBShowDebugger";
 			this.TSBShowDebugger.Size = new System.Drawing.Size(88, 22);
 			this.TSBShowDebugger.Text = "&Debugger...";
+			this.TSBShowDebugger.Click += new System.EventHandler(this.TSBShowDebugger_Click);
 			// 
 			// TSBHardware
 			// 
@@ -114,6 +118,7 @@
 			this.TSBHardware.Name = "TSBHardware";
 			this.TSBHardware.Size = new System.Drawing.Size(87, 22);
 			this.TSBHardware.Text = "&Hardware...";
+			this.TSBHardware.Click += new System.EventHandler(this.TSBHardware_Click);
 			// 
 			// ListVMs
 			// 

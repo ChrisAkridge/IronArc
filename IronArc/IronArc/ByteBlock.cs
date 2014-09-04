@@ -30,6 +30,14 @@ namespace IronArc
             }
         }
 
+		public static ByteBlock Empty
+		{
+			get
+			{
+				return new ByteBlock();
+			}
+		}
+
         public byte[] ToByteArray()
         {
 			byte[] result = new byte[this.Length];
@@ -49,7 +57,7 @@ namespace IronArc
         /// Initializes a new instance of this <see cref="ByteBlock"/> class.
         /// </summary>
         /// <param name="value">An array of bytes used to initialize this byte block.</param>
-        public ByteBlock(byte[] value)
+        public ByteBlock(byte[] value) : this()
         {
 			this.pointer = (byte*)Marshal.AllocHGlobal(value.Length);
 			this.Length = value.Length;
@@ -63,7 +71,7 @@ namespace IronArc
         /// <param name="length">The number of bytes from the array to use.</param>
         /// <param name="value">An array of bytes of which a portion is used to initialize this byte block.</param>
         /// <param name="startIndex">The index at which to start reading bytes in the array.</param>
-        public ByteBlock(int length, byte[] value, int startIndex)
+        public ByteBlock(int length, byte[] value, int startIndex) : this()
         {
 			this.pointer = (byte*)Marshal.AllocHGlobal(length);
 			this.Length = length;
@@ -451,16 +459,19 @@ namespace IronArc
         }
         #endregion
 
-		// Where you left off: fix the read at methods
         #region Read At Methods
         public byte[] ReadAt(uint length, uint address)
         {
-            Assert.IsTrue(address >= 0 && this.Length - address > length);
+			if (address < 0 || address + length >= this.Length)
+			{
+				throw new ArgumentOutOfRangeException(string.Format("Cannot read data at 0x{0:X2} of length {1}. Arguement(s) out of range.", address, length));
+			}
 
             byte[] result = new byte[length];
             for (int i = 0; i < length; i++)
             {
-                result[i] = this.bytes[address++];
+				result[i] = *(this.pointer + address);
+				address++;
             }
 
             return result;
@@ -468,16 +479,22 @@ namespace IronArc
 
         public bool ReadBoolAt(uint address)
         {
-            Assert.IsTrue(address >= 0 && address < this.Length);
+            if (address < 0 || address >= this.Length)
+			{
+				throw new ArgumentOutOfRangeException(string.Format("Cannot read bool at 0x{0:X2}. Argument out of range.", address));
+			}
 
-            return this.bytes[address] != 0;
+			return *(this.pointer + address) != 0;
         }
 
         public byte ReadByteAt(uint address)
         {
-            Assert.IsTrue(address >= 0 && address < this.Length);
+            if (address < 0 || address >= this.Length)
+			{
+				throw new ArgumentOutOfRangeException(string.Format("Cannot read byte at 0x{0:X2}. Argument out of range.", address));
+			}
 
-            return this.bytes[address];
+			return *(this.pointer + address);
         }
 
         public sbyte ReadSByteAt(uint address)
@@ -487,7 +504,12 @@ namespace IronArc
 
         public short ReadShortAt(uint address)
         {
-            return BitConverter.ToInt16(this.ReadAt(2, address), 0);
+            if (address < 0 || address + 2 >= this.Length)
+			{
+				throw new ArgumentOutOfRangeException(string.Format("Cannot read short at 0x{0:X2}. Argument out of range.", address));
+			}
+
+			return *(short*)(this.pointer + address);
         }
 
         public ushort ReadUShortAt(uint address)
@@ -497,7 +519,12 @@ namespace IronArc
 
         public int ReadIntAt(uint address)
         {
-            return BitConverter.ToInt32(this.ReadAt(4, address), 0);
+			if (address < 0 || address + 4 >= this.Length)
+			{
+				throw new ArgumentOutOfRangeException(string.Format("Cannot read int at 0x{0:X2}. Argument out of range.", address));
+			}
+
+			return *(int*)(this.pointer + address);
         }
 
         public uint ReadUIntAt(uint address)
@@ -507,7 +534,12 @@ namespace IronArc
 
         public long ReadLongAt(uint address)
         {
-            return BitConverter.ToInt64(this.ReadAt(8, address), 0);
+			if (address < 0 || address + 8 >= this.Length)
+			{
+				throw new ArgumentOutOfRangeException(string.Format("Cannot read long at 0x{0:X2}. Argument out of range.", address));
+			}
+
+			return *(long*)(this.pointer + address);
         }
 
         public ulong ReadULongAt(uint address)
@@ -517,12 +549,22 @@ namespace IronArc
 
         public float ReadFloatAt(uint address)
         {
-            return BitConverter.ToSingle(this.ReadAt(4, address), 0);
+			if (address < 0 || address + 4 >= this.Length)
+			{
+				throw new ArgumentOutOfRangeException(string.Format("Cannot read float at 0x{0:X2}. Argument out of range.", address));
+			}
+
+			return *(float*)(this.pointer + address);
         }
 
         public double ReadDoubleAt(uint address)
         {
-            return BitConverter.ToDouble(this.ReadAt(8, address), 0);
+			if (address < 0 || address + 8 >= this.Length)
+			{
+				throw new ArgumentOutOfRangeException(string.Format("Cannot read double at 0x{0:X2}. Argument out of range.", address));
+			}
+
+			return *(double*)(this.pointer + address);
         }
 
         public char ReadCharAt(uint address)
@@ -532,55 +574,72 @@ namespace IronArc
 
         public string ReadStringAt(uint length, uint address)
         {
-			byte[] bytes = this.ReadAt((uint)length, address);
-            return System.Text.Encoding.UTF8.GetString(bytes);
+			int stringLength = this.ReadIntAt(address);
+			address += 4;
+
+			if (address + stringLength >= this.Length)
+			{
+				throw new ArgumentOutOfRangeException(string.Format("Cannot read string at 0x{0:X2}. Argument out of range.", address));
+			}
+
+			byte[] utf8 = new byte[stringLength];
+			for (int i = 0; i < stringLength; i++)
+			{
+				utf8[i] = *(this.pointer + address);
+				address++;
+			}
+
+			return Encoding.UTF8.GetString(utf8);
         }
         #endregion
 
         #region Write At Methods
         public void WriteAt(byte[] bytes, int address)
         {
-            Assert.IsTrue(address >= 0 && address < this.Length);
-            Assert.IsTrue(address + bytes.Length < this.Length);
+			if (address < 0 || address + bytes.Length > this.Length)
+			{
+				throw new ArgumentOutOfRangeException(string.Format("Cannot write at 0x{0:X2}. Argument out of range.", address));
+			}
 
             for (int i = 0; i < bytes.Length; i++)
             {
-                this.bytes[address] = bytes[i];
-                address++;
+				*(this.pointer + address) = bytes[i];
+				address++;
             }
         }
 
         public void WriteAt(ByteBlock bytes, int address)
         {
-            Assert.IsTrue(address >= 0 && address < this.Length);
-            Assert.IsTrue(address + bytes.Length < this.Length);
+			if (address < 0 || address + bytes.Length >= this.Length)
+			{
+				throw new ArgumentOutOfRangeException(string.Format("Cannot write at 0x{0:X2}. Argument out of range.", address));
+			}
 
-            for (int i = 0; i < bytes.Length; i++)
-            {
-                this.bytes[address] = bytes[i];
-                address++;
-            }
+			for (int i = 0; i < bytes.Length; i++)
+			{
+				*(this.pointer + address) = *(bytes.pointer + i);
+				address++;
+			}
         }
 
         public void WriteBoolAt(bool value, int address)
         {
-            Assert.IsTrue(address >= 0 && address < this.Length);
+            if (address < 0 || address >= this.Length)
+			{
+				throw new ArgumentOutOfRangeException(string.Format("Cannot write bool at 0x{0:X2}. Argument out of range.", address));
+			}
 
-            if (value)
-            {
-                this.bytes[address] = 0xFF;
-            }
-            else
-            {
-                this.bytes[address] = 0x00;
-            }
+			*(this.pointer + address) = (value) ? (byte)1 : (byte)0;
         }
 
         public void WriteByteAt(byte value, int address)
         {
-            Assert.IsTrue(address >= 0 && address < this.Length);
+			if (address < 0 || address >= this.Length)
+			{
+				throw new ArgumentOutOfRangeException(string.Format("Cannot write byte at 0x{0:X2}. Argument out of range.", address));
+			}
 
-            this.bytes[address] = value;
+			*(this.pointer + address) = value;
         }
 
         public void WriteSByteAt(sbyte value, int address)
@@ -590,7 +649,12 @@ namespace IronArc
 
         public void WriteShortAt(short value, int address)
         {
-            this.WriteAt(BitConverter.GetBytes(value), address);
+			if (address < 0 || address + 2 >= this.Length)
+			{
+				throw new ArgumentOutOfRangeException(string.Format("Cannot write short at 0x{0:X2}. Argument out of range.", address));
+			}
+
+			*(short*)(this.pointer + address) = value;
         }
 
         public void WriteUShortAt(ushort value, int address)
@@ -600,7 +664,12 @@ namespace IronArc
 
         public void WriteIntAt(int value, int address)
         {
-            this.WriteAt(BitConverter.GetBytes(value), address);
+			if (address < 0 || address + 4 >= this.Length)
+			{
+				throw new ArgumentOutOfRangeException(string.Format("Cannot write int at 0x{0:X2}. Argument out of range.", address));
+			}
+
+			*(int*)(this.pointer + address) = value;
         }
 
         public void WriteUIntAt(uint value, int address)
@@ -610,7 +679,12 @@ namespace IronArc
 
         public void WriteLongAt(long value, int address)
         {
-            this.WriteAt(BitConverter.GetBytes(value), address);
+			if (address < 0 || address + 8 >= this.Length)
+			{
+				throw new ArgumentOutOfRangeException(string.Format("Cannot write long at 0x{0:X2}. Argument out of range.", address));
+			}
+
+			*(long*)(this.pointer + address) = value;
         }
 
         public void WriteULongAt(ulong value, int address)
@@ -620,12 +694,22 @@ namespace IronArc
 
         public void WriteFloatAt(float value, int address)
         {
-            this.WriteAt(BitConverter.GetBytes(value), address);
+			if (address < 0 || address + 4 >= this.Length)
+			{
+				throw new ArgumentOutOfRangeException(string.Format("Cannot write float at 0x{0:X2}. Argument out of range.", address));
+			}
+
+			*(float*)(this.pointer + address) = value;
         }
 
         public void WriteDoubleAt(double value, int address)
         {
-            this.WriteAt(BitConverter.GetBytes(value), address);
+			if (address < 0 || address + 8 >= this.Length)
+			{
+				throw new ArgumentOutOfRangeException(string.Format("Cannot write double at 0x{0:X2}. Argument out of range.", address));
+			}
+
+			*(double*)(this.pointer + address) = value;
         }
 
         public void WriteCharAt(char value, int address)
@@ -635,9 +719,35 @@ namespace IronArc
 
         public void WriteStringAt(string value, int address)
         {
-            this.WriteAt(System.Text.Encoding.UTF8.GetBytes(value), address);
+			byte[] utf8 = Encoding.UTF8.GetBytes(value);
+			int stringLength = utf8.Length;
+
+			if (address < 0 || address + 4 + stringLength >= this.Length)
+			{
+				throw new ArgumentOutOfRangeException(string.Format("Cannot write string at 0x{0:X2}. Argument out of range.", address));
+			}
+
+			this.WriteIntAt(stringLength, address);
+			address += 4;
+
+			for (int i = 0; i < stringLength; i++)
+			{
+				*(this.pointer + address) = utf8[i];
+				address++;
+			}
         }
         #endregion
+
+		#region IDisposable Methods
+		public void Dispose()
+		{
+			if ((IntPtr)this.pointer != IntPtr.Zero)
+			{
+				Marshal.FreeHGlobal((IntPtr)this.pointer);
+				this.pointer = (byte*)0;
+			}
+		}
+		#endregion
 
 		public static ByteBlock FromLength(int length)
 		{

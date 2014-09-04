@@ -43,7 +43,7 @@ namespace IronArc
                     new SystemError("DiskfileReadIndexOutOfRange", "Tried to read a byte above the range of the diskfile.").WriteToError();
                 }
 
-                this.File[index] = value;
+				//this.File[index] = value;
             }
         }
 

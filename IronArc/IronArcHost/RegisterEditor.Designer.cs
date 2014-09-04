@@ -59,6 +59,7 @@
 			this.TextValue.Size = new System.Drawing.Size(104, 20);
 			this.TextValue.TabIndex = 1;
 			this.TextValue.Text = "0000000000000000";
+			this.TextValue.TextChanged += new System.EventHandler(this.TextValue_TextChanged);
 			// 
 			// StaticLabelAsBigEndian
 			// 
@@ -77,6 +78,7 @@
 			this.TextAsBigEndian.Size = new System.Drawing.Size(104, 20);
 			this.TextAsBigEndian.TabIndex = 3;
 			this.TextAsBigEndian.Text = "0000000000000000";
+			this.TextAsBigEndian.TextChanged += new System.EventHandler(this.TextAsBigEndian_TextChanged);
 			// 
 			// StaticLabelSigned
 			// 
@@ -95,6 +97,7 @@
 			this.TextSigned.Size = new System.Drawing.Size(104, 20);
 			this.TextSigned.TabIndex = 5;
 			this.TextSigned.Text = "0";
+			this.TextSigned.TextChanged += new System.EventHandler(this.TextSigned_TextChanged);
 			// 
 			// StaticLabelUnsigned
 			// 
@@ -113,6 +116,7 @@
 			this.TextUnsigned.Size = new System.Drawing.Size(104, 20);
 			this.TextUnsigned.TabIndex = 7;
 			this.TextUnsigned.Text = "0";
+			this.TextUnsigned.TextChanged += new System.EventHandler(this.TextUnsigned_TextChanged);
 			// 
 			// StaticLabelFloatingPoint
 			// 
@@ -131,9 +135,11 @@
 			this.TextFloatingPoint.Size = new System.Drawing.Size(104, 20);
 			this.TextFloatingPoint.TabIndex = 9;
 			this.TextFloatingPoint.Text = "0.0";
+			this.TextFloatingPoint.TextChanged += new System.EventHandler(this.TextFloatingPoint_TextChanged);
 			// 
 			// ButtonCancel
 			// 
+			this.ButtonCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
 			this.ButtonCancel.Location = new System.Drawing.Point(128, 125);
 			this.ButtonCancel.Name = "ButtonCancel";
 			this.ButtonCancel.Size = new System.Drawing.Size(75, 23);

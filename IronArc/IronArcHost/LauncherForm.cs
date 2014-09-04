@@ -16,5 +16,34 @@ namespace IronArcHost
 		{
 			InitializeComponent();
 		}
+
+		private void TSBAddVM_Click(object sender, EventArgs e)
+		{
+			// temporary
+			new NewVMForm().ShowDialog();
+		}
+
+		private void TSBToggleVMState_Click(object sender, EventArgs e)
+		{
+
+		}
+
+		private void TSBShowTerminal_Click(object sender, EventArgs e)
+		{
+			// temporary
+			new Terminal().ShowDialog();
+		}
+
+		private void TSBShowDebugger_Click(object sender, EventArgs e)
+		{
+			// temporary
+			new DebuggerForm().ShowDialog();
+		}
+
+		private void TSBHardware_Click(object sender, EventArgs e)
+		{
+			// temporary
+			new HardwareForm().ShowDialog();
+		}
 	}
 }

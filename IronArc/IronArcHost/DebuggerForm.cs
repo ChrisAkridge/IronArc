@@ -16,5 +16,64 @@ namespace IronArcHost
 		{
 			InitializeComponent();
 		}
+
+		private void DebuggerForm_Load(object sender, EventArgs e)
+		{
+		}
+
+		private void LinkLabelEAX_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+		{
+			new RegisterEditor().ShowDialog();
+		}
+
+		private void LinkEBX_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+		{
+
+		}
+
+		private void LinkECX_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+		{
+
+		}
+
+		private void LinkEDX_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+		{
+
+		}
+
+		private void LinkEEX_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+		{
+
+		}
+
+		private void LinkEFX_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+		{
+
+		}
+
+		private void LinkEGX_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+		{
+
+		}
+
+		private void LinkEHX_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+		{
+
+		}
+
+		private void LinkIP_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+		{
+
+		}
+
+		private void LinkEBASE_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+		{
+
+		}
+
+		private void LinkEFLAGS_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+		{
+
+		}
 	}
 }

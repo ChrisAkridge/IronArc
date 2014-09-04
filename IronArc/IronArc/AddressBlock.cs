@@ -42,7 +42,7 @@ namespace IronArc
 						throw new FormatException("unrecognized address type");
 				}
 
-				return null;
+				return ByteBlock.Empty;
 			}
 		}
 

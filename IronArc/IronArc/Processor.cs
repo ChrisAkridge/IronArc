@@ -161,7 +161,7 @@ namespace IronArc
 					break;
 			}
 
-			return null;
+			return ByteBlock.Empty;
 		}
 
 		public void WriteRegister(byte register, ByteBlock value)
@@ -438,7 +438,7 @@ namespace IronArc
 
 		private ByteBlock GetValue(Operand op)
 		{
-			ByteBlock result = null;
+			ByteBlock result = ByteBlock.Empty;
 			switch (op.Type)
 			{
 				case Operand.OperandType.AddressBlock:
@@ -689,7 +689,7 @@ namespace IronArc
 
 		private long SignedArithmetic(DataOpcode opcode, long left, long right) // I don't like this repetition
 		{
-			long result = 0l;
+			long result = 0L;
 			switch (opcode)
 			{
 				case DataOpcode.MOV:

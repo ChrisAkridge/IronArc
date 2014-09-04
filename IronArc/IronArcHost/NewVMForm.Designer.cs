@@ -123,6 +123,11 @@
 			// 
 			this.NumUDLoadAtAddress.Hexadecimal = true;
 			this.NumUDLoadAtAddress.Location = new System.Drawing.Point(112, 42);
+			this.NumUDLoadAtAddress.Maximum = new decimal(new int[] {
+            2147483647,
+            0,
+            0,
+            0});
 			this.NumUDLoadAtAddress.Name = "NumUDLoadAtAddress";
 			this.NumUDLoadAtAddress.Size = new System.Drawing.Size(247, 22);
 			this.NumUDLoadAtAddress.TabIndex = 8;
@@ -138,6 +143,11 @@
 			// NumUDSystemMemory
 			// 
 			this.NumUDSystemMemory.Location = new System.Drawing.Point(112, 107);
+			this.NumUDSystemMemory.Maximum = new decimal(new int[] {
+            2147483647,
+            0,
+            0,
+            0});
 			this.NumUDSystemMemory.Minimum = new decimal(new int[] {
             1,
             0,
@@ -164,6 +174,11 @@
 			// numericUpDown1
 			// 
 			this.numericUpDown1.Location = new System.Drawing.Point(112, 135);
+			this.numericUpDown1.Maximum = new decimal(new int[] {
+            2147483647,
+            0,
+            0,
+            0});
 			this.numericUpDown1.Minimum = new decimal(new int[] {
             1,
             0,
@@ -250,6 +265,7 @@
 			this.Controls.Add(this.TextBoxInitialProgram);
 			this.Controls.Add(this.StaticLabelInitialProgram);
 			this.Font = new System.Drawing.Font("Segoe UI", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+			this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
 			this.MaximizeBox = false;
 			this.MinimizeBox = false;
 			this.Name = "NewVMForm";

@@ -221,6 +221,7 @@
 			this.LinkEBASE.TabIndex = 20;
 			this.LinkEBASE.TabStop = true;
 			this.LinkEBASE.Text = "EBASE";
+			this.LinkEBASE.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.LinkEBASE_LinkClicked);
 			// 
 			// textBox1
 			// 
@@ -240,6 +241,7 @@
 			this.LinkEFLAGS.TabIndex = 18;
 			this.LinkEFLAGS.TabStop = true;
 			this.LinkEFLAGS.Text = "EFLAGS";
+			this.LinkEFLAGS.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.LinkEFLAGS_LinkClicked);
 			// 
 			// textBox2
 			// 
@@ -259,6 +261,7 @@
 			this.LinkEHX.TabIndex = 16;
 			this.LinkEHX.TabStop = true;
 			this.LinkEHX.Text = "EHX";
+			this.LinkEHX.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.LinkEHX_LinkClicked);
 			// 
 			// textBox3
 			// 
@@ -278,6 +281,7 @@
 			this.LinkEGX.TabIndex = 14;
 			this.LinkEGX.TabStop = true;
 			this.LinkEGX.Text = "EGX";
+			this.LinkEGX.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.LinkEGX_LinkClicked);
 			// 
 			// textBox4
 			// 
@@ -297,6 +301,7 @@
 			this.LinkEFX.TabIndex = 12;
 			this.LinkEFX.TabStop = true;
 			this.LinkEFX.Text = "EFX";
+			this.LinkEFX.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.LinkEFX_LinkClicked);
 			// 
 			// textBox5
 			// 
@@ -316,6 +321,7 @@
 			this.LinkEEX.TabIndex = 10;
 			this.LinkEEX.TabStop = true;
 			this.LinkEEX.Text = "EEX";
+			this.LinkEEX.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.LinkEEX_LinkClicked);
 			// 
 			// TextIP
 			// 
@@ -335,6 +341,7 @@
 			this.LinkIP.TabIndex = 8;
 			this.LinkIP.TabStop = true;
 			this.LinkIP.Text = "IP";
+			this.LinkIP.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.LinkIP_LinkClicked);
 			// 
 			// TextEDX
 			// 
@@ -354,6 +361,7 @@
 			this.LinkEDX.TabIndex = 6;
 			this.LinkEDX.TabStop = true;
 			this.LinkEDX.Text = "EDX";
+			this.LinkEDX.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.LinkEDX_LinkClicked);
 			// 
 			// TextECX
 			// 
@@ -373,6 +381,7 @@
 			this.LinkECX.TabIndex = 4;
 			this.LinkECX.TabStop = true;
 			this.LinkECX.Text = "ECX";
+			this.LinkECX.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.LinkECX_LinkClicked);
 			// 
 			// TextEBX
 			// 
@@ -392,6 +401,7 @@
 			this.LinkEBX.TabIndex = 2;
 			this.LinkEBX.TabStop = true;
 			this.LinkEBX.Text = "EBX";
+			this.LinkEBX.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.LinkEBX_LinkClicked);
 			// 
 			// TextEAX
 			// 
@@ -411,6 +421,7 @@
 			this.LinkLabelEAX.TabIndex = 0;
 			this.LinkLabelEAX.TabStop = true;
 			this.LinkLabelEAX.Text = "EAX";
+			this.LinkLabelEAX.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.LinkLabelEAX_LinkClicked);
 			// 
 			// GroupMemory
 			// 
@@ -505,6 +516,7 @@
 			this.Name = "DebuggerForm";
 			this.ShowInTaskbar = false;
 			this.Text = "VM Debugger";
+			this.Load += new System.EventHandler(this.DebuggerForm_Load);
 			this.GroupBoxDisassembly.ResumeLayout(false);
 			this.ToolStripDebugger.ResumeLayout(false);
 			this.ToolStripDebugger.PerformLayout();
