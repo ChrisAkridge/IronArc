@@ -25,8 +25,8 @@ namespace IronArc
 			LPString
 		};
 		public OperandType Type;
-		public object Value; // maybe change
-		public uint Length;
+        public AddressBlock Address; // only used for address blocks
+        public ByteBlock Value;
 
 		public Operand(Processor cpu, OperandType optype)
 		{
@@ -34,61 +34,48 @@ namespace IronArc
 			switch (Type)
 			{
 				case OperandType.AddressBlock:
-					Length = 8;
-					// add later
+                    Address = new AddressBlock(cpu, cpu.ReadULong());
 					break;
 				case OperandType.Register:
-					Length = 1;
-					Value = cpu.ReadByte();
+					// add
 					break;
 				case OperandType.StackIndex:
-					Length = 4;
-					Value = cpu.ReadUInt();
+					// add
 					break;
 				case OperandType.NumericByte:
-					Length = 1;
-					Value = cpu.ReadByte();
+					Value = new ByteBlock(cpu.ReadByte());
 					break;
 				case OperandType.NumericSByte:
-					Length = 1;
-					Value = cpu.ReadSByte();
+					Value = new ByteBlock(cpu.ReadSByte());
 					break;
 				case OperandType.NumericShort:
-					Length = 2;
-					Value = cpu.ReadShort();
+                    Value = new ByteBlock(cpu.ReadShort());
 					break;
 				case OperandType.NumericUShort:
-					Length = 2;
-					Value = cpu.ReadUShort();
+                    Value = new ByteBlock(cpu.ReadUShort());
 					break;
 				case OperandType.NumericInt:
-					Length = 4;
-					Value = cpu.ReadInt();
+                    Value = new ByteBlock(cpu.ReadInt());
 					break;
 				case OperandType.NumericUInt:
-					Length = 4;
-					Value = cpu.ReadUInt();
+                    Value = new ByteBlock(cpu.ReadUInt());
 					break;
 				case OperandType.NumericLong:
-					Length = 8;
-					Value = cpu.ReadLong();
+                    Value = new ByteBlock(cpu.ReadLong());
 					break;
 				case OperandType.NumericULong:
-					Length = 8;
-					Value = cpu.ReadULong();
+                    Value = new ByteBlock(cpu.ReadULong());
 					break;
 				case OperandType.NumericFloat:
-					Length = 4;
-					Value = cpu.ReadFloat();
+                    Value = new ByteBlock(cpu.ReadFloat());
 					break;
 				case OperandType.NumericDouble:
-					Length = 8;
-					Value = cpu.ReadDouble();
+                    Value = new ByteBlock(cpu.ReadDouble());
 					break;
 				case OperandType.LPString:
-					Length = cpu.ReadUInt();
-					ByteBlock bytes = cpu.Read(Length);
-					Value = System.Text.Encoding.UTF8.GetString(bytes.ToByteArray());
+					uint length = cpu.ReadUInt();
+					ByteBlock bytes = cpu.Read(length);
+					Value = new ByteBlock(System.Text.Encoding.UTF8.GetString(bytes.ToByteArray()));
 					break;
 				default:
 					break;

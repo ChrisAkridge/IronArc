@@ -323,15 +323,17 @@ namespace IronArc
 		public void Execute()
 		{
 			ushort fullopcode = this.ReadUShort();
+            byte type = (byte)(fullopcode >> 8);
 			byte opcode = (byte)((fullopcode << 8) >> 8);
 			ushort arity = 0;
-			switch (fullopcode >> 8)
+			switch (type)
 			{
 				case 0x00: // Control flow instruction
 					CFOpcode cfopcode = (CFOpcode)opcode;
 					switch (cfopcode)
 					{
 						case CFOpcode.NOP:
+                            break;
 						case CFOpcode.RET:
 						case CFOpcode.END: // no operands
 							break;
@@ -408,7 +410,7 @@ namespace IronArc
 			}
 			if (arity > 0)
 			{
-				Operand[] operands = { null, null, null };
+				Operand[] operands = new Operand[arity];
 				byte flags = this.ReadByte();
 				int i;
 				for (i = 1; i <= arity; i++)
@@ -425,8 +427,8 @@ namespace IronArc
 							operands[i] = new Operand(this, Operand.OperandType.StackIndex);
 							break;
 						case 3: // literal
-							byte type = this.ReadByte();
-							operands[i] = new Operand(this, (Operand.OperandType)(type - 3));
+							byte valuetype = this.ReadByte();
+							operands[i] = new Operand(this, (Operand.OperandType)(valuetype - 3));
 							break;
 					}
 					flags <<= 2;
@@ -444,43 +446,21 @@ namespace IronArc
 				case Operand.OperandType.AddressBlock:
 					break;
 				case Operand.OperandType.Register:
-					result = this.ReadRegister((byte)op.Value);
-					break;
+					return this.ReadRegister(op.Value.ToByte());
 				case Operand.OperandType.StackIndex:
 					break;
 				case Operand.OperandType.NumericByte:
-					result = new ByteBlock((byte)op.Value);
-					break;
 				case Operand.OperandType.NumericSByte:
-					result = new ByteBlock((sbyte)op.Value);
-					break;
 				case Operand.OperandType.NumericShort:
-					result = new ByteBlock((short)op.Value);
-					break;
 				case Operand.OperandType.NumericUShort:
-					result = new ByteBlock((ushort)op.Value);
-					break;
 				case Operand.OperandType.NumericInt:
-					result = new ByteBlock((int)op.Value);
-					break;
 				case Operand.OperandType.NumericUInt:
-					result = new ByteBlock((uint)op.Value);
-					break;
 				case Operand.OperandType.NumericLong:
-					result = new ByteBlock((long)op.Value);
-					break;
 				case Operand.OperandType.NumericULong:
-					result = new ByteBlock((ulong)op.Value);
-					break;
 				case Operand.OperandType.NumericFloat:
-					result = new ByteBlock((float)op.Value);
-					break;
 				case Operand.OperandType.NumericDouble:
-					result = new ByteBlock((double)op.Value);
-					break;
 				case Operand.OperandType.LPString:
-					result = new ByteBlock((string)op.Value);
-					break;
+                    return op.Value;
 				default:
 					throw new ArgumentException();
 			}
@@ -521,7 +501,7 @@ namespace IronArc
 				}
 				else
 				{
-					this.Memory.WriteULongAt(uresult, (int)(((AddressBlock)dest.Value).Address));
+				//	this.Memory.WriteULongAt(uresult, (int)(((AddressBlock)dest.Value).Address)); fix
 				}
 			}
 			else if ((left.Type == Operand.OperandType.NumericSByte || left.Type == Operand.OperandType.NumericShort ||
@@ -537,7 +517,7 @@ namespace IronArc
 				}
 				else
 				{
-					this.Memory.WriteLongAt(sresult, (int)(((AddressBlock)dest.Value).Address));
+				//	this.Memory.WriteLongAt(sresult, (int)(((AddressBlock)dest.Value).Address)); fix
 				}
 			}
 			else
@@ -550,7 +530,7 @@ namespace IronArc
 				}
 				else
 				{
-					this.Memory.WriteDoubleAt(fresult, (int)(((AddressBlock)dest.Value).Address));
+				//	this.Memory.WriteDoubleAt(fresult, (int)(((AddressBlock)dest.Value).Address)); fix
 				}
 			}
 		}
