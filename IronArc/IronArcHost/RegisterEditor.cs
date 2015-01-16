@@ -65,6 +65,14 @@ namespace IronArcHost
 					this.SetFloatingPoint(valueUnsigned);
 					break;
 				case RegisterEditorTextBoxes.Floating:
+					double valueFloating = 0d;
+					if (!double.TryParse(this.TextFloatingPoint.Text, out valueFloating)) { goto cleanup; }
+					ulong valueFloatingAsULong = unchecked((ulong)BitConverter.DoubleToInt64Bits(valueFloating));
+
+					this.SetValue(valueFloatingAsULong);
+					this.SetBigEndianValue(valueFloatingAsULong);
+					this.SetSigned(valueFloatingAsULong);
+					this.SetUnsigned(valueFloatingAsULong);
 					break;
 				default:
 					break;
@@ -159,7 +167,7 @@ namespace IronArcHost
 			{
 				// where you left off: fix below line, finish the floating point textchanged thing, 
 				// add a public method to get the ulong that the register should be set to
-				this.TextUnsigned.Text = this.RemoveInvalidCharacters(this.TextUnsigned.Text, isHexadecimal: false, isSigned: false);
+				this.TextUnsigned.Text = this.RemoveInvalidCharacters(this.TextUnsigned.Text, RemoveCharactersFor.UnsignedDecimal);
 
 				if (this.TextUnsigned.Text.Length > 20)
 				{
@@ -174,7 +182,9 @@ namespace IronArcHost
 		{
 			if (!this.withinSetValuesCall)
 			{
-				this.TextFloatingPoint.Text = 
+				this.TextFloatingPoint.Text = this.RemoveInvalidCharacters(this.TextFloatingPoint.Text, RemoveCharactersFor.FloatingPoint);
+
+				this.SetValues(RegisterEditorTextBoxes.Floating);
 			}
 		}
 
@@ -193,7 +203,7 @@ namespace IronArcHost
 					validCharacters = "0123456789abcdef";
 					break;
 				case RemoveCharactersFor.FloatingPoint:
-					validCharacters = "0123456789.-fnaininite";
+					validCharacters = "0123456789.+-fnaite";
 					break;
 				default:
 					break;

@@ -40,15 +40,17 @@
 			this.GroupBoxSeparator1 = new System.Windows.Forms.GroupBox();
 			this.NumUDSystemMemory = new System.Windows.Forms.NumericUpDown();
 			this.StaticLabelStackMemory = new System.Windows.Forms.Label();
-			this.numericUpDown1 = new System.Windows.Forms.NumericUpDown();
+			this.NumUDSystemStack = new System.Windows.Forms.NumericUpDown();
 			this.GroupBoxSeparator2 = new System.Windows.Forms.GroupBox();
 			this.StaticLabelInitialHardwareDevices = new System.Windows.Forms.Label();
 			this.CLBInitialHardwareDevices = new System.Windows.Forms.CheckedListBox();
 			this.ButtonCancel = new System.Windows.Forms.Button();
 			this.ButtonOK = new System.Windows.Forms.Button();
+			this.OFDInitialProgram = new System.Windows.Forms.OpenFileDialog();
+			this.OFDSystemProgram = new System.Windows.Forms.OpenFileDialog();
 			((System.ComponentModel.ISupportInitialize)(this.NumUDLoadAtAddress)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.NumUDSystemMemory)).BeginInit();
-			((System.ComponentModel.ISupportInitialize)(this.numericUpDown1)).BeginInit();
+			((System.ComponentModel.ISupportInitialize)(this.NumUDSystemStack)).BeginInit();
 			this.SuspendLayout();
 			// 
 			// StaticLabelInitialProgram
@@ -75,6 +77,7 @@
 			this.ButtonSelectInitialProgram.TabIndex = 2;
 			this.ButtonSelectInitialProgram.Text = "...";
 			this.ButtonSelectInitialProgram.UseVisualStyleBackColor = true;
+			this.ButtonSelectInitialProgram.Click += new System.EventHandler(this.ButtonSelectInitialProgram_Click);
 			// 
 			// ButtonSelectSystemProgram
 			// 
@@ -84,6 +87,7 @@
 			this.ButtonSelectSystemProgram.TabIndex = 5;
 			this.ButtonSelectSystemProgram.Text = "...";
 			this.ButtonSelectSystemProgram.UseVisualStyleBackColor = true;
+			this.ButtonSelectSystemProgram.Click += new System.EventHandler(this.ButtonSelectSystemProgram_Click);
 			// 
 			// TextBoxSystemProgram
 			// 
@@ -171,23 +175,23 @@
 			this.StaticLabelStackMemory.TabIndex = 11;
 			this.StaticLabelStackMemory.Text = "Stack Size (B):";
 			// 
-			// numericUpDown1
+			// NumUDSystemStack
 			// 
-			this.numericUpDown1.Location = new System.Drawing.Point(112, 135);
-			this.numericUpDown1.Maximum = new decimal(new int[] {
+			this.NumUDSystemStack.Location = new System.Drawing.Point(112, 135);
+			this.NumUDSystemStack.Maximum = new decimal(new int[] {
             2147483647,
             0,
             0,
             0});
-			this.numericUpDown1.Minimum = new decimal(new int[] {
+			this.NumUDSystemStack.Minimum = new decimal(new int[] {
             1,
             0,
             0,
             0});
-			this.numericUpDown1.Name = "numericUpDown1";
-			this.numericUpDown1.Size = new System.Drawing.Size(247, 22);
-			this.numericUpDown1.TabIndex = 12;
-			this.numericUpDown1.Value = new decimal(new int[] {
+			this.NumUDSystemStack.Name = "NumUDSystemStack";
+			this.NumUDSystemStack.Size = new System.Drawing.Size(247, 22);
+			this.NumUDSystemStack.TabIndex = 12;
+			this.NumUDSystemStack.Value = new decimal(new int[] {
             1,
             0,
             0,
@@ -239,6 +243,16 @@
 			this.ButtonOK.UseVisualStyleBackColor = true;
 			this.ButtonOK.Click += new System.EventHandler(this.ButtonOK_Click);
 			// 
+			// OFDInitialProgram
+			// 
+			this.OFDInitialProgram.Filter = "All files|*.*";
+			this.OFDInitialProgram.Title = "Select Initial Program";
+			// 
+			// OFDSystemProgram
+			// 
+			this.OFDSystemProgram.Filter = "All files|*.*";
+			this.OFDSystemProgram.Title = "Select System Program";
+			// 
 			// NewVMForm
 			// 
 			this.AcceptButton = this.ButtonOK;
@@ -251,7 +265,7 @@
 			this.Controls.Add(this.CLBInitialHardwareDevices);
 			this.Controls.Add(this.StaticLabelInitialHardwareDevices);
 			this.Controls.Add(this.GroupBoxSeparator2);
-			this.Controls.Add(this.numericUpDown1);
+			this.Controls.Add(this.NumUDSystemStack);
 			this.Controls.Add(this.StaticLabelStackMemory);
 			this.Controls.Add(this.NumUDSystemMemory);
 			this.Controls.Add(this.GroupBoxSeparator1);
@@ -274,7 +288,7 @@
 			this.Text = "Add a Virtual Machine";
 			((System.ComponentModel.ISupportInitialize)(this.NumUDLoadAtAddress)).EndInit();
 			((System.ComponentModel.ISupportInitialize)(this.NumUDSystemMemory)).EndInit();
-			((System.ComponentModel.ISupportInitialize)(this.numericUpDown1)).EndInit();
+			((System.ComponentModel.ISupportInitialize)(this.NumUDSystemStack)).EndInit();
 			this.ResumeLayout(false);
 			this.PerformLayout();
 
@@ -294,11 +308,13 @@
 		private System.Windows.Forms.GroupBox GroupBoxSeparator1;
 		private System.Windows.Forms.NumericUpDown NumUDSystemMemory;
 		private System.Windows.Forms.Label StaticLabelStackMemory;
-		private System.Windows.Forms.NumericUpDown numericUpDown1;
+		private System.Windows.Forms.NumericUpDown NumUDSystemStack;
 		private System.Windows.Forms.GroupBox GroupBoxSeparator2;
 		private System.Windows.Forms.Label StaticLabelInitialHardwareDevices;
 		private System.Windows.Forms.CheckedListBox CLBInitialHardwareDevices;
 		private System.Windows.Forms.Button ButtonCancel;
 		private System.Windows.Forms.Button ButtonOK;
+		private System.Windows.Forms.OpenFileDialog OFDInitialProgram;
+		private System.Windows.Forms.OpenFileDialog OFDSystemProgram;
 	}
 }
