@@ -1,0 +1,65 @@
+IronArc Simplification:
+
+The End of the Size Stack:
+	The Size Stack and its registers (SSP and SBP) are henceforth removed from IronArc, although the concept of a sized stack is not lost entirely. Instead, it will be handled at assembly time as opposed to at runtime. The user or compiler will write assembly code in the traditional way, assuming that sizes are still kept track of at runtime. The assembler then keeps track of each "stack frame" as it linearly proceeds through the labels it's assembling.
+	
+	Consider the following list of instructions:
+		stackalloc 8:u8
+		mov QWORD *eax stack[0]
+		andl QWORD stack[0] 0x00000000FFFFFFFF stack[0]
+		mov QWORD ebx ecx
+		andl QWORD ecx 0x00000000FFFFFFFF ecx
+		orl DWORD stack[0] ecx
+		pop ecx
+		ret
+	These instructions allocate eight bytes on the stack, treats the value of EAX as a pointer and reads eight bytes from it. Next, it blanks out the upper four bytes of the stack item, copies EBX to ECX, and then blanks out the upper four bytes of ECX. Next, it performs a bitwise OR on ECX and the stack item, pops the item into ECX (thus, overwriting it), and returns. This is what the code will look like after translation without the size stack:
+		addl QWORD esp 8:u8 esp
+		mov QWORD *eax *[esp-8]
+		andl QWORD *[esp-8] 0x00000000FFFFFFFF *[esp-8]
+		mov QWORD ebx ecx
+		andl QWORD ecx 0x00000000FFFFFFFF *[esp-8]
+		orl DWORD *[esp-8] ecx
+		pop ecx
+		ret
+	There's a lot different here. Let's first cover the *[esp-8] notation, which is a new kind of address block. These address blocks take the form of a register and an integral offset, either positive or negative. In each instruction, the two-byte opcode is succeeded by a flags byte with has four two-bit blocks that identify the type of each operand. The 01 bit pair indicates a processor register. As we only have two bits per pair, and three bits does not fit into an eight-bit byte. Thus, we must halve the total possible number of registers by allocating another flag bit in the byte to indicate the processor register itself.
+	
+	Old (ecx):
+	
+	Is pointer
+	|
+	v
+	0000 0010
+	 ^^^ ^^^^
+	 ||| ||||
+	 Register number (ECX)
+	 
+	New (*[esp + ?]):
+	
+	Is pointer
+	|Has offset
+	||
+	vv
+	1100 1011
+	  ^^ ^^^^
+	  || ||||
+	  Register number (ESP)
+	 
+	The offset is then stored as a two-byte unsigned integer immediately proceeding the register number. Thus, *[esp - 8] would be assembled into CB 08 00, and andl QWORD *[esp-8] 0x00000000FFFFFFFF *[esp-8] would be assembled as 01 40 03 74 CB 08 00 07 FF FF FF FF 00 00 00 00 CB 08 00.
+	
+	Opcode:  01 40 -> andl
+	Size:    03 -> QWORD
+	Flags:   74 -> 01 11 01 00 -> Register, Literal, Register, unused
+	Operand: CB 08 00 -> *[esp-8]
+	Literal: 07 FF FF FF FF 00 00 00 00 -> 4294967295:u8
+	Operand: CB 08 00 -> *[esp-8]
+	
+	During execution, when a register with offset is encountered, the value of the register is taken, the offset added to it, and the result used in the remainder of the instruction. The operation does not, by itself, mutate the register it refers to, so ESP will be the same as it was in this instruction.
+	
+	The second new portion is the QWORD, a size signifier. All operations that operate on numeric types will now specify their size as either BYTE, WORD, DWORD, QWORD, FLOAT, or DOUBLE. The sizes of each of these signifiers should be obvious. During assembly, the size signifier is assembled immediately next to the opcode as one byte encoded as follows:
+	BYTE -> 00
+	WORD -> 01
+	DWORD -> 02
+	QWORD -> 03
+	FLOAT -> 04
+	DOUBLE -> 05
+	The size signifier signifies the size of the result of the operation and the size that all operands are promoted or demoted to. Demotion takes the lowest logical bytes and ignored the highest logical bytes.
