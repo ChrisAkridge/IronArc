@@ -20,11 +20,11 @@ namespace IronArcHost
 
 		private void ButtonOK_Click(object sender, EventArgs e)
 		{
-			string initialProgramPath = this.TextBoxInitialProgram.Text;
-			string systemProgramPath = this.TextBoxSystemProgram.Text;
-			int systemMemorySize = (int)this.NumUDSystemMemory.Value;
-			int stackSize = (int)this.NumUDSystemStack.Value;
-			int loadAddress = (int)this.NumUDLoadAtAddress.Value;
+			string initialProgramPath = TextBoxInitialProgram.Text;
+			string systemProgramPath = TextBoxSystemProgram.Text;
+			int systemMemorySize = (int)NumUDSystemMemory.Value;
+			int stackSize = (int)NumUDSystemStack.Value;
+			int loadAddress = (int)NumUDLoadAtAddress.Value;
 
 			// Validate the selected files, memory sizes, and program load address.
 			if (!File.Exists(initialProgramPath))
@@ -55,29 +55,29 @@ namespace IronArcHost
 			// TODO: Add checks for the hardware devices
 			// TODO: Create a VM with these parameters and give it to the host
 
-			this.DialogResult = DialogResult.OK;
+			DialogResult = DialogResult.OK;
 		}
 
 		private void ButtonCancel_Click(object sender, EventArgs e)
 		{
-			this.DialogResult = DialogResult.Cancel;
+			DialogResult = DialogResult.Cancel;
 		}
 
 		private void ButtonSelectInitialProgram_Click(object sender, EventArgs e)
 		{
-			if (this.OFDInitialProgram.ShowDialog() == DialogResult.OK)
+			if (OFDInitialProgram.ShowDialog() == DialogResult.OK)
 			{
-				string filePath = this.OFDInitialProgram.FileName;
-				this.TextBoxInitialProgram.Text = filePath;
+				string filePath = OFDInitialProgram.FileName;
+				TextBoxInitialProgram.Text = filePath;
 			}
 		}
 
 		private void ButtonSelectSystemProgram_Click(object sender, EventArgs e)
 		{
-			if (this.OFDSystemProgram.ShowDialog() == DialogResult.OK)
+			if (OFDSystemProgram.ShowDialog() == DialogResult.OK)
 			{
-				string filePath = this.OFDSystemProgram.FileName;
-				this.TextBoxSystemProgram.Text = filePath;
+				string filePath = OFDSystemProgram.FileName;
+				TextBoxSystemProgram.Text = filePath;
 			}
 		}
 	}

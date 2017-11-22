@@ -16,14 +16,14 @@ namespace IronArc
 
         public SystemError(string type, string message)
         {
-            this.Type = type;
-            this.Message = message;
+			Type = type;
+			Message = message;
         }
 
         public void WriteToError()
         {
             Stream error = StandardStreams.StreamError;
-            error.WriteString(string.Format("Error {0}: {1} ({2})", this.Type.GetHashCode(), this.Message, this.Type));
+            error.WriteString(string.Format("Error {0}: {1} ({2})", Type.GetHashCode(), Message, Type));
         }
     }
 }

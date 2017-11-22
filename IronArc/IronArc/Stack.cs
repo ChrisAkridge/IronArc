@@ -18,140 +18,140 @@ namespace IronArc
                 new SystemError("InvalidStackSize", "Stack size must be greater than zero.").WriteToError();
             }
 
-            this.bytes = ByteBlock.FromLength(stackSize);
+			bytes = ByteBlock.FromLength(stackSize);
         }
 
         private int GetObjectSizeAtIndex(int index)
         {
-            var field = this.objectSizes.GetType().GetField("_array", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-            return ((int[])field.GetValue(this.objectSizes))[index];
+            var field = objectSizes.GetType().GetField("_array", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+            return ((int[])field.GetValue(objectSizes))[index];
         }
 
         public byte[] GetObject(int objectIndex)
         {
-            objectIndex = this.objectSizes.Count - objectIndex;
+            objectIndex = objectSizes.Count - objectIndex;
 
             uint objectStartPointer = 0u;
-            uint objectSize = (uint)this.objectSizes.ElementAt(objectIndex);
+            uint objectSize = (uint)objectSizes.ElementAt(objectIndex);
 
             for (int i = 0; i < objectIndex; i++)
             {
-                objectStartPointer += (uint)this.objectSizes.ElementAt(i);
+                objectStartPointer += (uint)objectSizes.ElementAt(i);
             }
 
-            return this.bytes.ReadAt(objectSize, objectStartPointer);
+            return bytes.ReadAt(objectSize, objectStartPointer);
         }
 
         public byte GetByte(int index)
         {
-            index = this.stackPointer - index;
-            return this.bytes[index];
+            index = stackPointer - index;
+            return bytes[index];
         }
 
         #region Push Methods
         public void Push(byte[] bytes)
         {
-            this.objectSizes.Push(bytes.Length);
-            this.bytes.WriteAt(bytes, this.stackPointer);
-            this.stackPointer += bytes.Length;
+			objectSizes.Push(bytes.Length);
+            this.bytes.WriteAt(bytes, stackPointer);
+			stackPointer += bytes.Length;
         }
 
         public void Push(ByteBlock bytes)
         {
-            this.objectSizes.Push(bytes.Length);
-            this.bytes.WriteAt(bytes, this.stackPointer);
-            this.stackPointer += bytes.Length;
+			objectSizes.Push(bytes.Length);
+            this.bytes.WriteAt(bytes, stackPointer);
+			stackPointer += bytes.Length;
         }
 
         public void Push(bool value)
         {
-            this.Push(value ? (byte)1 : (byte)0);
+			Push(value ? (byte)1 : (byte)0);
         }
 
         public void Push(byte value)
         {
-            this.objectSizes.Push(1);
-            this.bytes.WriteByteAt(value, this.stackPointer);
-            this.stackPointer++;
+			objectSizes.Push(1);
+			bytes.WriteByteAt(value, stackPointer);
+			stackPointer++;
         }
 
         public void Push(sbyte value)
         {
-            this.Push((byte)value);
+			Push((byte)value);
         }
 
         public void Push(short value)
         {
-            this.objectSizes.Push(2);
-            this.bytes.WriteShortAt(value, this.stackPointer);
-            this.stackPointer += 2;
+			objectSizes.Push(2);
+			bytes.WriteShortAt(value, stackPointer);
+			stackPointer += 2;
         }
 
         public void Push(ushort value)
         {
-            this.Push((short)value);
+			Push((short)value);
         }
 
         public void Push(int value)
         {
-            this.objectSizes.Push(4);
-            this.bytes.WriteIntAt(value, this.stackPointer);
-            this.stackPointer += 4;
+			objectSizes.Push(4);
+			bytes.WriteIntAt(value, stackPointer);
+			stackPointer += 4;
         }
 
         public void Push(uint value)
         {
-            this.Push((int)value);
+			Push((int)value);
         }
 
         public void Push(long value)
         {
-            this.objectSizes.Push(8);
-            this.bytes.WriteLongAt(value, this.stackPointer);
-            this.stackPointer += 8;
+			objectSizes.Push(8);
+			bytes.WriteLongAt(value, stackPointer);
+			stackPointer += 8;
         }
 
         public void Push(ulong value)
         {
-            this.Push((long)value);
+			Push((long)value);
         }
 
         public void Push(float value)
         {
-            this.objectSizes.Push(4);
-            this.bytes.WriteFloatAt(value, this.stackPointer);
-            this.stackPointer += 4;
+			objectSizes.Push(4);
+			bytes.WriteFloatAt(value, stackPointer);
+			stackPointer += 4;
         }
 
         public void Push(double value)
         {
-            this.objectSizes.Push(8);
-            this.bytes.WriteDoubleAt(value, this.stackPointer);
-            this.stackPointer += 8;
+			objectSizes.Push(8);
+			bytes.WriteDoubleAt(value, stackPointer);
+			stackPointer += 8;
         }
 
         public void Push(char value)
         {
-            this.Push((short)value);
+			Push((short)value);
         }
 
         public void Push(string value)
         {
-            this.Push(Encoding.UTF8.GetBytes(value));
+			Push(Encoding.UTF8.GetBytes(value));
         }
         #endregion
 
         #region Pop Methods
         public byte[] Pop()
         {
-            int objectSize = this.objectSizes.Pop();
-            int startPointer = this.stackPointer - objectSize;
+            int objectSize = objectSizes.Pop();
+            int startPointer = stackPointer - objectSize;
             byte[] result = new byte[objectSize];
 
             for (int i = 0; i < objectSize; i++)
             {
-                result[i] = this.bytes[startPointer];
-                this.bytes[startPointer] = 0;
+                result[i] = bytes[startPointer];
+				bytes[startPointer] = 0;
                 startPointer++;
             }
 
@@ -161,97 +161,97 @@ namespace IronArc
 
         public ByteBlock PopByteBlock()
         {
-            byte[] resultBytes = this.Pop();
+            byte[] resultBytes = Pop();
             return new ByteBlock(resultBytes);
         }
 
         public bool PopBool()
         {
-            return this.PopByte() != 0;
+            return PopByte() != 0;
         }
 
         public byte PopByte()
         {
-            this.objectSizes.Pop();
-            this.stackPointer--;
-            byte result = this.bytes.ReadByteAt((uint)this.stackPointer);
-            this.bytes.WriteByteAt(0, this.stackPointer);
+			objectSizes.Pop();
+			stackPointer--;
+            byte result = bytes.ReadByteAt((uint)stackPointer);
+			bytes.WriteByteAt(0, stackPointer);
             return result;
         }
 
         public sbyte PopSByte()
         {
-            return (sbyte)this.PopByte();
+            return (sbyte)PopByte();
         }
 
         public short PopShort()
         {
-            this.objectSizes.Pop();
-            this.stackPointer -= 2;
-			short result = this.bytes.ReadShortAt((uint)this.stackPointer);
-            this.bytes.WriteShortAt(0, this.stackPointer);
+			objectSizes.Pop();
+			stackPointer -= 2;
+			short result = bytes.ReadShortAt((uint)stackPointer);
+			bytes.WriteShortAt(0, stackPointer);
             return result;
         }
 
         public ushort PopUShort()
         {
-            return (ushort)this.PopShort();
+            return (ushort)PopShort();
         }
 
         public int PopInt()
         {
-            this.objectSizes.Pop();
-            this.stackPointer -= 4;
-			int result = this.bytes.ReadIntAt((uint)this.stackPointer);
-            this.bytes.WriteIntAt(0, this.stackPointer);
+			objectSizes.Pop();
+			stackPointer -= 4;
+			int result = bytes.ReadIntAt((uint)stackPointer);
+			bytes.WriteIntAt(0, stackPointer);
             return result;
         }
 
         public uint PopUInt()
         {
-            return (uint)this.PopInt();
+            return (uint)PopInt();
         }
 
         public long PopLong()
         {
-            this.objectSizes.Pop();
-            this.stackPointer -= 8;
-			long result = this.bytes.ReadLongAt((uint)this.stackPointer);
-            this.bytes.WriteLongAt(0L, this.stackPointer);
+			objectSizes.Pop();
+			stackPointer -= 8;
+			long result = bytes.ReadLongAt((uint)stackPointer);
+			bytes.WriteLongAt(0L, stackPointer);
             return result;
         }
 
         public ulong PopULong()
         {
-            return (ulong)this.PopLong();
+            return (ulong)PopLong();
         }
 
         public float PopFloat()
         {
-            this.objectSizes.Pop();
-            this.stackPointer -= 4;
-			float result = this.bytes.ReadFloatAt((uint)this.stackPointer);
-            this.bytes.WriteIntAt(0, this.stackPointer);
+			objectSizes.Pop();
+			stackPointer -= 4;
+			float result = bytes.ReadFloatAt((uint)stackPointer);
+			bytes.WriteIntAt(0, stackPointer);
             return result;
         }
 
         public double PopDouble()
         {
-            this.objectSizes.Pop();
-            this.stackPointer -= 8;
-			double result = this.bytes.ReadDoubleAt((uint)this.stackPointer);
-            this.bytes.WriteLongAt(0L, this.stackPointer);
+			objectSizes.Pop();
+			stackPointer -= 8;
+			double result = bytes.ReadDoubleAt((uint)stackPointer);
+			bytes.WriteLongAt(0L, stackPointer);
             return result;
         }
 
         public char PopChar()
         {
-            return (char)this.PopShort();
+            return (char)PopShort();
         }
 
         public string PopString()
         {
-            byte[] stringBytes = this.Pop();
+            byte[] stringBytes = Pop();
             return Encoding.UTF8.GetString(stringBytes);
         }
         #endregion
@@ -259,80 +259,80 @@ namespace IronArc
         #region Peek Methods
         public byte[] Peek()
         {
-            int objectSize = this.objectSizes.Peek();
-            int startPointer = this.stackPointer - objectSize;
-			return this.bytes.ReadAt((uint)objectSize, (uint)startPointer);
+            int objectSize = objectSizes.Peek();
+            int startPointer = stackPointer - objectSize;
+			return bytes.ReadAt((uint)objectSize, (uint)startPointer);
         }
 
         public ByteBlock PeekByteBlock()
         {
-            return new ByteBlock(this.Peek());
+            return new ByteBlock(Peek());
         }
 
         public bool PeekBool()
         {
-            return this.PeekByte() != 0;
+            return PeekByte() != 0;
         }
 
         public byte PeekByte()
         {
-			return this.bytes.ReadByteAt((uint)this.stackPointer - 1);
+			return bytes.ReadByteAt((uint)stackPointer - 1);
         }
 
         public sbyte PeekSByte()
         {
-            return (sbyte)this.PeekByte();
+            return (sbyte)PeekByte();
         }
 
         public short PeekShort()
         {
-			return this.bytes.ReadShortAt((uint)this.stackPointer - 2);
+			return bytes.ReadShortAt((uint)stackPointer - 2);
         }
 
         public ushort PeekUShort()
         {
-            return (ushort)this.PeekShort();
+            return (ushort)PeekShort();
         }
 
         public int PeekInt()
         {
-			return this.bytes.ReadIntAt((uint)this.stackPointer - 4);
+			return bytes.ReadIntAt((uint)stackPointer - 4);
         }
 
         public uint PeekUInt()
         {
-            return (uint)this.PeekInt();
+            return (uint)PeekInt();
         }
 
         public long PeekLong()
         {
-			return this.bytes.ReadLongAt((uint)this.stackPointer - 8);
+			return bytes.ReadLongAt((uint)stackPointer - 8);
         }
 
         public ulong PeekULong()
         {
-            return (ulong)this.PeekLong();
+            return (ulong)PeekLong();
         }
 
         public float PeekFloat()
         {
-			return this.bytes.ReadFloatAt((uint)this.stackPointer - 4);
+			return bytes.ReadFloatAt((uint)stackPointer - 4);
         }
 
         public double PeekDouble()
         {
-			return this.bytes.ReadDoubleAt((uint)this.stackPointer - 8);
+			return bytes.ReadDoubleAt((uint)stackPointer - 8);
         }
 
         public char PeekChar()
         {
-            return (char)this.PeekShort();
+            return (char)PeekShort();
         }
 
         public string PeekString()
         {
-            int stringSize = this.objectSizes.Peek();
-			return this.bytes.ReadStringAt((uint)stringSize, (uint)(this.stackPointer - stringSize));
+            int stringSize = objectSizes.Peek();
+			return bytes.ReadStringAt((uint)stringSize, (uint)(stackPointer - stringSize));
         }
         #endregion
     }

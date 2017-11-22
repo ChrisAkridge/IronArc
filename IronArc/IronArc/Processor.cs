@@ -41,92 +41,92 @@ namespace IronArc
 
 		public Processor(int memorySize)
 		{
-			this.EAX = ByteBlock.FromLength(8);
-			this.EBX = ByteBlock.FromLength(8);
-			this.ECX = ByteBlock.FromLength(8);
-			this.EDX = ByteBlock.FromLength(8);
-			this.EEX = ByteBlock.FromLength(8);
-			this.EFX = ByteBlock.FromLength(8);
-			this.EGX = ByteBlock.FromLength(8);
-			this.EHX = ByteBlock.FromLength(8);
+			EAX = ByteBlock.FromLength(8);
+			EBX = ByteBlock.FromLength(8);
+			ECX = ByteBlock.FromLength(8);
+			EDX = ByteBlock.FromLength(8);
+			EEX = ByteBlock.FromLength(8);
+			EFX = ByteBlock.FromLength(8);
+			EGX = ByteBlock.FromLength(8);
+			EHX = ByteBlock.FromLength(8);
 
-			this.EFLAGS = ByteBlock.FromLength(4);
+			EFLAGS = ByteBlock.FromLength(4);
 
-			this.Memory = ByteBlock.FromLength(memorySize);
-			this.Stack = new Stack<long>();
-			this.CallStack = new Stack<int>();
+			Memory = ByteBlock.FromLength(memorySize);
+			Stack = new Stack<long>();
+			CallStack = new Stack<int>();
 		}
 
 		#region Memory Read Methods
 		public byte ReadByte()
 		{
-			return this.Memory[(int)this.InstructionPointer++]; // fix
+			return Memory[(int)InstructionPointer++]; // fix
 		}
 
 		public sbyte ReadSByte()
 		{
-			return (sbyte)this.ReadByte();
+			return (sbyte)ReadByte();
 		}
 
 		public short ReadShort()
 		{
-			short result = this.Memory.ReadShortAt(this.InstructionPointer);
-			this.InstructionPointer += 2;
+			short result = Memory.ReadShortAt(InstructionPointer);
+			InstructionPointer += 2;
 			return result;
 		}
 
 		public ushort ReadUShort()
 		{
-			return (ushort)this.ReadShort();
+			return (ushort)ReadShort();
 		}
 
 		public int ReadInt()
 		{
-			int result = this.Memory.ReadIntAt(this.InstructionPointer);
-			this.InstructionPointer += 4;
+			int result = Memory.ReadIntAt(InstructionPointer);
+			InstructionPointer += 4;
 			return result;
 		}
 
 		public uint ReadUInt()
 		{
-			return (uint)this.ReadInt();
+			return (uint)ReadInt();
 		}
 
 		public long ReadLong()
 		{
-			long result = this.Memory.ReadLongAt(this.InstructionPointer);
-			this.InstructionPointer += 8;
+			long result = Memory.ReadLongAt(InstructionPointer);
+			InstructionPointer += 8;
 			return result;
 		}
 
 		public ulong ReadULong()
 		{
-			return (ulong)this.ReadLong();
+			return (ulong)ReadLong();
 		}
 
 		public float ReadFloat()
 		{
-			float result = this.Memory.ReadFloatAt(this.InstructionPointer);
-			this.InstructionPointer += 4;
+			float result = Memory.ReadFloatAt(InstructionPointer);
+			InstructionPointer += 4;
 			return result;
 		}
 
 		public double ReadDouble()
 		{
-			double result = this.Memory.ReadDoubleAt(this.InstructionPointer);
-			this.InstructionPointer += 8;
+			double result = Memory.ReadDoubleAt(InstructionPointer);
+			InstructionPointer += 8;
 			return result;
 		}
 
 		public char ReadChar()
 		{
-			return (char)this.ReadShort();
+			return (char)ReadShort();
 		}
 
 		public ByteBlock Read(uint length)
 		{
-			ByteBlock result = this.Memory.ReadAt(length, this.InstructionPointer);
-			this.InstructionPointer += length;
+			ByteBlock result = Memory.ReadAt(length, InstructionPointer);
+			InstructionPointer += length;
 			return result;
 		}
 		#endregion
@@ -137,23 +137,23 @@ namespace IronArc
 			switch (register)
 			{
 				case 0x00:
-					return this.EAX;
+					return EAX;
 				case 0x01:
-					return this.EBX;
+					return EBX;
 				case 0x02:
-					return this.ECX;
+					return ECX;
 				case 0x03:
-					return this.EDX;
+					return EDX;
 				case 0x04:
-					return this.EEX;
+					return EEX;
 				case 0x05:
-					return this.EFX;
+					return EFX;
 				case 0x06:
-					return this.EGX;
+					return EGX;
 				case 0x07:
-					return this.EHX;
+					return EHX;
 				case 0x08:
-					return new ByteBlock(this.InstructionPointer);
+					return new ByteBlock(InstructionPointer);
 				case 0x09:
 					return new ByteBlock((byte)0);
 				default:
@@ -184,39 +184,39 @@ namespace IronArc
 			switch (register)
 			{
 				case 0x00:
-					this.EAX = 0UL;
-					this.EAX.WriteAt(value, 8 - value.Length);
+					EAX = 0UL;
+					EAX.WriteAt(value, 8 - value.Length);
 					break;
 				case 0x01:
-					this.EBX = 0UL;
-					this.EBX.WriteAt(value, 8 - value.Length);
+					EBX = 0UL;
+					EBX.WriteAt(value, 8 - value.Length);
 					break;
 				case 0x02:
-					this.ECX = 0UL;
-					this.ECX.WriteAt(value, 8 - value.Length);
+					ECX = 0UL;
+					ECX.WriteAt(value, 8 - value.Length);
 					break;
 				case 0x03:
-					this.EDX = 0UL;
-					this.EDX.WriteAt(value, 8 - value.Length);
+					EDX = 0UL;
+					EDX.WriteAt(value, 8 - value.Length);
 					break;
 				case 0x04:
-					this.EEX = 0UL;
-					this.EEX.WriteAt(value, 8 - value.Length);
+					EEX = 0UL;
+					EEX.WriteAt(value, 8 - value.Length);
 					break;
 				case 0x05:
-					this.EFX = 0UL;
-					this.EFX.WriteAt(value, 8 - value.Length);
+					EFX = 0UL;
+					EFX.WriteAt(value, 8 - value.Length);
 					break;
 				case 0x06:
-					this.EGX = 0UL;
-					this.EGX.WriteAt(value, 8 - value.Length);
+					EGX = 0UL;
+					EGX.WriteAt(value, 8 - value.Length);
 					break;
 				case 0x07:
-					this.EHX = 0UL;
-					this.EHX.WriteAt(value, 8 - value.Length);
+					EHX = 0UL;
+					EHX.WriteAt(value, 8 - value.Length);
 					break;
 				case 0x08:
-					this.InstructionPointer = value.ToUInt();
+					InstructionPointer = value.ToUInt();
 					break;
 				case 0x09:
 					break;
@@ -322,7 +322,7 @@ namespace IronArc
 		#region Execution
 		public void Execute()
 		{
-			ushort fullopcode = this.ReadUShort();
+			ushort fullopcode = ReadUShort();
             byte type = (byte)(fullopcode >> 8);
 			byte opcode = (byte)((fullopcode << 8) >> 8);
 			ushort arity = 0;
@@ -411,7 +411,7 @@ namespace IronArc
 			if (arity > 0)
 			{
 				Operand[] operands = new Operand[arity];
-				byte flags = this.ReadByte();
+				byte flags = ReadByte();
 				int i;
 				for (i = 1; i <= arity; i++)
 				{
@@ -427,7 +427,7 @@ namespace IronArc
 							operands[i] = new Operand(this, Operand.OperandType.StackIndex);
 							break;
 						case 3: // literal
-							byte valuetype = this.ReadByte();
+							byte valuetype = ReadByte();
 							operands[i] = new Operand(this, (Operand.OperandType)(valuetype - 3));
 							break;
 					}
@@ -446,7 +446,7 @@ namespace IronArc
 				case Operand.OperandType.AddressBlock:
 					break;
 				case Operand.OperandType.Register:
-					return this.ReadRegister(op.Value.ToByte());
+					return ReadRegister(op.Value.ToByte());
 				case Operand.OperandType.StackIndex:
 					break;
 				case Operand.OperandType.NumericByte:

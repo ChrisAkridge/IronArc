@@ -1,0 +1,71 @@
+Types of instruction operands:
+- Data size, one of { BYTE, WORD, DWORD, QWORD }
+- Register (any offset present can be encoded in the register reference byte)
+- Memory address (since a memory address can specify if it's a pointer for itself, no further pointer type is needed)
+- Numeric literal (size determined by the data size operand)
+
+Each instruction can have between 0 and 4 operands. There may be only zero or one data size operands.
+
+All operands are stored in little-endian (lower-order bits are stored in 
+
+The flags byte, which follows the opcode bytes, determines the type of each operand:
+
+0000 0000
+ o o  o o
+ p p  p p
+ e e  e e
+ r r  r r
+ a a  a a
+ n n  n n
+ d d  d d
+ 
+ 0 1  2 3
+ 
+If an instruction has less than four operands, any remaining bits are ignored. Each bit pair maps to one of the types of instrution operand:
+00: Data size
+01: Register
+10: Memory address
+11: Numeric literal
+
+Data Size:
+	- One byte:
+		0x00 BYTE
+		0x01 WORD
+		0x02 DWORD
+		0x03 QWORD
+		Remaining 252 values are reserved
+
+Register:
+	Without offset:
+		- Made of one byte, the register reference byte:
+			porr rrrr
+			^^^^ ^^^^
+			|||| ||||----------- register number
+			||------------------+
+			+---- pointer flag  |----- offset flag
+		- If the pointer flag is set, the VM will use the value at the address specified by the register instead of the register's value
+		- If the offset flag is set, the VM will read another flags byte and a single operand specifying the offset
+		- The lower six bits is the register number:
+			0: EAX, 1: EBX, 2: ECX, 3: EDX, 4: EEX, 5: EFX, 6: EGX, 7: EHX, 8: ESP, 9: EBP, A: EIP, B: ERP, C: EFLAGS
+		- The remaining 52 values are reserved
+	With offset:
+		- Made of a byte, the register reference number, which is the same as the operand type above.
+		- Followed by another flags byte which specifies the type of only one operand in the two highest bits.
+		- Another operand of any type except data size will follow (register, register with offset, memory address, numeric literal)
+
+Memory address:
+	- Made of 8 bytes.
+	- The top bit is the pointer bit; if set, the VM will use the value at the address specified at the memory address instead of the value at the memory address.
+	- The lower 63 bits name a byte in up to 8 exabytes of memory, which includes system memory and memory-mapped hardware.
+	
+Numeric literal:
+	- Only present on instructions that have a data size operand.
+	- Made of 1, 2, 4, or 8 bytes.
+	- The bytes are the literal's value.
+	
+Examples:
+	jmp 0x00000000FEDCBA98:
+		- The jmp opcode becomes 00 01
+		- The flags byte is 10 00 00 00 for the one operand (memory address) - this is 80
+		- The address doesn't have the pointer flag set
+		- The address is written

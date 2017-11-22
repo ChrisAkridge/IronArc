@@ -15,7 +15,7 @@ namespace IronArc
 			Memory = 0x0000,
 			System = 0x4000,
 			Stack = 0x8000,
-			HW = 0xC000 // don't know why 2B are needed
+			HW = 0xC000
 		};
 
 		private Processor owner;
@@ -28,10 +28,10 @@ namespace IronArc
 		{
 			get
 			{
-				switch (this.Type)
+				switch (Type)
 				{
 					case AddressType.Memory:
-						return this.owner.Memory.ReadAt(this.Length, this.Address);
+						return owner.Memory.ReadAt(Length, Address);
 					case AddressType.System:
 						break;
 					case AddressType.Stack:
@@ -53,11 +53,11 @@ namespace IronArc
 		/// <param name="bytes">The 8 bytes from which the AddressBlock will be created.</param>
 		public AddressBlock(Processor cpu, ulong bytes)
 		{
-			this.owner = cpu;
-			this.Type = (AddressType)(bytes >> 48);
-			this.IsPointer = (bytes & (1 << 47)) != 0 ? true : false;
-			this.Length = (uint)(bytes & 0x00007FFF00000000UL);
-			this.Address = (uint)(bytes & 0x00000000FFFFFFFFUL);
+			owner = cpu;
+			Type = (AddressType)(bytes >> 48);
+			IsPointer = (bytes & (1 << 47)) != 0 ? true : false;
+			Length = (uint)(bytes & 0x00007FFF00000000UL);
+			Address = (uint)(bytes & 0x00000000FFFFFFFFUL);
 		}
 	}
 }

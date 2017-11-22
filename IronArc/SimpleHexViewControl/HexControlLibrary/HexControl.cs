@@ -17,11 +17,11 @@ namespace HexControlLibrary
         {
             InitializeComponent();
 
-            this.SetStyle(ControlStyles.UserPaint, true);
-            this.SetStyle(ControlStyles.DoubleBuffer, true);
-            this.SetStyle(ControlStyles.AllPaintingInWmPaint, true);
-            this.SetStyle(ControlStyles.ResizeRedraw, true);
-            this.SetStyle(ControlStyles.StandardDoubleClick, false);
+			SetStyle(ControlStyles.UserPaint, true);
+			SetStyle(ControlStyles.DoubleBuffer, true);
+			SetStyle(ControlStyles.AllPaintingInWmPaint, true);
+			SetStyle(ControlStyles.ResizeRedraw, true);
+			SetStyle(ControlStyles.StandardDoubleClick, false);
         }
 
         void HexControl_FontChanged(object sender, EventArgs e)
@@ -41,27 +41,27 @@ namespace HexControlLibrary
             int visibleRows = hexView1.GetVisibleRows();
             if (visibleColumns < hexView1.Model.MaxColumns)
             {
-                this.hexView1.Model.Column = 0;
-                this.hScrollBar1.Minimum = 0;
-                this.hScrollBar1.Value = 0;
-                this.hScrollBar1.Maximum = hexView1.Model.MaxColumns - visibleColumns;
-                this.hScrollBar1.Visible = true;
+				hexView1.Model.Column = 0;
+				hScrollBar1.Minimum = 0;
+				hScrollBar1.Value = 0;
+				hScrollBar1.Maximum = hexView1.Model.MaxColumns - visibleColumns;
+				hScrollBar1.Visible = true;
             }
             else
             {
-                this.hScrollBar1.Visible = false;
+				hScrollBar1.Visible = false;
             }
             if (visibleRows < hexView1.Model.MaxRows)
             {
-                this.hexView1.Model.Row = 0;
-                this.vScrollBar1.Minimum = 0;
-                this.vScrollBar1.Value = 0;
-                this.vScrollBar1.Maximum = hexView1.Model.MaxRows - visibleRows;
-                this.vScrollBar1.Visible = true;
+				hexView1.Model.Row = 0;
+				vScrollBar1.Minimum = 0;
+				vScrollBar1.Value = 0;
+				vScrollBar1.Maximum = hexView1.Model.MaxRows - visibleRows;
+				vScrollBar1.Visible = true;
             }
             else
             {
-                this.vScrollBar1.Visible = false;
+				vScrollBar1.Visible = false;
             }
             hexView1.Invalidate();
         }
@@ -115,14 +115,14 @@ namespace HexControlLibrary
 
         private void vScrollBar1_Scroll(object sender, ScrollEventArgs e)
         {
-            this.hexView1.Model.Row += e.NewValue - e.OldValue;
-            this.hexView1.Invalidate();
+			hexView1.Model.Row += e.NewValue - e.OldValue;
+			hexView1.Invalidate();
         }
 
         private void hScrollBar1_Scroll(object sender, ScrollEventArgs e)
         {
-            this.hexView1.Model.Column += e.NewValue - e.OldValue;
-            this.hexView1.Invalidate();
+			hexView1.Model.Column += e.NewValue - e.OldValue;
+			hexView1.Invalidate();
         }
 
         public void DrawBlock(int byteIndex)

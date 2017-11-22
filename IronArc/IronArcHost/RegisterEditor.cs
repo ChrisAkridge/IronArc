@@ -22,69 +22,69 @@ namespace IronArcHost
 
 		private void SetValues(RegisterEditorTextBoxes textBox)
 		{
-			this.withinSetValuesCall = true;
+			withinSetValuesCall = true;
 			switch (textBox)
 			{
 				case RegisterEditorTextBoxes.Value:
 					ulong value;
-					if (!ulong.TryParse(this.TextValue.Text, NumberStyles.HexNumber, null, out value)) { goto cleanup; }
+					if (!ulong.TryParse(TextValue.Text, NumberStyles.HexNumber, null, out value)) { goto cleanup; }
 
-					this.SetBigEndianValue(value);
-					this.SetSigned(value);
-					this.SetUnsigned(value);
-					this.SetFloatingPoint(value);
+					SetBigEndianValue(value);
+					SetSigned(value);
+					SetUnsigned(value);
+					SetFloatingPoint(value);
 					break;
 				case RegisterEditorTextBoxes.BigEndianValue:
 					ulong valueBigEndian = 0UL;
-					if (!ulong.TryParse(this.BigEndianToLittleEndian(this.TextAsBigEndian.Text.PadLeft(16, '0')), NumberStyles.HexNumber, null, out valueBigEndian)) { goto cleanup; }
+					if (!ulong.TryParse(BigEndianToLittleEndian(TextAsBigEndian.Text.PadLeft(16, '0')), NumberStyles.HexNumber, null, out valueBigEndian)) { goto cleanup; }
 
-					this.SetValue(valueBigEndian);
-					this.SetSigned(valueBigEndian);
-					this.SetUnsigned(valueBigEndian);
-					this.SetFloatingPoint(valueBigEndian);
+					SetValue(valueBigEndian);
+					SetSigned(valueBigEndian);
+					SetUnsigned(valueBigEndian);
+					SetFloatingPoint(valueBigEndian);
 					break;
 				case RegisterEditorTextBoxes.Signed:
 					long valueSigned = 0L;
-					if (!long.TryParse(this.TextSigned.Text, out valueSigned)) { goto cleanup; }
+					if (!long.TryParse(TextSigned.Text, out valueSigned)) { goto cleanup; }
 
 					unchecked
 					{
-						this.SetValue((ulong)valueSigned);
-						this.SetBigEndianValue((ulong)valueSigned);
-						this.SetUnsigned((ulong)valueSigned);
-						this.SetFloatingPoint((ulong)valueSigned);
+						SetValue((ulong)valueSigned);
+						SetBigEndianValue((ulong)valueSigned);
+						SetUnsigned((ulong)valueSigned);
+						SetFloatingPoint((ulong)valueSigned);
 					}
 					break;
 				case RegisterEditorTextBoxes.Unsigned:
 					ulong valueUnsigned = 0UL;
-					if (!ulong.TryParse(this.TextUnsigned.Text, out valueUnsigned)) { goto cleanup; }
+					if (!ulong.TryParse(TextUnsigned.Text, out valueUnsigned)) { goto cleanup; }
 
-					this.SetValue(valueUnsigned);
-					this.SetBigEndianValue(valueUnsigned);
-					this.SetSigned(valueUnsigned);
-					this.SetFloatingPoint(valueUnsigned);
+					SetValue(valueUnsigned);
+					SetBigEndianValue(valueUnsigned);
+					SetSigned(valueUnsigned);
+					SetFloatingPoint(valueUnsigned);
 					break;
 				case RegisterEditorTextBoxes.Floating:
 					double valueFloating = 0d;
-					if (!double.TryParse(this.TextFloatingPoint.Text, out valueFloating)) { goto cleanup; }
+					if (!double.TryParse(TextFloatingPoint.Text, out valueFloating)) { goto cleanup; }
 					ulong valueFloatingAsULong = unchecked((ulong)BitConverter.DoubleToInt64Bits(valueFloating));
 
-					this.SetValue(valueFloatingAsULong);
-					this.SetBigEndianValue(valueFloatingAsULong);
-					this.SetSigned(valueFloatingAsULong);
-					this.SetUnsigned(valueFloatingAsULong);
+					SetValue(valueFloatingAsULong);
+					SetBigEndianValue(valueFloatingAsULong);
+					SetSigned(valueFloatingAsULong);
+					SetUnsigned(valueFloatingAsULong);
 					break;
 				default:
 					break;
 			}
 
 			cleanup:
-			this.withinSetValuesCall = false;
+			withinSetValuesCall = false;
 		}
 
 		private void SetValue(ulong value)
 		{
-			this.TextValue.Text = string.Format("{0:X16}", value);
+			TextValue.Text = string.Format("{0:X16}", value);
 		}
 
 		private void SetBigEndianValue(ulong value)
@@ -95,96 +95,96 @@ namespace IronArcHost
 			{
 				result.Append(b.ToString("X2"));
 			}
-			this.TextAsBigEndian.Text = result.ToString();
+			TextAsBigEndian.Text = result.ToString();
 		}
 
 		public void SetSigned(ulong value)
 		{
-			this.TextSigned.Text = string.Format("{0}", unchecked((long)value));
+			TextSigned.Text = string.Format("{0}", unchecked((long)value));
 		}
 		
 		public void SetUnsigned(ulong value)
 		{
-			this.TextUnsigned.Text = value.ToString();
+			TextUnsigned.Text = value.ToString();
 		}
 
 		public void SetFloatingPoint(ulong value)
 		{
 			double result = BitConverter.Int64BitsToDouble(unchecked((long)value));
-			this.TextFloatingPoint.Text = result.ToString();
+			TextFloatingPoint.Text = result.ToString();
 		}
 
 		private void TextValue_TextChanged(object sender, EventArgs e)
 		{
-			if (!this.withinSetValuesCall)
+			if (!withinSetValuesCall)
 			{
 				// Verify that the string contains only hexadecimal digits.
-				this.TextValue.Text = this.RemoveInvalidCharacters(this.TextValue.Text, RemoveCharactersFor.Hexadecimal);
+				TextValue.Text = RemoveInvalidCharacters(TextValue.Text, RemoveCharactersFor.Hexadecimal);
 
 				// Verify that the string has up to 16 characters.
-				if (this.TextValue.Text.Length > 16)
+				if (TextValue.Text.Length > 16)
 				{
-					this.TextValue.Text = this.TextValue.Text.Substring(0, 16);
+					TextValue.Text = TextValue.Text.Substring(0, 16);
 				}
 
-				this.SetValues(RegisterEditorTextBoxes.Value);
+				SetValues(RegisterEditorTextBoxes.Value);
 			}
 		}
 
 		private void TextAsBigEndian_TextChanged(object sender, EventArgs e)
 		{
-			if (!this.withinSetValuesCall)
+			if (!withinSetValuesCall)
 			{
-				this.TextAsBigEndian.Text = this.RemoveInvalidCharacters(this.TextAsBigEndian.Text, RemoveCharactersFor.Hexadecimal);
+				TextAsBigEndian.Text = RemoveInvalidCharacters(TextAsBigEndian.Text, RemoveCharactersFor.Hexadecimal);
 
-				if (this.TextAsBigEndian.Text.Length > 16)
+				if (TextAsBigEndian.Text.Length > 16)
 				{
-					this.TextAsBigEndian.Text = this.TextAsBigEndian.Text.Substring(0, 16);
+					TextAsBigEndian.Text = TextAsBigEndian.Text.Substring(0, 16);
 				}
 
-				this.SetValues(RegisterEditorTextBoxes.BigEndianValue);
+				SetValues(RegisterEditorTextBoxes.BigEndianValue);
 			}
 		}
 
 		private void TextSigned_TextChanged(object sender, EventArgs e)
 		{
-			if (!this.withinSetValuesCall)
+			if (!withinSetValuesCall)
 			{
-				this.TextSigned.Text = this.RemoveInvalidCharacters(this.TextSigned.Text, RemoveCharactersFor.SignedDecimal);
+				TextSigned.Text = RemoveInvalidCharacters(TextSigned.Text, RemoveCharactersFor.SignedDecimal);
 
-				if (this.TextSigned.Text.Length > 20)
+				if (TextSigned.Text.Length > 20)
 				{
-					this.TextSigned.Text = this.TextSigned.Text.Substring(0, 20);
+					TextSigned.Text = TextSigned.Text.Substring(0, 20);
 				}
 
-				this.SetValues(RegisterEditorTextBoxes.Signed);
+				SetValues(RegisterEditorTextBoxes.Signed);
 			}
 		}
 
 		private void TextUnsigned_TextChanged(object sender, EventArgs e)
 		{
-			if (!this.withinSetValuesCall)
+			if (!withinSetValuesCall)
 			{
 				// where you left off: fix below line, finish the floating point textchanged thing, 
 				// add a public method to get the ulong that the register should be set to
-				this.TextUnsigned.Text = this.RemoveInvalidCharacters(this.TextUnsigned.Text, RemoveCharactersFor.UnsignedDecimal);
+				TextUnsigned.Text = RemoveInvalidCharacters(TextUnsigned.Text, RemoveCharactersFor.UnsignedDecimal);
 
-				if (this.TextUnsigned.Text.Length > 20)
+				if (TextUnsigned.Text.Length > 20)
 				{
-					this.TextUnsigned.Text = this.TextUnsigned.Text.Substring(0, 20);
+					TextUnsigned.Text = TextUnsigned.Text.Substring(0, 20);
 				}
 
-				this.SetValues(RegisterEditorTextBoxes.Unsigned);
+				SetValues(RegisterEditorTextBoxes.Unsigned);
 			}
 		}
 
 		private void TextFloatingPoint_TextChanged(object sender, EventArgs e)
 		{
-			if (!this.withinSetValuesCall)
+			if (!withinSetValuesCall)
 			{
-				this.TextFloatingPoint.Text = this.RemoveInvalidCharacters(this.TextFloatingPoint.Text, RemoveCharactersFor.FloatingPoint);
+				TextFloatingPoint.Text = RemoveInvalidCharacters(TextFloatingPoint.Text, RemoveCharactersFor.FloatingPoint);
 
-				this.SetValues(RegisterEditorTextBoxes.Floating);
+				SetValues(RegisterEditorTextBoxes.Floating);
 			}
 		}
 

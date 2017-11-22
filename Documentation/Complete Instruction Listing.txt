@@ -25,7 +25,7 @@ Control Flow
 		Mnemonic: jmp
 		Arguments: jmp <address>
 			<address>: An addressing block containing the memory address to jump to.
-		Description: Sets the program counter (PC) to the given address. This moves execution to the given address.
+		Description: Sets EIP to the given address + ERP. This moves execution to the given address.
 		Errors:
 			InvalidAddressType: Raised if the given address block does not point to a memory address.
 			AddressOutOfRange: Raised if the given address points to a memory location beyond the bounds of the memory space.
@@ -35,7 +35,7 @@ Control Flow
 		Mnemonic: call
 		Arguments: call <address>
 			<address>: An addresing block containing the memory address to call.
-		Description: Pushes the current processor state (registers, flags, PC) onto the Call Stack and then clears the processor state. The given address is jumped to, and upon a return instruction, the processor state on the top of the call stack is popped back into the current processor state, overwriting it.
+		Description: Pushes the current processor state (registers, flags, EIP) onto the Call Stack and then clears the processor state. The given address + ERP is jumped to, and upon a return instruction, the processor state on the top of the call stack is popped back into the current processor state, overwriting it.
 		Errors:
 			InvalidAddressType: Raised if the given address block does not point to a memory address.
 			AddressOutOfRange: Raised if the given address points to a memory location beyond the bounds of the memory space.
@@ -49,30 +49,73 @@ Control Flow
 		Errors:
 			CallStackEmpty: Raised if the call stack has no processor states loaded onto it.
 			
-	Conditional Jump
+	Jump if Equal
 		Opcode: 0x0005
-		Mnemonic: cjmp
-		Arguments: cjmp <jump-address> <condition-address>
-			<jump-address>: An addressing block containing the memory address to jump to.
-			<condition-address>: An addressing block containing a pointer to some part of memory (processor, memory, diskfile) to test.
-		Description: Performs a jump to the specified address if the value at the condition address is nonzero (true).
+		Mnemonic: je
+		Arguments: je <address>
+			<address>: An addressing block containing the memory address to jump to.
+		Description: Performs a jump to the specified address + ERP if the equal flag on EFLAGS is set.
 		Errors:
-			InvalidAddressType: Raised if the given jump address block does not point to a memory address.
-			AddressOutOfRange: Raised if the given jump address or condition address points to a memory location beyond the bounds of the memory space.
-			InvalidProcessorAddress: Raised if the given condition address points to an invalid processor memory area.
 			
-	Conditional Call
+	Jump if Not Equal
 		Opcode: 0x0006
-		Mmemonic: ccall
-		Arguments: ccall <call-address> <condition-address>
-			<jump-address>: An addressing block containing the memory address to jump to.
-			<condition-address>: An addressing block containing a pointer to some part of memory (processor, memory, diskfile) to test.
-		Description: Performs a call to the specified address if the value at the condition address is nonzero (true).
+		Mnemonic: jne
+		Arguments: jen <address>
+			<address>: An addressing block containing the memory address to jump to.
+		Description: Performs a jump to the specified address + ERP if the equal flag on EFLAGS is clear.
 		Errors:
-			InvalidAddressType: Raised if the given jump address block does not point to a memory address.
-			AddressOutOfRange: Raised if the given jump address or condition address points to a memory location beyond the bounds of the memory space.
-			InvalidProcessorAddress: Raised if the given condition address points to an invalid processor memory area.
-			
+		
+	Jump if Less Than
+		Opcode: 0x0007
+		Mnemonic: jlt
+		Arguments: jlt <address>
+			<address>: An addressing block containing the memory address to jump to.
+		Description: Performs a jump to the specified address + ERP if the less-than flag on EFLAGS is set.
+		Errors:
+		
+	Jump if Greater Than
+		Opcode: 0x0008
+		Mnemonic: jgt
+		Arguments: jgt <address>
+			<address>: An addressing block containing the memory address to jump to.
+		Description: Performs a jump to the specified address + ERP if the greater-than flag on EFLAGS is set.
+		Errors:
+	
+	Jump if Less Than or Equal
+		Opcode: 0x0009
+		Mnemonic: jlte
+		Arguments: jlte <address>
+			<address>: An addressing block containing the memory address to jump to.
+		Description: Performs a jump to the specified address + ERP if the equal flag or the less-than flag on EFLAGS is set.
+		Errors:
+	
+	Jump if Greater Than or Equal
+		Opcode: 0x000A
+		Mnemonic: jgte
+		Arguments: jgte <address>
+			<address>: An addressing block containing the memory address to jump to.
+		Description: Performs a jump to the specified address + ERP if the equal flag or the greater-than flag on EFLAGS is set.
+		Errors:
+		
+	Absolute Jump
+		Opcode: 0x000B
+		Mnemonic: jmpa
+		Arguments: jmpa <address>
+		Description: Performs an absolute jump to an address, that is, a jump to an address to which ERP is not added.
+		Errors:
+		
+	Hardware Call
+		Opcode: 0x000C
+		Mnemonic: hwcall
+		Arguments: hwcall <addressToString>
+		Description: Loads a length-prefixed string that contains a hardware command from the given address and performs a hardware call to perform the command.
+	
+	Stack Argument Prologue
+		Opcode: 0x000D
+		Mnemonic: stackargs
+		Arguments: None
+		Description: Indicates that anything pushed onto the stack is going to be an argument to a function call. Calling a function sets EBP equal to ESP to create a new stack frame. Since arguments are pushed on the stack, anything pushed after a stackargs instruction will be placed after EBP.
+	
 Data Operations
 	Move Data
 		Opcode: 0x0100
@@ -93,9 +136,34 @@ Data Operations
 		Description: Moves a certain length of a value into a given destination
 		Errors:
 			InsufficientDestinationSize: Raised if the destination size is too small for the data.
-	
-	Stack Addition
+			
+	Push to Stack
 		Opcode: 0x0102
+		Mnemonic: push
+		Arguments: push <SIZE> <data>
+		Description: Depending on the value of SIZE, pushes a BYTE, WORD, DWORD, or QWORD value onto the stack by writing it to the memory pointed to by ESP then adding the size to ESP.
+	
+	Pop from Stack
+		Opcode: 0x0103
+		Mnemonic: pop
+		Arguments: pop <SIZE> <destination>
+		Description: Depending on the value of SIZE, pops a BYTE, WORD, DWORD, or QWORD value off the top of the stack, writing it to the specified destination then subtracting the size from ESP.
+	
+	Read Array Value
+		Opcode: 0x0104
+		Mnemonic: arrayread
+		Arguments: arrayread SIZE <index>
+		Description: Given a pointer to an array at the top of the stack, arrayread reads an array element pointed to by the index, popping the array pointer and pushing the resulting value. The index is zero-based.
+	
+	Write Array Value
+		Opcode: 0x0105
+		Mnemonic: arraywrite
+		Arguments: arraywrite SIZE <index> <data>
+		Description: Given a pointer to an array at the top of the stack, arraywrite writes the given data to the specified index. The array pointer is popped off the top of the stock. The index is zero-based.
+
+Integral/Bitwise Operations
+	Stack Addition
+		Opcode: 0x0200
 		Mnemonic: add
 		Arguments: None
 		Description: Pops the top two values off the stack, adds them together, and pushes their sum onto the stack.
@@ -104,7 +172,7 @@ Data Operations
 			ArithmeticUnderflow: Raised if the sum is lower than the minimum value of the datatype.
 			
 	Stack Subtraction
-		Opcode: 0x0103
+		Opcode: 0x0201
 		Mnemonic: sub
 		Arguments: None
 		Description: Pops the top two values off the stack, subtracts them, and pushes their difference onto the stack.
@@ -113,7 +181,7 @@ Data Operations
 			ArithmeticUnderflow: Raised if the difference is lower than the minimum value of the datatype.
 	
 	Stack Multiplication
-		Opcode: 0x0104
+		Opcode: 0x0202
 		Mnemonic: mult
 		Arguments: None
 		Description: Pops the top two values off the stack, multiplies them, and pushes their product onto the stack.
@@ -122,7 +190,7 @@ Data Operations
 			ArithmeticUnderflow: Raised if the product is lower than the minimum value of the datatype.
 	
 	Stack Division
-		Opcode: 0x0105
+		Opcode: 0x0203
 		Mnemonic: div
 		Arguments: None
 		Description: Pops the top two values off the stack, divides them, and pushes their quotient onto the stack.
@@ -131,7 +199,7 @@ Data Operations
 			ArithmeticUnderflow: Raised if the quotient is lower than the minimum value of the datatype.
 	
 	Stack Modulus Division
-		Opcode: 0x0106
+		Opcode: 0x0204
 		Mnemonic: mod
 		Arguments: None
 		Description: Pops the top two values off the stack, divides them, and pushes the remainder onto the stack.
@@ -140,7 +208,7 @@ Data Operations
 			ArithmeticUnderflow: Raised if the remainder is lower than the minimum value of the datatype.
 			
 	Stack Increment
-		Opcode: 0x0107
+		Opcode: 0x0205
 		Mnemonic: inc
 		Arguments: None
 		Description: Pops the top value off the stack, increments it, and pushes it back onto the stack.
@@ -148,23 +216,15 @@ Data Operations
 			ArithmeticOverflow: Raised if the value is higher than the maximum value of the datatype.
 	
 	Stack Decrement
-		Opcode: 0x0108
+		Opcode: 0x0206
 		Mnemonic: dec
 		Arguments: None
 		Description: Pops the top value off the stack, decrements it, and pushes it back onto the stack.
 		Errors:
 			ArithmeticUnderflow: Raised if the value is lower than the maximum value of the datatype.
 			
-	Stack Arithmetic Inverse
-		Opcode: 0x0109
-		Mnemonic: inv
-		Arguments: None
-		Description: Pops the top value off the stack, inverts it, and pushes it back onto the stack.
-		Errors:
-			ArithmeticOverflow: Raised if the value is higher than the maximum value of the datatype.
-			
 	Stack Bitwise AND
-		Opcode: 0x010A
+		Opcode: 0x0207
 		Mnemonic: bwand
 		Arguments: None
 		Description: Pops the top two values off the stack, performs a bitwise AND on them, and pushes the result onto the stack.
@@ -172,7 +232,7 @@ Data Operations
 			InvalidBitwiseOperandSize: Raised if the two values are of different sizes.
 	
 	Stack Bitwise OR
-		Opcode: 0x010B
+		Opcode: 0x0208
 		Mnemonic: bwor
 		Arguments: None
 		Description: Pops the top two values off the stack, performs a bitwise OR on them, and pushes the result onto the stack.
@@ -180,7 +240,7 @@ Data Operations
 			InvalidBitwiseOperandSize: Raised if the two values are of different sizes.
 
 	Stack Bitwise XOR
-		Opcode: 0x010C
+		Opcode: 0x0209
 		Mnemonic: bwxor
 		Arguments: None
 		Description: Pops the top two values off the stack, performs a bitwise XOR on them, and pushes the result onto the stack.
@@ -188,14 +248,14 @@ Data Operations
 			InvalidBitwiseOperandSize: Raised if the two values are of different sizes.
 	
 	Stack Bitwise NOT
-		Opcode: 0x010D
+		Opcode: 0x020A
 		Mnemonic: bwnot
 		Arguments: None
 		Description: Pops the top value off the stack, performs a bitwise NOT on it, and pushes the result onto the stack.
 		Errors: None
 		
 	Stack Bitwise Shift Left
-		Opcode: 0x010E
+		Opcode: 0x020B
 		Mnemonic: lshift
 		Arguments: None
 		Description: Pops the top two values off the stack, shifts left the second value by the number of bits specified in the first value, and pushes the result on the stack.
@@ -203,7 +263,7 @@ Data Operations
 			BitwiseShiftPositionsInvalid: Raised if the number of bits to shift is greater than 2,147,483,647 or less than 0.
 		
 	Stack Bitwise Shift Right
-		Opcode: 0x010F
+		Opcode: 0x020C
 		Mnemonic: rshift
 		Arguments: None
 		Description: Pops the top two values off the stack, shifts right the second value by the number of bits specified in the first value, and pushes the result on the stack.
@@ -211,86 +271,41 @@ Data Operations
 			BitwiseShiftPositionsInvalid: Raised if the number of bits to shift is greater than 2,147,483,647 or less than 0.
 			
 	Stack Logical AND
-		Opcode: 0x0110
+		Opcode: 0x020D
 		Mnemonic: land
 		Arguments: None
 		Description: Pops the top two values off the stack. If they are both non-zero, the value 1 is pushed onto the stack. Else, the value of 0 is pushed onto the stack.
 		Errors: None
 	
 	Stack Logical OR
-		Opcode: 0x0111
+		Opcode: 0x020E
 		Mnemonic: lor
 		Arguments: None
 		Description: Pops the top two values off the stack. If either or both of them are non-zero, the value 1 is pushed onto the stack. Else, the value of 0 is pushed onto the stack.
 		Errors: None
 		
 	Stack Logical XOR
-		Opcode: 0x0112
+		Opcode: 0x020F
 		Mnemonic: lxor
 		Arguments: None
 		Description: Pops the top two values off the stack. If either (but not both) of them are non-zero, the value 1 is pushed onto the stack. Else, the value of 0 is pushed onto the stack.
 		Errors: None
 		
 	Stack Logical NOT
-		Opcode: 0x0113
+		Opcode: 0x0210
 		Mnemonic: lnot
 		Arguments: None
 		Description: Pops the top value off the stack. If it's nonzero, the value of 0 is pushed onto the stack. Else, the value of 1 is pushed onto the stack.
 		Errors: None
 		
-	Stack Subtractive Comparison
-		Opcode: 0x0114
-		Mnemonic: scmp
+	Stack Comparison
+		Opcode: 0x0211
+		Mnemonic: cmp
 		Arguments: None
-		Description: Pops the top two values off the stack and subtracts them. If the result is non-zero, the value is set to 1 with its sign preserved (-12 would become -1, for example, and +37 would become +1). Else, the value is set to zero. The value is pushed onto the stack.
-		Errors:
-			ArithmeticOverflow: Raised if the difference is higher than the maximum value of the datatype.
-			ArithmeticUnderflow: Raised if the difference is lower than the minimum value of the datatype.
-			
-	Stack Equality
-		Opcode: 0x0115
-		Mnemonic: eq
-		Arguments: None
-		Description: Pops the top two values off the stack. If they're equal, the value of 1 is pushed onto the stack. Else, the value of 0 is pushed onto the stack.
-		Errors: None
-		
-	Stack Inequality
-		Opcode: 0x0116
-		Mnemonic: ineq
-		Arguments: None
-		Description: Pops the top two values off the stack. If they're not equal, the value of 1 is pushed onto the stack. Else, the value of 0 is pushed onto the stack.
-		Errors: None
-		
-	Stack Less Than
-		Opcode: 0x0117
-		Mnemonic: lt
-		Arguemnts: None
-		Description: Pops the top two values off the stack. If the second value is less than the first, the value of 1 is pushed onto the stack. Else, the value of 0 is pushed onto the stack.
-		Errors: None	
-		
-	Stack Greater Than
-		Opcode: 0x0118
-		Mnemonic: gt
-		Arguemnts: None
-		Description: Pops the top two values off the stack. If the second value is greater than the first, the value of 1 is pushed onto the stack. Else, the value of 0 is pushed onto the stack.
-		Errors: None
-				
-	Stack Less Than or Equal To
-		Opcode: 0x0119
-		Mnemonic: lte
-		Arguemnts: None
-		Description: Pops the top two values off the stack. If the second value is less than or equal to the first, the value of 1 is pushed onto the stack. Else, the value of 0 is pushed onto the stack.
-		Errors: None
-		
-	Stack Greater Than or Equal To
-		Opcode: 0x011A
-		Mnemonic: gte
-		Arguemnts: None
-		Description: Pops the top two values off the stack. If the second value is greater than or equal to the first, the value of 1 is pushed onto the stack. Else, the value of 0 is pushed onto the stack.
-		Errors: None
-		
+		Description: Pops the top two values off the stack and compares them, setting the equals, less-than, and greater-than flags in EFLAGS accordingly.
+
 	Long Addition
-		Opcode: 0x011B
+		Opcode: 0x0212
 		Mnemonic: addl
 		Arguments: addl <source1-address> <source2-address> <dest-address>
 			<source1-address>: An addressing block containing the first operand.
@@ -302,7 +317,7 @@ Data Operations
 			ArithmeticUnderflow: Raised if the sum is lower than the minimum value of the datatype.
 	
 	Long Subtraction
-		Opcode: 0x011C
+		Opcode: 0x0213
 		Mnemonic: subl
 		Arguments: subl <source1-address> <source2-address> <dest-address>
 			<source1-address>: An addressing block containing the first operand.
@@ -314,7 +329,7 @@ Data Operations
 			ArithmeticUnderflow: Raised if the difference is lower than the minimum value of the datatype.
 	
 	Long Multiplication
-		Opcode: 0x011D
+		Opcode: 0x0214
 		Mnemonic: multl
 		Arguments: multl <source1-address> <source2-address> <dest-address>
 			<source1-address>: An addressing block containing the first operand.
@@ -326,7 +341,7 @@ Data Operations
 			ArithmeticUnderflow: Raised if the product is lower than the minimum value of the datatype.
 			
 	Long Division
-		Opcode: 0x011E
+		Opcode: 0x0215
 		Mnemonic: divl
 		Arguments: divl <source1-address> <source2-address> <dest-address>
 			<source1-address>: An addressing block containing the first operand.
@@ -338,7 +353,7 @@ Data Operations
 			ArithmeticUnderflow: Raised if the quotient is lower than the minimum value of the datatype.
 			
 	Long Modulus Division
-		Opcode: 0x011F
+		Opcode: 0x0216
 		Mnemonic: modl
 		Arguments: modl <source1-address> <source2-address> <dest-address>
 			<source1-address>: An addressing block containing the first operand.
@@ -350,7 +365,7 @@ Data Operations
 			ArithmeticUnderflow: Raised if the remainder is lower than the minimum value of the datatype.
 			
 	Long Increment
-		Opcode: 0x0120
+		Opcode: 0x0217
 		Mnemonic: incl
 		Arguments: incl <source-address>
 			<source-address>: An addressing block containing the operand.
@@ -359,7 +374,7 @@ Data Operations
 			ArithmeticOverflow: Raised if the value is higher than the maximum value of the datatype.
 			
 	Long Decrement
-		Opcode: 0x0121
+		Opcode: 0x0218
 		Mnemonic: decl
 		Arguments: decl <source-address>
 			<source-address>: An addressing block containing the operand.
@@ -367,18 +382,8 @@ Data Operations
 		Errors:
 			ArithmeticUnderflow: Raised if the value is lower than the minimum value of the datatype.
 			
-	Long Arithmetic Inverse
-		Opcode: 0x0122
-		Mnemonic: invl
-		Arguments: invl <source-address> <dest-address>
-			<source-address>: An addressing block containing the operand.
-			<dest-address>: An addressing block containing the destination of the operation.
-		Description: Inverts the value at the source address and stores it in the destination address.
-		Errors:
-			ArithmeticOverflow: Raised if the value is higher than the maximum value of the datatype.
-			
 	Long Bitwise AND
-		Opcode: 0x0123
+		Opcode: 0x0219
 		Mnemonic: bwandl
 		Arguments: bwandl <source1-address> <source2-address> <dest-address>
 			<source1-address>: An addressing block containing the first operand.
@@ -389,7 +394,7 @@ Data Operations
 			InvalidBitwiseOperandSize: Raised if the two values are of different sizes.
 			
 	Long Bitwise OR
-		Opcode: 0x0124
+		Opcode: 0x021A
 		Mnemonic: bworl
 		Arguments: bworl <source1-address> <source2-address> <dest-address>
 			<source1-address>: An addressing block containing the first operand.
@@ -400,7 +405,7 @@ Data Operations
 			InvalidBitwiseOperandSize: Raised if the two values are of different sizes.
 			
 	Long Bitwise XOR
-		Opcode: 0x0125
+		Opcode: 0x021B
 		Mnemonic: bwxorl
 		Arguments: bwxorl <source1-address> <source2-address> <dest-address>
 			<source1-address>: An addressing block containing the first operand.
@@ -411,17 +416,17 @@ Data Operations
 			InvalidBitwiseOperandSize: Raised if the two values are of different sizes.
 	
 	Long Bitwise NOT
-		Opcode: 0x0126
+		Opcode: 0x021C
 		Mnemonic: bwnotl
 		Arguments: bwnotrl <source-address> <dest-address>
 			<source-address>: An addressing block containing the operand.
 			<dest-address>: An addressing block containing the destination.
-		Description: Performs a bitwis NOT on the value at the source address and stores the result in the destination address.
+		Description: Performs a bitwise NOT on the value at the source address and stores the result in the destination address.
 		Errors:
 			InvalidBitwiseOperandSize: Raised if the two values are of different sizes.
 			
 	Long Bitwise Shift Left
-		Opcode: 0x0127
+		Opcode: 0x021D
 		Mnemonic: lshiftl
 		Arguments: lshiftl <operand-address> <positions-address> <dest-address>
 			<operand-address>: An addressing block containing the operand.
@@ -432,7 +437,7 @@ Data Operations
 			BitwiseShiftPositionsInvalid: Raised if the number of bits to shift is greater than 2,147,483,647 or less than 0.
 			
 	Long Bitwise Shift Right
-		Opcode: 0x0128
+		Opcode: 0x021E
 		Mnemonic: rshiftl
 		Arguments: rshiftl <operand-address> <positions-address> <dest-address>
 			<operand-address>: An addressing block containing the operand.
@@ -443,7 +448,7 @@ Data Operations
 			BitwiseShiftPositionsInvalid: Raised if the number of bits to shift is greater than 2,147,483,647 or less than 0.
 			
 	Long Logical AND
-		Opcode: 0x0129
+		Opcode: 0x021F
 		Mnemonic: landl
 		Arguments: landl <source1-address> <source2-address> <dest-address>
 			<source1-address>: An addressing block containing the first operand.
@@ -453,7 +458,7 @@ Data Operations
 		Errors: None
 		
 	Long Logical OR
-		Opcode: 0x012A
+		Opcode: 0x0220
 		Mnemonic: lorl
 		Arguments: lorl <source1-address> <source2-address> <dest-address>
 			<source1-address>: An addressing block containing the first operand.
@@ -463,7 +468,7 @@ Data Operations
 		Errors: None
 		
 	Long Logical XOR
-		Opcode: 0x012B
+		Opcode: 0x0221
 		Mnemonic: lxorl
 		Arguments: lxorl <source1-address> <source2-address> <dest-address>
 			<source1-address>: An addressing block containing the first operand.
@@ -473,7 +478,7 @@ Data Operations
 		Errors: None
 		
 	Long Logical NOT
-		Opcode: 0x012C
+		Opcode: 0x0222
 		Mnemonic: lnotl
 		Arguments: lnotl <source-address> <dest-address>
 			<source-address>: An addressing block containing the operand.
@@ -481,308 +486,29 @@ Data Operations
 		Description: If the source value is non-zero, the value of 0 is placed in the destination. Else, the value of 1 is placed in the destination.
 		Errors: None
 		
-	Long Subtractive Comparison
-		Opcode: 0x012D
-		Mnemonic: scmpl
-		Arguments: scmpl <source1-address> <source2-address> <dest-address>
+	Long Comparison
+		Opcode: 0x0223
+		Mnemonic: cmpl
+		Arguments: cmpl <source1-address> <source2-address> <dest-address>
 			<source1-address>: An addressing block containing the first operand.
 			<source2-address>: An addressing block containing the second operand.
 			<dest-address>: The addressing block containing the destination of the result.
-		Description: Subtracts the two source values. If the result is non-zero, the value of 1 (with the same sign as the result) is placed in the destination. Else, the value of 0 is placed in the destination.
+		Description: Compares the two source values and stores either -1, 0, or +1 in the destination address.
 		Errors:
 			ArithmeticUnderflow: Raised if the difference is lower than the minimum value of the datatype.
 		
-	Long Equality
-		Opcode: 0x012E
-		Mnemonic: eql
-		Arguments: eql <source1-address> <source2-address> <dest-address>
-			<source1-address>: An addressing block containing the first operand.
-			<source2-address>: An addressing block containing the second operand.
-			<dest-address>: The addressing block containing the destination of the result.
-		Description: If the source values are equal, the value of 1 is placed in the destination. Else, the value of 0 is placed in the destination
-		Errors: None
-		
-	Long Inequality
-		Opcode: 0x012F
-		Mnemonic: ineql
-		Arguments: ineql <source1-address> <source2-address> <dest-address>
-			<source1-address>: An addressing block containing the first operand.
-			<source2-address>: An addressing block containing the second operand.
-			<dest-address>: The addressing block containing the destination of the result.
-		Description: If the source values are not equal, the value of 1 is placed in the destination. Else, the value of 0 is placed in the destination
-		Errors: None
-		
-	Long Less Than
-		Opcode: 0x0130
-		Mnemonic: ltl
-		Arguments: ltl <source1-address> <source2-address> <dest-address>
-			<source1-address>: An addressing block containing the first operand.
-			<source2-address>: An addressing block containing the second operand.
-			<dest-address>: The addressing block containing the destination of the result.
-		Description: If the first source value is less than the second, the value of 1 is placed in the destination. Else, the value of 0 is placed in the destination
-		Errors: None
-		
-	Long Greater Than
-		Opcode: 0x0131
-		Mnemonic: gtl
-		Arguments: gtl <source1-address> <source2-address> <dest-address>
-			<source1-address>: An addressing block containing the first operand.
-			<source2-address>: An addressing block containing the second operand.
-			<dest-address>: The addressing block containing the destination of the result.
-		Description: If the first source value is greater than the second, the value of 1 is placed in the destination. Else, the value of 0 is placed in the destination
-		Errors: None
-		
-	Long Less Than or Equal To
-		Opcode: 0x0132
-		Mnemonic: lteql
-		Arguments: lteql <source1-address> <source2-address> <dest-address>
-			<source1-address>: An addressing block containing the first operand.
-			<source2-address>: An addressing block containing the second operand.
-			<dest-address>: The addressing block containing the destination of the result.
-		Description: If the first source value is less than or equal to the second, the value of 1 is placed in the destination. Else, the value of 0 is placed in the destination
-		Errors: None
-	
-	Long Greater Than or Equal To
-		Opcode: 0x0133
-		Mnemonic: gteql
-		Arguments: gteql <source1-address> <source2-address> <dest-address>
-			<source1-address>: An addressing block containing the first operand.
-			<source2-address>: An addressing block containing the second operand.
-			<dest-address>: The addressing block containing the destination of the result.
-		Description: If the first source value is greater than or equal to the second, the value of 1 is placed in the destination. Else, the value of 0 is placed in the destination
-		Errors: None
-		
-Console Wrapper
-	Console Read Character
-		Opcode: 0x0200
-		Mnemonic: creadc
-		Arguments: creadc <destination-address>
-			<destination-address>: The addressing block where the pressed key will be.
-		Description: Halts execution until the user presses a key. When the user does, the key is passed to the destination as a UTF-16 character.
-	
-	Console Read Line
-		Opcode: 0x0201
-		Mnemonic: cread
-		Arguments: cread <destination-address> <pointer-destination>
-			<destination-address>: The addressing block where the line will be.
-		Description: Halts execution until the user presses Enter. When the user does, a UTF-16 string is created at the destination and the resulting line is placed in the string. Finally, a pointer to the string is stored at the pointer destination address.
-		
-	Console Write
-		Opcode: 0x0202
-		Mnemonic: cwrite
-		Arguments: cwrite <string>
-			<string>: The string or pointer to the string to write.
-		Description: Writes the string to the console.
-	
-	Console Write Line
-		Opcode: 0x0203
-		Mnemonic: cwritel
-		Arguments: cwritel <string>
-			<string>: The string or pointer to the string to write.
-		Description: Writes the string to the console, and then writes a new line.
-		
-System.Math Wrapper
-	Absolute Value
-		Opcode: 0x0300
-		Mnemonic: abs
-		Arguments: abs <source-address> <dest-address>
-			<source-address>: Address of numeric operand.
-			<dest-address>: Address to place result.
-		Description: Returns the absolute value of a number.
-
-	Angle from Cosine
-		Opcode: 0x0301
-		Mnemonic: acos
-		Arguments: acos <source-address> <dest-address>
-			<source-address>: Address of cosine value.
-			<dest-address>: Adress to place angle.
-		Description: Given a cosine, returns the angle that corresponds to it.
-
-	Angle from Sine
-		Opcode: 0x0302
-		Mnemonic: asin
-		Arguments: asin <source-address> <dest-address>
-			<source-address>: Address of sine value.
-			<dest-address>: Adress to place angle.
-		Description: Given a sine, returns the angle that corresponds to it.
-
-	Angle from Tangent
-		Opcode: 0x0303
-		Mnemonic: atan
-		Arguments: atan <source-address> <dest-address>
-			<source-address>: Address of tangent value.
-			<dest-address>: Adress to place angle.
-		Description: Given a tangent value, returns the angle that corresponds to it.
-
-	Angle from Tangent 2
-		Opcode: 0x0304
-		Mnemonic: atan2
-		Arguments: atan2 <x> <y> <dest-address>
-			<x>, <y>: Addresses of values.
-			<dest-address>: Adress to place angle
-		Description: Given numeric x and y, returns the arctan(y / x) (if x != 0) that corresponds to it.
-		             See http://msdn.microsoft.com/en-us/library/system.math.atan2.aspx for details.
-
-	Ceiling
-		Opcode: 0x0305
-		Mnemonic: ceil
-		Arguments: ceil <source-address> <dest-address>
-			<source-address>: Address of floating point value.
-			<dest-address>: Adress to place result.
-		Description: Given a number, returns the nearest integer larger than it.
-
-	Cosine
-		Opcode: 0x0306
-		Mnemonic: cos
-		Arguments: cos <source-address> <dest-address>
-			<source-address>: Address of angle.
-			<dest-address>: Adress to place cosine.
-		Description: Given an angle, returns its cosine.
-
-	Hyperbolic Cosine
-		Opcode: 0x0307
-		Mnemonic: cosh
-		Arguments: cosh <source-address> <dest-address>
-			<source-address>: Address of value.
-			<dest-address>: Adress to place result.
-		Description: Given a value, returns its hyperbolic cosine.
-
-	Exp (e raised to a power)
-		Opcode: 0x0308
-		Mnemonic: exp
-		Arguments: exp <source-address> <dest-address>
-			<source-address>: Address of value.
-			<dest-address>: Adress to place exponential.
-		Description: Given a value, returns e raised to its power.
-
-	Floor
-		Opcode: 0x0309
-		Mnemonic: floor
-		Arguments: floor <source-address> <dest-address>
-			<source-address>: Address of floating point value.
-			<dest-address>: Adress to place result.
-		Description: Given a floating point value, returns the nearest integer lower than it.
-
-	Log (base e)
-		Opcode: 0x030A
-		Mnemonic: ln
-		Arguments: ln <source-address> <dest-address>
-			<source-address>: Address of positive number.
-			<dest-address>: Adress to place logarithm.
-		Description: Given a value, returns its natural logarithm.  Inverse of the exp instruction.
-
-	Log (specified base)
-		Opcode: 0x030B
-		Mnemonic: logb
-		Arguments: logb <b> <source-address> <dest-address>
-			<source-address>: Address of positive number.
-			<b>: Base.
-			<dest-address>: Adress to place result.
-		Description: Given a value, returns its logarithm to the base b.
-
-	Log (base 10)
-		Opcode: 0x030C
-		Mnemonic: log
-		Arguments: log <source-address> <dest-address>
-			<source-address>: Address of positive number.
-			<dest-address>: Adress to place result.
-		Description: Given a floating point value, returns its common logarithm.
-
-	Max
-		Opcode: 0x030D
-		Mnemonic: max
-		Arguments: max <value1> <value2> <dest-address>
-			<value1>, <value2>: Addresses of values to compare.
-			<dest-address>: Adress to place result.
-		Description: Given two values, returns the larger of the two. (Specify).
-
-	Min
-		Opcode: 0x030E
-		Mnemonic: min
-		Arguments: max <value1> <value2> <dest-address>
-			<value1>, <value2>: Addresses of values to compare.
-			<dest-address>: Adress to place result.
-		Description: Given two values, returns the smaller of the two. (Specify).
-
-	Power
-		Opcode: 0x030F
-		Mnemonic: pow
-		Arguments: pow <value1> <value2> <dest-address>
-			<value1>, <value2>: Addresses of operands.
-			<dest-address>: Adress to place result.
-		Description: Given two values, returns the first raised to the power of the second.
-
-	Round
-		Opcode: 0x0310
-		Mnemonic: round
-		Arguments: (Specify).
-		Description: (Specify).
-
-	Sign
-		Opcode: 0x0311
-		Mnemonic: sgn
-		Arguments: sgn <source-address> <dest-address>
-			<source-address>: Address of value
-			<dest-address>: Adress to place result.
-		Description: Given a value, returns an integer that tells its sign.
-
-	Sine
-		Opcode: 0x0312
-		Mnemonic: sin
-		Arguments: sin <source-address> <dest-address>
-			<source-address>: Address of angle
-			<dest-address>: Adress to place sine.
-		Description: Given an angle, returns its sine.
-
-	Hyperbolic Sine
-		Opcode: 0x0313
-		Mnemonic: sinh
-		Arguments: sinh <source-address> <dest-address>
-			<source-address>: Address of value
-			<dest-address>: Adress to place result.
-		Description: Given a value, returns its hyperbolic sine.
-
-	Square Root
-		Opcode: 0x0314
-		Mnemonic: sqrt
-		Arguments: sqrt <source-address> <dest-address>
-			<source-address>: Address of value
-			<dest-address>: Adress to place root.
-		Description: Given a non-negative number, returns its square root.
-
-	Tangent
-		Opcode: 0x0315
-		Mnemonic: tan
-		Arguments: tan <source-address> <dest-address>
-			<source-address>: Address of angle
-			<dest-address>: Adress to place tangent.
-		Description: Given an angle, returns its tangent.
-
-	Hyperbolic Tangent
-		Opcode: 0x0316
-		Mnemonic: tanh
-		Arguments: tanh <source-address> <dest-address>
-			<source-address>: Address of value
-			<dest-address>: Adress to place result.
-		Description: Given a value, returns its hpyerbolic tangent.
-
-	Truncate
-		Opcode: 0x0317
-		Mnemonic: trunc
-		Arguments: trunc <source-address> <dest-address>
-			<source-address>: Address of value
-			<dest-address>: Adress to place result.
-		Description: Given a value, returns the next lowest integer. (Same as floor?)
-		
-	Push E
-		Opcode: 0x0318
-		Mnemonic: push e
-		Arguments: None.
-		Description: Pushes the most important transcendental number onto the stack. (Specify).
-
-	Push Pi
-		Opcode: 0x0319
-		Mnemonic: push pi
-		Arguments: None.
-		Description: Pushes pi onto the stack. (Specify).
-
+Floating Point Stack Operations
+	Floating Stack Addition
+		Opcode: 0x0280
+	Floating Stack Subtraction
+		Opcode: 0x281
+	Floating Stack Multiplication
+		Opcode: 0x282
+	Floating Stack Division
+		Opcode: 0x283
+	Floating Stack Modulus
+		Opcode: 0x284
+	Floating Stack Comparison
+		Opcode: 0x285
+	Floating Stack Square Root
+		Opcode: 0x286

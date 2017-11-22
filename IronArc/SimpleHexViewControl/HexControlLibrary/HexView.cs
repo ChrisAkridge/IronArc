@@ -23,7 +23,7 @@ namespace HexControlLibrary
             float width = legend.Width;
             for (int i = 0; i < model.ColumnsPerRow; i++)
             {
-                if (width + block.Width > this.ClientSize.Width)
+                if (width + block.Width > ClientSize.Width)
                 {
                     break;
                 }
@@ -39,7 +39,7 @@ namespace HexControlLibrary
             float height = 0;
             for (int i = 0; i < model.MaxRows; i++)
             {
-                if (height + block.Height > this.ClientSize.Height)
+                if (height + block.Height > ClientSize.Height)
                 {
                     break;
                 }
@@ -76,10 +76,10 @@ namespace HexControlLibrary
             {
                 offset = legend.Width;
             }
-            SolidBrush foreBrush = new SolidBrush(this.ForeColor);
+            SolidBrush foreBrush = new SolidBrush(ForeColor);
             for (int i = row; i < model.MaxRows; i++)
             {
-                if ((i - row) * block.Height > this.ClientRectangle.Height)
+                if ((i - row) * block.Height > ClientRectangle.Height)
                 {
                     break;
                 }
@@ -89,7 +89,7 @@ namespace HexControlLibrary
                 }
                 for (int j = col; j < model.MaxColumns; j++)
                 {
-                    if (offset + (j - col) * block.Width > this.ClientRectangle.Width)
+                    if (offset + (j - col) * block.Width > ClientRectangle.Width)
                     {
                         break;
                     }
@@ -100,20 +100,20 @@ namespace HexControlLibrary
 
         private void DrawLegend(Graphics g, SolidBrush foreBrush, int i, int row)
         {
-            g.DrawString(GetLegend(i), this.Font, foreBrush, new RectangleF(0, (i - row) * block.Height, legend.Width, block.Height), StringFormats.Default);
+            g.DrawString(GetLegend(i), Font, foreBrush, new RectangleF(0, (i - row) * block.Height, legend.Width, block.Height), StringFormats.Default);
         }
 
         private void DrawBlock(Graphics g, SolidBrush foreBrush, float offset, int i, int j, int row, int col)
         {
             RectangleF rect = new RectangleF(offset + (j - col) * block.Width, (i - row) * block.Height, block.Width, block.Height);
-            g.DrawString(GetBlock(i, j), this.Font, foreBrush, rect, StringFormats.Default);
+            g.DrawString(GetBlock(i, j), Font, foreBrush, rect, StringFormats.Default);
         }
 
         private void DrawBlock(Graphics g, SolidBrush backBrush, SolidBrush foreBrush, float offset, int i, int j, int row, int col)
         {
             RectangleF rect = new RectangleF(offset + (j - col) * block.Width, (i - row) * block.Height, block.Width, block.Height);
             g.FillRectangle(backBrush, rect);
-            g.DrawString(GetBlock(i, j), this.Font, foreBrush, rect, StringFormats.Default);
+            g.DrawString(GetBlock(i, j), Font, foreBrush, rect, StringFormats.Default);
         }
 
         private SizeF GetSize(Graphics g, string format)
@@ -173,18 +173,18 @@ namespace HexControlLibrary
         {
             InitializeComponent();
 
-            this.SetStyle(ControlStyles.UserPaint, true);
-            this.SetStyle(ControlStyles.DoubleBuffer, true);
-            this.SetStyle(ControlStyles.AllPaintingInWmPaint, true);
-            this.SetStyle(ControlStyles.ResizeRedraw, true);
-            this.SetStyle(ControlStyles.StandardDoubleClick, false);
-            this.UpdateStyles();
+			SetStyle(ControlStyles.UserPaint, true);
+			SetStyle(ControlStyles.DoubleBuffer, true);
+			SetStyle(ControlStyles.AllPaintingInWmPaint, true);
+			SetStyle(ControlStyles.ResizeRedraw, true);
+			SetStyle(ControlStyles.StandardDoubleClick, false);
+			UpdateStyles();
 
-            this.BackColor = Color.White;
-            this.FontChanged += new EventHandler(HexView_FontChanged);
-            this.Resize += HexView_Resize;
+			BackColor = Color.White;
+			FontChanged += new EventHandler(HexView_FontChanged);
+			Resize += HexView_Resize;
 
-            this.model = new HexViewModel();
+			model = new HexViewModel();
         }
 
         void HexView_Resize(object sender, EventArgs e)
@@ -199,7 +199,7 @@ namespace HexControlLibrary
 
         public void UpdateModel()
         {
-            using (Graphics g = this.CreateGraphics())
+            using (Graphics g = CreateGraphics())
             {
                 SetRenderingOptions(g);
                 legend = DefaultLegend(g);
@@ -240,7 +240,7 @@ namespace HexControlLibrary
                 int col = currentIndex % maxColumns;
                 SolidBrush foreBrush = new SolidBrush(ForeColor);
                 SolidBrush backBrush = new SolidBrush(BackColor);
-                using (Graphics g = this.CreateGraphics())
+                using (Graphics g = CreateGraphics())
                 {
                     SetRenderingOptions(g);
                     if (drawLegend)

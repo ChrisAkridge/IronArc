@@ -20,10 +20,10 @@ namespace IronArcHost
 
 		private void CMISaveOutput_Click(object sender, EventArgs e)
 		{
-			if (this.SFDSaveOutput.ShowDialog() == DialogResult.OK)
+			if (SFDSaveOutput.ShowDialog() == DialogResult.OK)
 			{
-				string filePath = this.SFDSaveOutput.FileName;
-				File.WriteAllText(filePath, this.TextTerminalWindow.Text);
+				string filePath = SFDSaveOutput.FileName;
+				File.WriteAllText(filePath, TextTerminalWindow.Text);
 			}
 		}
 	}

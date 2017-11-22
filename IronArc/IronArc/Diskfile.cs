@@ -20,25 +20,25 @@ namespace IronArc
         {
             get
             {
-                if (this.filePath == null)
+                if (filePath == null)
                 {
                     new SystemError("DiskfileNotLoaded", "Tried to read from a diskfile that was not loaded.").WriteToError();
                 }
-                else if (index >= this.length)
+                else if (index >= length)
                 {
                     new SystemError("DiskfileReadIndexOutOfRange", "Tried to read a byte above the range of the diskfile.").WriteToError();
                 }
 
-                return this.File[index];
+                return File[index];
             }
 
             set
             {
-                if (this.filePath == null)
+                if (filePath == null)
                 {
                     new SystemError("DiskfileNotLoaded", "Tried to read from a diskfile that was not loaded.").WriteToError();
                 }
-                else if (index >= this.length)
+                else if (index >= length)
                 {
                     new SystemError("DiskfileReadIndexOutOfRange", "Tried to read a byte above the range of the diskfile.").WriteToError();
                 }
@@ -55,13 +55,13 @@ namespace IronArc
             }
 
             this.filePath = filePath;
-            this.File = System.IO.File.ReadAllBytes(filePath);
-            this.length = this.File.Length;
+			File = System.IO.File.ReadAllBytes(filePath);
+			length = File.Length;
         }
 
         public void SaveToDisk()
         {
-            System.IO.File.WriteAllBytes(this.filePath, this.File.ToByteArray());
+            System.IO.File.WriteAllBytes(filePath, File.ToByteArray());
         }
     }
 }
