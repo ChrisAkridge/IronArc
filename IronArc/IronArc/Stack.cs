@@ -18,7 +18,7 @@ namespace IronArc
                 new SystemError("InvalidStackSize", "Stack size must be greater than zero.").WriteToError();
             }
 
-			bytes = ByteBlock.FromLength(stackSize);
+			bytes = ByteBlock.FromLength((ulong)stackSize);
         }
 
         private int GetObjectSizeAtIndex(int index)
@@ -45,22 +45,22 @@ namespace IronArc
         public byte GetByte(int index)
         {
             index = stackPointer - index;
-            return bytes[index];
+            return bytes[(ulong)index];
         }
 
         #region Push Methods
         public void Push(byte[] bytes)
         {
 			objectSizes.Push(bytes.Length);
-            this.bytes.WriteAt(bytes, stackPointer);
+            this.bytes.WriteAt(bytes, (ulong)stackPointer);
 			stackPointer += bytes.Length;
         }
 
         public void Push(ByteBlock bytes)
         {
-			objectSizes.Push(bytes.Length);
-            this.bytes.WriteAt(bytes, stackPointer);
-			stackPointer += bytes.Length;
+			objectSizes.Push((int)bytes.Length);
+            this.bytes.WriteAt(bytes, (ulong)stackPointer);
+			stackPointer += (int)bytes.Length;
         }
 
         public void Push(bool value)
@@ -71,7 +71,7 @@ namespace IronArc
         public void Push(byte value)
         {
 			objectSizes.Push(1);
-			bytes.WriteByteAt(value, stackPointer);
+			bytes.WriteByteAt(value, (ulong)stackPointer);
 			stackPointer++;
         }
 
@@ -83,7 +83,7 @@ namespace IronArc
         public void Push(short value)
         {
 			objectSizes.Push(2);
-			bytes.WriteShortAt(value, stackPointer);
+			bytes.WriteShortAt(value, (ulong)stackPointer);
 			stackPointer += 2;
         }
 
@@ -95,7 +95,7 @@ namespace IronArc
         public void Push(int value)
         {
 			objectSizes.Push(4);
-			bytes.WriteIntAt(value, stackPointer);
+			bytes.WriteIntAt(value, (ulong)stackPointer);
 			stackPointer += 4;
         }
 
@@ -107,7 +107,7 @@ namespace IronArc
         public void Push(long value)
         {
 			objectSizes.Push(8);
-			bytes.WriteLongAt(value, stackPointer);
+			bytes.WriteLongAt(value, (ulong)stackPointer);
 			stackPointer += 8;
         }
 
@@ -119,14 +119,14 @@ namespace IronArc
         public void Push(float value)
         {
 			objectSizes.Push(4);
-			bytes.WriteFloatAt(value, stackPointer);
+			bytes.WriteFloatAt(value, (ulong)stackPointer);
 			stackPointer += 4;
         }
 
         public void Push(double value)
         {
 			objectSizes.Push(8);
-			bytes.WriteDoubleAt(value, stackPointer);
+			bytes.WriteDoubleAt(value, (ulong)stackPointer);
 			stackPointer += 8;
         }
 
@@ -150,8 +150,8 @@ namespace IronArc
 
             for (int i = 0; i < objectSize; i++)
             {
-                result[i] = bytes[startPointer];
-				bytes[startPointer] = 0;
+                result[i] = bytes[(ulong)startPointer];
+				bytes[(ulong)startPointer] = 0;
                 startPointer++;
             }
 
@@ -175,7 +175,7 @@ namespace IronArc
 			objectSizes.Pop();
 			stackPointer--;
             byte result = bytes.ReadByteAt((uint)stackPointer);
-			bytes.WriteByteAt(0, stackPointer);
+			bytes.WriteByteAt(0, (ulong)stackPointer);
             return result;
         }
 
@@ -189,7 +189,7 @@ namespace IronArc
 			objectSizes.Pop();
 			stackPointer -= 2;
 			short result = bytes.ReadShortAt((uint)stackPointer);
-			bytes.WriteShortAt(0, stackPointer);
+			bytes.WriteShortAt(0, (ulong)stackPointer);
             return result;
         }
 
@@ -203,7 +203,7 @@ namespace IronArc
 			objectSizes.Pop();
 			stackPointer -= 4;
 			int result = bytes.ReadIntAt((uint)stackPointer);
-			bytes.WriteIntAt(0, stackPointer);
+			bytes.WriteIntAt(0, (ulong)stackPointer);
             return result;
         }
 
@@ -217,7 +217,7 @@ namespace IronArc
 			objectSizes.Pop();
 			stackPointer -= 8;
 			long result = bytes.ReadLongAt((uint)stackPointer);
-			bytes.WriteLongAt(0L, stackPointer);
+			bytes.WriteLongAt(0L, (ulong)stackPointer);
             return result;
         }
 
@@ -231,7 +231,7 @@ namespace IronArc
 			objectSizes.Pop();
 			stackPointer -= 4;
 			float result = bytes.ReadFloatAt((uint)stackPointer);
-			bytes.WriteIntAt(0, stackPointer);
+			bytes.WriteIntAt(0, (ulong)stackPointer);
             return result;
         }
 
@@ -240,7 +240,7 @@ namespace IronArc
 			objectSizes.Pop();
 			stackPointer -= 8;
 			double result = bytes.ReadDoubleAt((uint)stackPointer);
-			bytes.WriteLongAt(0L, stackPointer);
+			bytes.WriteLongAt(0L, (ulong)stackPointer);
             return result;
         }
 

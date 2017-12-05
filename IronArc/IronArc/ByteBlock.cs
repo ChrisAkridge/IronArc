@@ -13,9 +13,9 @@ namespace IronArc
     {
 		private byte* pointer;
 
-		public int Length { get; private set; }
+		public ulong Length { get; private set; }
 
-        public byte this[int index]
+        public byte this[ulong index]
         {
             get
             {
@@ -43,7 +43,7 @@ namespace IronArc
 			byte[] result = new byte[Length];
 			byte* current = pointer;
 
-			for (int i = 0; i < Length; i++)
+			for (ulong i = 0UL; i < Length; i++)
 			{
 				result[i] = *current;
 				current++;
@@ -60,7 +60,7 @@ namespace IronArc
         public ByteBlock(byte[] value) : this()
         {
 			pointer = (byte*)Marshal.AllocHGlobal(value.Length);
-			Length = value.Length;
+			Length = (ulong)value.Length;
 
 			Marshal.Copy(value, 0, (IntPtr)pointer, value.Length);
         }
@@ -71,12 +71,12 @@ namespace IronArc
         /// <param name="length">The number of bytes from the array to use.</param>
         /// <param name="value">An array of bytes of which a portion is used to initialize this byte block.</param>
         /// <param name="startIndex">The index at which to start reading bytes in the array.</param>
-        public ByteBlock(int length, byte[] value, int startIndex) : this()
+        public ByteBlock(ulong length, byte[] value, int startIndex) : this()
         {
-			pointer = (byte*)Marshal.AllocHGlobal(length);
+			pointer = (byte*)Marshal.AllocHGlobal((int)length);
 			Length = length;
 
-			Marshal.Copy(value, startIndex, (IntPtr)pointer, length);
+			Marshal.Copy(value, startIndex, (IntPtr)pointer, (int)length);
         }
 
         /// <summary>
@@ -199,7 +199,7 @@ namespace IronArc
         public ByteBlock(string value)
         {
 			byte[] utf8 = Encoding.UTF8.GetBytes(value);
-			this = ByteBlock.FromLength(4 + utf8.Length);
+			this = ByteBlock.FromLength(4 + (ulong)utf8.Length);
 
 			*(int*)pointer = utf8.Length;
 			byte* stringPointer = pointer + 4;
@@ -460,7 +460,7 @@ namespace IronArc
         #endregion
 
         #region Read At Methods
-        public byte[] ReadAt(uint length, uint address)
+        public byte[] ReadAt(ulong length, ulong address)
         {
 			if (address < 0 || address + length >= Length)
 			{
@@ -468,7 +468,7 @@ namespace IronArc
 			}
 
             byte[] result = new byte[length];
-            for (int i = 0; i < length; i++)
+            for (ulong i = 0; i < length; i++)
             {
 				result[i] = *(pointer + address);
 				address++;
@@ -477,7 +477,7 @@ namespace IronArc
             return result;
         }
 
-        public bool ReadBoolAt(uint address)
+        public bool ReadBoolAt(ulong address)
         {
             if (address < 0 || address >= Length)
 			{
@@ -487,7 +487,7 @@ namespace IronArc
 			return *(pointer + address) != 0;
         }
 
-        public byte ReadByteAt(uint address)
+        public byte ReadByteAt(ulong address)
         {
             if (address < 0 || address >= Length)
 			{
@@ -497,12 +497,12 @@ namespace IronArc
 			return *(pointer + address);
         }
 
-        public sbyte ReadSByteAt(uint address)
+        public sbyte ReadSByteAt(ulong address)
         {
             return (sbyte)ReadByteAt(address);
         }
 
-        public short ReadShortAt(uint address)
+        public short ReadShortAt(ulong address)
         {
             if (address < 0 || address + 2 >= Length)
 			{
@@ -512,12 +512,12 @@ namespace IronArc
 			return *(short*)(pointer + address);
         }
 
-        public ushort ReadUShortAt(uint address)
+        public ushort ReadUShortAt(ulong address)
         {
             return (ushort)ReadShortAt(address);
         }
 
-        public int ReadIntAt(uint address)
+        public int ReadIntAt(ulong address)
         {
 			if (address < 0 || address + 4 >= Length)
 			{
@@ -527,12 +527,12 @@ namespace IronArc
 			return *(int*)(pointer + address);
         }
 
-        public uint ReadUIntAt(uint address)
+        public uint ReadUIntAt(ulong address)
         {
             return (uint)ReadIntAt(address);
         }
 
-        public long ReadLongAt(uint address)
+        public long ReadLongAt(ulong address)
         {
 			if (address < 0 || address + 8 >= Length)
 			{
@@ -542,12 +542,12 @@ namespace IronArc
 			return *(long*)(pointer + address);
         }
 
-        public ulong ReadULongAt(uint address)
+        public ulong ReadULongAt(ulong address)
         {
             return (ulong)ReadLongAt(address);
         }
 
-        public float ReadFloatAt(uint address)
+        public float ReadFloatAt(ulong address)
         {
 			if (address < 0 || address + 4 >= Length)
 			{
@@ -557,7 +557,7 @@ namespace IronArc
 			return *(float*)(pointer + address);
         }
 
-        public double ReadDoubleAt(uint address)
+        public double ReadDoubleAt(ulong address)
         {
 			if (address < 0 || address + 8 >= Length)
 			{
@@ -572,12 +572,12 @@ namespace IronArc
             return (char)ToShort();
         }
 
-        public string ReadStringAt(uint length, uint address)
+        public string ReadStringAt(ulong length, ulong address)
         {
 			int stringLength = ReadIntAt(address);
 			address += 4;
 
-			if (address + stringLength >= Length)
+			if (address + (ulong)stringLength >= Length)
 			{
 				throw new ArgumentOutOfRangeException(string.Format("Cannot read string at 0x{0:X2}. Argument out of range.", address));
 			}
@@ -594,9 +594,9 @@ namespace IronArc
         #endregion
 
         #region Write At Methods
-        public void WriteAt(byte[] bytes, int address)
+        public void WriteAt(byte[] bytes, ulong address)
         {
-			if (address < 0 || address + bytes.Length > Length)
+			if (address < 0 || address + (ulong)bytes.Length > Length)
 			{
 				throw new ArgumentOutOfRangeException(string.Format("Cannot write at 0x{0:X2}. Argument out of range.", address));
 			}
@@ -608,21 +608,21 @@ namespace IronArc
             }
         }
 
-        public void WriteAt(ByteBlock bytes, int address)
+        public void WriteAt(ByteBlock bytes, ulong address)
         {
 			if (address < 0 || address + bytes.Length >= Length)
 			{
 				throw new ArgumentOutOfRangeException(string.Format("Cannot write at 0x{0:X2}. Argument out of range.", address));
 			}
 
-			for (int i = 0; i < bytes.Length; i++)
+			for (ulong i = 0; i < (ulong)bytes.Length; i++)
 			{
 				*(pointer + address) = *(bytes.pointer + i);
 				address++;
 			}
         }
 
-        public void WriteBoolAt(bool value, int address)
+        public void WriteBoolAt(bool value, ulong address)
         {
             if (address < 0 || address >= Length)
 			{
@@ -632,7 +632,7 @@ namespace IronArc
 			*(pointer + address) = (value) ? (byte)1 : (byte)0;
         }
 
-        public void WriteByteAt(byte value, int address)
+        public void WriteByteAt(byte value, ulong address)
         {
 			if (address < 0 || address >= Length)
 			{
@@ -642,12 +642,12 @@ namespace IronArc
 			*(pointer + address) = value;
         }
 
-        public void WriteSByteAt(sbyte value, int address)
+        public void WriteSByteAt(sbyte value, ulong address)
         {
 			WriteByteAt((byte)value, address);
         }
 
-        public void WriteShortAt(short value, int address)
+        public void WriteShortAt(short value, ulong address)
         {
 			if (address < 0 || address + 2 >= Length)
 			{
@@ -657,12 +657,12 @@ namespace IronArc
 			*(short*)(pointer + address) = value;
         }
 
-        public void WriteUShortAt(ushort value, int address)
+        public void WriteUShortAt(ushort value, ulong address)
         {
 			WriteShortAt((short)value, address);
         }
 
-        public void WriteIntAt(int value, int address)
+        public void WriteIntAt(int value, ulong address)
         {
 			if (address < 0 || address + 4 >= Length)
 			{
@@ -672,12 +672,12 @@ namespace IronArc
 			*(int*)(pointer + address) = value;
         }
 
-        public void WriteUIntAt(uint value, int address)
+        public void WriteUIntAt(uint value, ulong address)
         {
 			WriteIntAt((int)value, address);
         }
 
-        public void WriteLongAt(long value, int address)
+        public void WriteLongAt(long value, ulong address)
         {
 			if (address < 0 || address + 8 >= Length)
 			{
@@ -687,12 +687,12 @@ namespace IronArc
 			*(long*)(pointer + address) = value;
         }
 
-        public void WriteULongAt(ulong value, int address)
+        public void WriteULongAt(ulong value, ulong address)
         {
 			WriteLongAt((long)value, address);
         }
 
-        public void WriteFloatAt(float value, int address)
+        public void WriteFloatAt(float value, ulong address)
         {
 			if (address < 0 || address + 4 >= Length)
 			{
@@ -702,7 +702,7 @@ namespace IronArc
 			*(float*)(pointer + address) = value;
         }
 
-        public void WriteDoubleAt(double value, int address)
+        public void WriteDoubleAt(double value, ulong address)
         {
 			if (address < 0 || address + 8 >= Length)
 			{
@@ -712,17 +712,17 @@ namespace IronArc
 			*(double*)(pointer + address) = value;
         }
 
-        public void WriteCharAt(char value, int address)
+        public void WriteCharAt(char value, ulong address)
         {
 			WriteShortAt((short)value, address);
         }
 
-        public void WriteStringAt(string value, int address)
+        public void WriteStringAt(string value, ulong address)
         {
 			byte[] utf8 = Encoding.UTF8.GetBytes(value);
 			int stringLength = utf8.Length;
 
-			if (address < 0 || address + 4 + stringLength >= Length)
+			if (address < 0 || address + 4UL + (ulong)stringLength >= Length)
 			{
 				throw new ArgumentOutOfRangeException(string.Format("Cannot write string at 0x{0:X2}. Argument out of range.", address));
 			}
@@ -749,13 +749,13 @@ namespace IronArc
 		}
 		#endregion
 
-		public static ByteBlock FromLength(int length)
+		public static ByteBlock FromLength(ulong length)
 		{
 			ByteBlock result = new ByteBlock();
-			result.pointer = (byte*)Marshal.AllocHGlobal(length);
+			result.pointer = (byte*)Marshal.AllocHGlobal((int)length);
 			result.Length = length;
 
-			for (int i = 0; i < length; i++)
+			for (int i = 0; i < (uint)length; i++)
 			{
 				*(result.pointer + i) = 0;
 			}

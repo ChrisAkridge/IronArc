@@ -34,7 +34,7 @@ namespace IronArc
 			switch (Type)
 			{
 				case OperandType.AddressBlock:
-                    Address = new AddressBlock(cpu, cpu.ReadULong());
+                    
 					break;
 				case OperandType.Register:
 					// add

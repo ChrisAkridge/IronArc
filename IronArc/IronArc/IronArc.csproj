@@ -67,7 +67,6 @@
     <Compile Include="AddressBlock.cs" />
     <Compile Include="Assert.cs" />
     <Compile Include="ByteBlock.cs" />
-    <Compile Include="Diskfile.cs" />
     <Compile Include="Enums.cs" />
     <Compile Include="HardwareDevice.cs" />
     <Compile Include="Hardware\ITerminal.cs" />

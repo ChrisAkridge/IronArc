@@ -6,58 +6,90 @@ using System.Text;
 namespace IronArc
 {
 	/// <summary>
-	/// An address to a part of various memory sources available to the VM.
+	/// An operand that points to a memory address, processor register, or an entry in the string
+	/// table, or is a numeric literal value.
 	/// </summary>
-	public sealed class AddressBlock
+	public struct AddressBlock
 	{
-		public enum AddressType : ushort
+		public const ulong MemoryPointerMask = ((ulong)1 << 63);
+		public const ulong RegisterPointerMask = ((ulong)1 << 7);
+		public const ulong RegisterHasOffsetMask = ((ulong)1 << 6);
+
+		public enum AddressType
 		{
-			Memory = 0x0000,
-			System = 0x4000,
-			Stack = 0x8000,
-			HW = 0xC000
-		};
-
-		private Processor owner;
-		public AddressType Type { get; private set; }
-		public bool IsPointer { get; private set; }
-		public uint Length { get; private set; }
-		public uint Address { get; private set; }
-
-		public ByteBlock Value
-		{
-			get
-			{
-				switch (Type)
-				{
-					case AddressType.Memory:
-						return owner.Memory.ReadAt(Length, Address);
-					case AddressType.System:
-						break;
-					case AddressType.Stack:
-						break;
-					case AddressType.HW:
-						break; // add
-					default:
-						throw new FormatException("unrecognized address type");
-				}
-
-				return ByteBlock.Empty;
-			}
+			MemoryAddress,
+			Register,
+			NumericLiteral,
+			StringEntry
 		}
 
-		/// <summary>
-		/// Initializes a new instance of the <see cref="AddressBlock"/> class.
-		/// </summary>
-		/// <param name="cpu">The processor that is creating the AddressBlock.</param>
-		/// <param name="bytes">The 8 bytes from which the AddressBlock will be created.</param>
-		public AddressBlock(Processor cpu, ulong bytes)
+		// TODO: test the perf of using autoprops here to see if we can take the perf hit
+		public AddressType type;
+		public OperandSize size;
+		public ulong value;
+		public int offset;
+		public bool isPointer;
+		public ulong operandLength;
+
+		public AddressBlock(OperandSize size, AddressType type, ByteBlock memory, ulong operandAddress)
 		{
-			owner = cpu;
-			Type = (AddressType)(bytes >> 48);
-			IsPointer = (bytes & (1 << 47)) != 0 ? true : false;
-			Length = (uint)(bytes & 0x00007FFF00000000UL);
-			Address = (uint)(bytes & 0x00000000FFFFFFFFUL);
+			this.size = size;
+			this.type = type;
+
+			// These assignments are just so the compiler doesn't complain
+			value = 0UL;
+			offset = 0;
+			isPointer = false;
+			operandLength = 0UL;
+
+			switch (type)
+			{
+				case AddressType.MemoryAddress:
+					value = memory.ReadULongAt(operandAddress);
+					isPointer = (value & MemoryPointerMask) != 0;
+					operandLength = 8UL;
+					break;
+				case AddressType.Register:
+					value = memory.ReadByteAt(operandAddress);
+					isPointer = (value & RegisterPointerMask) != 0;
+					operandLength = 1UL;
+					if ((value & RegisterHasOffsetMask) != 0)
+					{
+						offset = memory.ReadIntAt(operandAddress + 1);
+						operandLength = 5UL;
+					}
+					break;
+				case AddressType.NumericLiteral:
+					switch (size)
+					{
+						case OperandSize.Byte:
+							value = memory.ReadByteAt(operandAddress);
+							operandLength = 1UL;
+							break;
+						case OperandSize.Word:
+							value = memory.ReadUShortAt(operandAddress);
+							operandLength = 2UL;
+							break;
+						case OperandSize.DWord:
+							value = memory.ReadUIntAt(operandAddress);
+							operandLength = 4UL;
+							break;
+						case OperandSize.QWord:
+							value = memory.ReadULongAt(operandAddress);
+							operandLength = 8UL;
+							break;
+						default:
+							throw new ArgumentException($"Invalid operand size {size}.", nameof(size));
+					}
+					break;
+				case AddressType.StringEntry:
+					// TODO: implement string tables
+					value = memory.ReadUIntAt(operandAddress);
+					operandLength = operandAddress + 4UL;
+					break;
+				default:
+					throw new ArgumentException($"Invalid address type {type}.", nameof(type));
+			}
 		}
 	}
 }

@@ -12,4 +12,12 @@ namespace IronArc
 		Error,
 		Finalized
 	}
+
+	public enum OperandSize
+	{
+		Byte,
+		Word,
+		DWord,
+		QWord
+	}
 }

@@ -30,11 +30,7 @@ namespace IronArc
 		public uint InstructionPointer { get; set; }
 
 		// Flags register
-
 		public ByteBlock EFLAGS { get; set; }
-
-		// Diskfile
-		public Diskfile Diskfile { get; set; }
 
 		// Call stack
 		public Stack<int> CallStack { get; set; }
@@ -52,7 +48,7 @@ namespace IronArc
 
 			EFLAGS = ByteBlock.FromLength(4);
 
-			Memory = ByteBlock.FromLength(memorySize);
+			Memory = ByteBlock.FromLength((ulong)memorySize);
 			Stack = new Stack<long>();
 			CallStack = new Stack<int>();
 		}
@@ -60,7 +56,7 @@ namespace IronArc
 		#region Memory Read Methods
 		public byte ReadByte()
 		{
-			return Memory[(int)InstructionPointer++]; // fix
+			return Memory[(ulong)InstructionPointer++]; // fix
 		}
 
 		public sbyte ReadSByte()
