@@ -31,26 +31,19 @@
 			this.StaticLabelInitialProgram = new System.Windows.Forms.Label();
 			this.TextBoxInitialProgram = new System.Windows.Forms.TextBox();
 			this.ButtonSelectInitialProgram = new System.Windows.Forms.Button();
-			this.ButtonSelectSystemProgram = new System.Windows.Forms.Button();
-			this.TextBoxSystemProgram = new System.Windows.Forms.TextBox();
-			this.StaticLabelSystemProgram = new System.Windows.Forms.Label();
 			this.StaticLabelSystemMemory = new System.Windows.Forms.Label();
 			this.StaticLabelLoadAtAddress = new System.Windows.Forms.Label();
 			this.NumUDLoadAtAddress = new System.Windows.Forms.NumericUpDown();
 			this.GroupBoxSeparator1 = new System.Windows.Forms.GroupBox();
 			this.NumUDSystemMemory = new System.Windows.Forms.NumericUpDown();
-			this.StaticLabelStackMemory = new System.Windows.Forms.Label();
-			this.NumUDSystemStack = new System.Windows.Forms.NumericUpDown();
 			this.GroupBoxSeparator2 = new System.Windows.Forms.GroupBox();
 			this.StaticLabelInitialHardwareDevices = new System.Windows.Forms.Label();
 			this.CLBInitialHardwareDevices = new System.Windows.Forms.CheckedListBox();
 			this.ButtonCancel = new System.Windows.Forms.Button();
 			this.ButtonOK = new System.Windows.Forms.Button();
 			this.OFDInitialProgram = new System.Windows.Forms.OpenFileDialog();
-			this.OFDSystemProgram = new System.Windows.Forms.OpenFileDialog();
 			((System.ComponentModel.ISupportInitialize)(this.NumUDLoadAtAddress)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.NumUDSystemMemory)).BeginInit();
-			((System.ComponentModel.ISupportInitialize)(this.NumUDSystemStack)).BeginInit();
 			this.SuspendLayout();
 			// 
 			// StaticLabelInitialProgram
@@ -58,15 +51,15 @@
 			this.StaticLabelInitialProgram.AutoSize = true;
 			this.StaticLabelInitialProgram.Location = new System.Drawing.Point(13, 13);
 			this.StaticLabelInitialProgram.Name = "StaticLabelInitialProgram";
-			this.StaticLabelInitialProgram.Size = new System.Drawing.Size(85, 13);
+			this.StaticLabelInitialProgram.Size = new System.Drawing.Size(53, 13);
 			this.StaticLabelInitialProgram.TabIndex = 0;
-			this.StaticLabelInitialProgram.Text = "Initial Program:";
+			this.StaticLabelInitialProgram.Text = "Program:";
 			// 
 			// TextBoxInitialProgram
 			// 
-			this.TextBoxInitialProgram.Location = new System.Drawing.Point(112, 10);
+			this.TextBoxInitialProgram.Location = new System.Drawing.Point(72, 10);
 			this.TextBoxInitialProgram.Name = "TextBoxInitialProgram";
-			this.TextBoxInitialProgram.Size = new System.Drawing.Size(214, 22);
+			this.TextBoxInitialProgram.Size = new System.Drawing.Size(254, 22);
 			this.TextBoxInitialProgram.TabIndex = 1;
 			// 
 			// ButtonSelectInitialProgram
@@ -79,36 +72,10 @@
 			this.ButtonSelectInitialProgram.UseVisualStyleBackColor = true;
 			this.ButtonSelectInitialProgram.Click += new System.EventHandler(this.ButtonSelectInitialProgram_Click);
 			// 
-			// ButtonSelectSystemProgram
-			// 
-			this.ButtonSelectSystemProgram.Location = new System.Drawing.Point(334, 67);
-			this.ButtonSelectSystemProgram.Name = "ButtonSelectSystemProgram";
-			this.ButtonSelectSystemProgram.Size = new System.Drawing.Size(25, 23);
-			this.ButtonSelectSystemProgram.TabIndex = 5;
-			this.ButtonSelectSystemProgram.Text = "...";
-			this.ButtonSelectSystemProgram.UseVisualStyleBackColor = true;
-			this.ButtonSelectSystemProgram.Click += new System.EventHandler(this.ButtonSelectSystemProgram_Click);
-			// 
-			// TextBoxSystemProgram
-			// 
-			this.TextBoxSystemProgram.Location = new System.Drawing.Point(112, 69);
-			this.TextBoxSystemProgram.Name = "TextBoxSystemProgram";
-			this.TextBoxSystemProgram.Size = new System.Drawing.Size(214, 22);
-			this.TextBoxSystemProgram.TabIndex = 4;
-			// 
-			// StaticLabelSystemProgram
-			// 
-			this.StaticLabelSystemProgram.AutoSize = true;
-			this.StaticLabelSystemProgram.Location = new System.Drawing.Point(13, 72);
-			this.StaticLabelSystemProgram.Name = "StaticLabelSystemProgram";
-			this.StaticLabelSystemProgram.Size = new System.Drawing.Size(91, 13);
-			this.StaticLabelSystemProgram.TabIndex = 3;
-			this.StaticLabelSystemProgram.Text = "System Program:";
-			// 
 			// StaticLabelSystemMemory
 			// 
 			this.StaticLabelSystemMemory.AutoSize = true;
-			this.StaticLabelSystemMemory.Location = new System.Drawing.Point(13, 115);
+			this.StaticLabelSystemMemory.Location = new System.Drawing.Point(16, 90);
 			this.StaticLabelSystemMemory.Name = "StaticLabelSystemMemory";
 			this.StaticLabelSystemMemory.Size = new System.Drawing.Size(67, 13);
 			this.StaticLabelSystemMemory.TabIndex = 6;
@@ -138,7 +105,7 @@
 			// 
 			// GroupBoxSeparator1
 			// 
-			this.GroupBoxSeparator1.Location = new System.Drawing.Point(16, 97);
+			this.GroupBoxSeparator1.Location = new System.Drawing.Point(16, 70);
 			this.GroupBoxSeparator1.Name = "GroupBoxSeparator1";
 			this.GroupBoxSeparator1.Size = new System.Drawing.Size(343, 10);
 			this.GroupBoxSeparator1.TabIndex = 9;
@@ -146,7 +113,7 @@
 			// 
 			// NumUDSystemMemory
 			// 
-			this.NumUDSystemMemory.Location = new System.Drawing.Point(112, 107);
+			this.NumUDSystemMemory.Location = new System.Drawing.Point(112, 88);
 			this.NumUDSystemMemory.Maximum = new decimal(new int[] {
             2147483647,
             0,
@@ -161,45 +128,14 @@
 			this.NumUDSystemMemory.Size = new System.Drawing.Size(247, 22);
 			this.NumUDSystemMemory.TabIndex = 10;
 			this.NumUDSystemMemory.Value = new decimal(new int[] {
-            1,
-            0,
-            0,
-            0});
-			// 
-			// StaticLabelStackMemory
-			// 
-			this.StaticLabelStackMemory.AutoSize = true;
-			this.StaticLabelStackMemory.Location = new System.Drawing.Point(13, 137);
-			this.StaticLabelStackMemory.Name = "StaticLabelStackMemory";
-			this.StaticLabelStackMemory.Size = new System.Drawing.Size(76, 13);
-			this.StaticLabelStackMemory.TabIndex = 11;
-			this.StaticLabelStackMemory.Text = "Stack Size (B):";
-			// 
-			// NumUDSystemStack
-			// 
-			this.NumUDSystemStack.Location = new System.Drawing.Point(112, 135);
-			this.NumUDSystemStack.Maximum = new decimal(new int[] {
-            2147483647,
-            0,
-            0,
-            0});
-			this.NumUDSystemStack.Minimum = new decimal(new int[] {
-            1,
-            0,
-            0,
-            0});
-			this.NumUDSystemStack.Name = "NumUDSystemStack";
-			this.NumUDSystemStack.Size = new System.Drawing.Size(247, 22);
-			this.NumUDSystemStack.TabIndex = 12;
-			this.NumUDSystemStack.Value = new decimal(new int[] {
-            1,
+            1048576,
             0,
             0,
             0});
 			// 
 			// GroupBoxSeparator2
 			// 
-			this.GroupBoxSeparator2.Location = new System.Drawing.Point(16, 163);
+			this.GroupBoxSeparator2.Location = new System.Drawing.Point(16, 116);
 			this.GroupBoxSeparator2.Name = "GroupBoxSeparator2";
 			this.GroupBoxSeparator2.Size = new System.Drawing.Size(343, 10);
 			this.GroupBoxSeparator2.TabIndex = 10;
@@ -208,7 +144,7 @@
 			// StaticLabelInitialHardwareDevices
 			// 
 			this.StaticLabelInitialHardwareDevices.AutoSize = true;
-			this.StaticLabelInitialHardwareDevices.Location = new System.Drawing.Point(16, 180);
+			this.StaticLabelInitialHardwareDevices.Location = new System.Drawing.Point(13, 134);
 			this.StaticLabelInitialHardwareDevices.Name = "StaticLabelInitialHardwareDevices";
 			this.StaticLabelInitialHardwareDevices.Size = new System.Drawing.Size(133, 13);
 			this.StaticLabelInitialHardwareDevices.TabIndex = 13;
@@ -217,7 +153,7 @@
 			// CLBInitialHardwareDevices
 			// 
 			this.CLBInitialHardwareDevices.FormattingEnabled = true;
-			this.CLBInitialHardwareDevices.Location = new System.Drawing.Point(19, 197);
+			this.CLBInitialHardwareDevices.Location = new System.Drawing.Point(16, 150);
 			this.CLBInitialHardwareDevices.Name = "CLBInitialHardwareDevices";
 			this.CLBInitialHardwareDevices.Size = new System.Drawing.Size(340, 89);
 			this.CLBInitialHardwareDevices.TabIndex = 14;
@@ -225,7 +161,7 @@
 			// ButtonCancel
 			// 
 			this.ButtonCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-			this.ButtonCancel.Location = new System.Drawing.Point(284, 293);
+			this.ButtonCancel.Location = new System.Drawing.Point(284, 245);
 			this.ButtonCancel.Name = "ButtonCancel";
 			this.ButtonCancel.Size = new System.Drawing.Size(75, 23);
 			this.ButtonCancel.TabIndex = 15;
@@ -235,7 +171,7 @@
 			// 
 			// ButtonOK
 			// 
-			this.ButtonOK.Location = new System.Drawing.Point(203, 292);
+			this.ButtonOK.Location = new System.Drawing.Point(203, 245);
 			this.ButtonOK.Name = "ButtonOK";
 			this.ButtonOK.Size = new System.Drawing.Size(75, 23);
 			this.ButtonOK.TabIndex = 16;
@@ -248,33 +184,23 @@
 			this.OFDInitialProgram.Filter = "All files|*.*";
 			this.OFDInitialProgram.Title = "Select Initial Program";
 			// 
-			// OFDSystemProgram
-			// 
-			this.OFDSystemProgram.Filter = "All files|*.*";
-			this.OFDSystemProgram.Title = "Select System Program";
-			// 
 			// NewVMForm
 			// 
 			this.AcceptButton = this.ButtonOK;
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.CancelButton = this.ButtonCancel;
-			this.ClientSize = new System.Drawing.Size(371, 326);
+			this.ClientSize = new System.Drawing.Size(371, 277);
 			this.Controls.Add(this.ButtonOK);
 			this.Controls.Add(this.ButtonCancel);
 			this.Controls.Add(this.CLBInitialHardwareDevices);
 			this.Controls.Add(this.StaticLabelInitialHardwareDevices);
 			this.Controls.Add(this.GroupBoxSeparator2);
-			this.Controls.Add(this.NumUDSystemStack);
-			this.Controls.Add(this.StaticLabelStackMemory);
 			this.Controls.Add(this.NumUDSystemMemory);
 			this.Controls.Add(this.GroupBoxSeparator1);
 			this.Controls.Add(this.NumUDLoadAtAddress);
 			this.Controls.Add(this.StaticLabelLoadAtAddress);
 			this.Controls.Add(this.StaticLabelSystemMemory);
-			this.Controls.Add(this.ButtonSelectSystemProgram);
-			this.Controls.Add(this.TextBoxSystemProgram);
-			this.Controls.Add(this.StaticLabelSystemProgram);
 			this.Controls.Add(this.ButtonSelectInitialProgram);
 			this.Controls.Add(this.TextBoxInitialProgram);
 			this.Controls.Add(this.StaticLabelInitialProgram);
@@ -288,7 +214,6 @@
 			this.Text = "Add a Virtual Machine";
 			((System.ComponentModel.ISupportInitialize)(this.NumUDLoadAtAddress)).EndInit();
 			((System.ComponentModel.ISupportInitialize)(this.NumUDSystemMemory)).EndInit();
-			((System.ComponentModel.ISupportInitialize)(this.NumUDSystemStack)).EndInit();
 			this.ResumeLayout(false);
 			this.PerformLayout();
 
@@ -299,22 +224,16 @@
 		private System.Windows.Forms.Label StaticLabelInitialProgram;
 		private System.Windows.Forms.TextBox TextBoxInitialProgram;
 		private System.Windows.Forms.Button ButtonSelectInitialProgram;
-		private System.Windows.Forms.Button ButtonSelectSystemProgram;
-		private System.Windows.Forms.TextBox TextBoxSystemProgram;
-		private System.Windows.Forms.Label StaticLabelSystemProgram;
 		private System.Windows.Forms.Label StaticLabelSystemMemory;
 		private System.Windows.Forms.Label StaticLabelLoadAtAddress;
 		private System.Windows.Forms.NumericUpDown NumUDLoadAtAddress;
 		private System.Windows.Forms.GroupBox GroupBoxSeparator1;
 		private System.Windows.Forms.NumericUpDown NumUDSystemMemory;
-		private System.Windows.Forms.Label StaticLabelStackMemory;
-		private System.Windows.Forms.NumericUpDown NumUDSystemStack;
 		private System.Windows.Forms.GroupBox GroupBoxSeparator2;
 		private System.Windows.Forms.Label StaticLabelInitialHardwareDevices;
 		private System.Windows.Forms.CheckedListBox CLBInitialHardwareDevices;
 		private System.Windows.Forms.Button ButtonCancel;
 		private System.Windows.Forms.Button ButtonOK;
 		private System.Windows.Forms.OpenFileDialog OFDInitialProgram;
-		private System.Windows.Forms.OpenFileDialog OFDSystemProgram;
 	}
 }

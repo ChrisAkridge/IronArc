@@ -5,6 +5,7 @@ using System.Data;
 using System.Drawing;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -15,6 +16,16 @@ namespace IronArcHost
 		public LauncherForm()
 		{
 			InitializeComponent();
+
+			// Open a terminal so we can test cross thread messaging
+			var terminalForm = new TerminalForm();
+			terminalForm.Show();
+
+			var vmTest = new IronArc.VMThreadingTest("C:\\program.iexe", 1048576, 2048, 
+				new List<IronArc.HardwareDevice> { terminalForm.HardwareTerminal });
+
+			var thread = new Thread(vmTest.Start);
+			thread.Start();
 		}
 
 		private void TSBAddVM_Click(object sender, EventArgs e)
@@ -31,7 +42,7 @@ namespace IronArcHost
 		private void TSBShowTerminal_Click(object sender, EventArgs e)
 		{
 			// temporary
-			new Terminal().ShowDialog();
+			new TerminalForm().ShowDialog();
 		}
 
 		private void TSBShowDebugger_Click(object sender, EventArgs e)

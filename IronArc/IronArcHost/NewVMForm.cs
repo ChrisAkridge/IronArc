@@ -21,21 +21,13 @@ namespace IronArcHost
 		private void ButtonOK_Click(object sender, EventArgs e)
 		{
 			string initialProgramPath = TextBoxInitialProgram.Text;
-			string systemProgramPath = TextBoxSystemProgram.Text;
 			int systemMemorySize = (int)NumUDSystemMemory.Value;
-			int stackSize = (int)NumUDSystemStack.Value;
 			int loadAddress = (int)NumUDLoadAtAddress.Value;
 
 			// Validate the selected files, memory sizes, and program load address.
 			if (!File.Exists(initialProgramPath))
 			{
 				MessageBox.Show("The initial program file does not exist.", "File Not Found", MessageBoxButtons.OK, MessageBoxIcon.Error);
-				return;
-			}
-
-			if (!File.Exists(systemProgramPath))
-			{
-				MessageBox.Show("The system program file does not exist.", "File Not Found", MessageBoxButtons.OK, MessageBoxIcon.Error);
 				return;
 			}
 
@@ -48,7 +40,7 @@ namespace IronArcHost
 			FileInfo initialProgramInfo = new FileInfo(initialProgramPath);
 			if ((systemMemorySize - loadAddress) < initialProgramInfo.Length)
 			{
-				MessageBox.Show("The initial program is larger than the space given to it; it is loaded too far into the system memory.", "Program Too Large", MessageBoxButtons.OK, MessageBoxIcon.Error);
+				MessageBox.Show("The initial program is larger than the space given to it or it is loaded too far into the system memory.", "Program Too Large", MessageBoxButtons.OK, MessageBoxIcon.Error);
 				return;
 			}
 
@@ -69,15 +61,6 @@ namespace IronArcHost
 			{
 				string filePath = OFDInitialProgram.FileName;
 				TextBoxInitialProgram.Text = filePath;
-			}
-		}
-
-		private void ButtonSelectSystemProgram_Click(object sender, EventArgs e)
-		{
-			if (OFDSystemProgram.ShowDialog() == DialogResult.OK)
-			{
-				string filePath = OFDSystemProgram.FileName;
-				TextBoxSystemProgram.Text = filePath;
 			}
 		}
 	}

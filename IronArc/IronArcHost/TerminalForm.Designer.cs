@@ -1,6 +1,6 @@
 ﻿namespace IronArcHost
 {
-	partial class Terminal
+	partial class TerminalForm
 	{
 		/// <summary>
 		/// Required designer variable.

@@ -40,7 +40,6 @@
 			this.ListVMs = new System.Windows.Forms.ListView();
 			this.LVCState = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
 			this.LVCMemory = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-			this.LVCStackMemory = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
 			this.LVCHardwareDeviceCount = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
 			this.toolStrip1.SuspendLayout();
 			this.SuspendLayout();
@@ -98,7 +97,7 @@
 			this.TSBShowTerminal.Image = ((System.Drawing.Image)(resources.GetObject("TSBShowTerminal.Image")));
 			this.TSBShowTerminal.ImageTransparentColor = System.Drawing.Color.Magenta;
 			this.TSBShowTerminal.Name = "TSBShowTerminal";
-			this.TSBShowTerminal.Size = new System.Drawing.Size(83, 22);
+			this.TSBShowTerminal.Size = new System.Drawing.Size(82, 22);
 			this.TSBShowTerminal.Text = "&Terminal...";
 			this.TSBShowTerminal.Click += new System.EventHandler(this.TSBShowTerminal_Click);
 			// 
@@ -125,7 +124,6 @@
 			this.ListVMs.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
             this.LVCState,
             this.LVCMemory,
-            this.LVCStackMemory,
             this.LVCHardwareDeviceCount});
 			this.ListVMs.Dock = System.Windows.Forms.DockStyle.Fill;
 			this.ListVMs.Font = new System.Drawing.Font("Segoe UI", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
@@ -144,11 +142,6 @@
 			// LVCMemory
 			// 
 			this.LVCMemory.Text = "Memory";
-			// 
-			// LVCStackMemory
-			// 
-			this.LVCStackMemory.Text = "Stack Memory";
-			this.LVCStackMemory.Width = 94;
 			// 
 			// LVCHardwareDeviceCount
 			// 
@@ -183,7 +176,6 @@
 		private System.Windows.Forms.ListView ListVMs;
 		private System.Windows.Forms.ColumnHeader LVCState;
 		private System.Windows.Forms.ColumnHeader LVCMemory;
-		private System.Windows.Forms.ColumnHeader LVCStackMemory;
 		private System.Windows.Forms.ColumnHeader LVCHardwareDeviceCount;
 		private System.Windows.Forms.ToolStripButton TSBHardware;
 	}

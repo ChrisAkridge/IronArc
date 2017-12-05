@@ -75,5 +75,15 @@ namespace IronArcHost
 		{
 
 		}
+
+		private void TextIP_TextChanged(object sender, EventArgs e)
+		{
+
+		}
+
+		private void HexMemoryViewer_Load(object sender, EventArgs e)
+		{
+
+		}
 	}
 }

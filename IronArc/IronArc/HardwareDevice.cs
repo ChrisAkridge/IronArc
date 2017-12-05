@@ -11,7 +11,7 @@ namespace IronArc
 
 		public Guid DeviceID { get; private set; }
 		public abstract string DeviceName { get; }
-		public abstract HardwareDeviceStatus Status { get; } // add a SetStatus(HardwareDeviceStatus) method to derived classes to set the status. Also use a field, not an autoproperty.z
+		public abstract HardwareDeviceStatus Status { get; } // add a SetStatus(HardwareDeviceStatus) method to derived classes to set the status. Also use a field, not an autoproperty.
 
 		public abstract void HardwareCall(string functionName, Stack vmStack);
 	}
