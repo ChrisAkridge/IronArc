@@ -65,20 +65,18 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AddressBlock.cs" />
-    <Compile Include="Assert.cs" />
     <Compile Include="ByteBlock.cs" />
+    <Compile Include="CallStackFrame.cs" />
     <Compile Include="Enums.cs" />
     <Compile Include="HardwareDevice.cs" />
+    <Compile Include="HardwareProvider.cs" />
     <Compile Include="Hardware\ITerminal.cs" />
     <Compile Include="Hardware\TerminalDevice.cs" />
-    <Compile Include="Operand.cs" />
+    <Compile Include="ICoreHardwareProvider.cs" />
+    <Compile Include="InterruptHandler.cs" />
+    <Compile Include="Message.cs" />
     <Compile Include="Processor.cs" />
-    <Compile Include="Stack.cs" />
-    <Compile Include="StandardStreams.cs" />
-    <Compile Include="Stream.cs" />
-    <Compile Include="SystemError.cs" />
-    <Compile Include="SystemStack.cs" />
-    <Compile Include="VMThreadingTest.cs" />
+    <Compile Include="VirtualMachine.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- <Import Project="$(ProgramFiles)\MSBuild\StyleCop\v4.7\StyleCop.targets" />

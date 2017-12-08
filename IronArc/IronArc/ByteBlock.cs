@@ -17,37 +17,17 @@ namespace IronArc
 
         public byte this[ulong index]
         {
-            get
-            {
-				byte* resultPointer = pointer + index;
-				return *resultPointer;
-            }
-
-            set
-            {
-				byte* resultPointer = pointer + index;
-				*resultPointer = value;
-            }
-        }
-
-		public static ByteBlock Empty
-		{
-			get
-			{
-				return new ByteBlock();
-			}
+            get => *(pointer + index);
+            set => *(pointer + index) = value;
 		}
+
+		public static ByteBlock Empty => new ByteBlock();
 
         public byte[] ToByteArray()
         {
 			byte[] result = new byte[Length];
-			byte* current = pointer;
 
-			for (ulong i = 0UL; i < Length; i++)
-			{
-				result[i] = *current;
-				current++;
-			}
+			Marshal.Copy((IntPtr)pointer, result, 0, (int)Length);
 
 			return result;
         }
@@ -85,7 +65,7 @@ namespace IronArc
         /// <param name="value">A Boolean value. True becomes 0xFF and false becomes 0x00.</param>
         public ByteBlock(bool value)
         {
-			this = ByteBlock.FromLength(1);
+			this = FromLength(1);
 			*pointer = (value) ? (byte)1 : (byte)0;
         }
 
@@ -95,7 +75,7 @@ namespace IronArc
         /// <param name="value">A byte value.</param>
         public ByteBlock(byte value)
         {
-			this = ByteBlock.FromLength(1);
+			this = FromLength(1);
 			*pointer = value;
         }
 
@@ -114,7 +94,7 @@ namespace IronArc
         /// <param name="value">A signed 16-bit integer value.</param>
         public ByteBlock(short value)
         {
-			this = ByteBlock.FromLength(2);
+			this = FromLength(2);
 			*(short*)pointer = value;
         }
 
@@ -133,7 +113,7 @@ namespace IronArc
         /// <param name="value">A signed 32-bit integer value.</param>
         public ByteBlock(int value)
         {
-			this = ByteBlock.FromLength(4);
+			this = FromLength(4);
 			*(int*)pointer = value;
         }
 
@@ -152,7 +132,7 @@ namespace IronArc
         /// <param name="value">A signed 64-bit integer value.</param>
         public ByteBlock(long value)
         {
-			this = ByteBlock.FromLength(8);
+			this = FromLength(8);
 			*(long*)pointer = value;
         }
 
@@ -171,7 +151,7 @@ namespace IronArc
         /// <param name="value">A single-precision floating point value.</param>
         public ByteBlock(float value)
         {
-			this = ByteBlock.FromLength(4);
+			this = FromLength(4);
 			*(float*)pointer = value;
         }
 
@@ -181,7 +161,7 @@ namespace IronArc
         /// <param name="value">A double-precision floating point value.</param>
         public ByteBlock(double value)
         {
-			this = ByteBlock.FromLength(8);
+			this = FromLength(8);
 			*(double*)pointer = value;
         }
 
@@ -199,7 +179,7 @@ namespace IronArc
         public ByteBlock(string value)
         {
 			byte[] utf8 = Encoding.UTF8.GetBytes(value);
-			this = ByteBlock.FromLength(4 + (ulong)utf8.Length);
+			this = FromLength(4 + (ulong)utf8.Length);
 
 			*(int*)pointer = utf8.Length;
 			byte* stringPointer = pointer + 4;
@@ -218,134 +198,37 @@ namespace IronArc
         /// </summary>
         /// <param name="value">An array of bytes.</param>
         /// <returns>A ByteBlock containing the bytes of the array.</returns>
-        public static implicit operator ByteBlock(byte[] value)
-        {
-            return new ByteBlock(value);
-        }
+        public static implicit operator ByteBlock(byte[] value) => new ByteBlock(value);
 
-        public static implicit operator ByteBlock(bool value)
-        {
-            return new ByteBlock(value);
-        }
+        public static implicit operator ByteBlock(bool value) => new ByteBlock(value);
+        public static implicit operator ByteBlock(byte value) => new ByteBlock(value);
+		public static implicit operator ByteBlock(sbyte value) => new ByteBlock(value);
+		public static implicit operator ByteBlock(short value) => new ByteBlock(value);
+		public static implicit operator ByteBlock(ushort value) => new ByteBlock(value);
+		public static implicit operator ByteBlock(int value) => new ByteBlock(value);
+		public static implicit operator ByteBlock(uint value) => new ByteBlock(value);
+		public static implicit operator ByteBlock(long value) => new ByteBlock(value);
+		public static implicit operator ByteBlock(ulong value) => new ByteBlock(value);
+		public static implicit operator ByteBlock(float value) => new ByteBlock(value);
+		public static implicit operator ByteBlock(double value) => new ByteBlock(value);
+		public static implicit operator ByteBlock(char value) => new ByteBlock(value);
+		public static implicit operator ByteBlock(string value) => new ByteBlock(value);
 
-        public static implicit operator ByteBlock(byte value)
-        {
-            return new ByteBlock(value);
-        }
+		public static implicit operator bool(ByteBlock value) => value.ToBool();
+        public static implicit operator byte(ByteBlock value) => value.ToByte();
+		public static implicit operator sbyte(ByteBlock value) => value.ToSByte();
+		public static implicit operator short(ByteBlock value) => value.ToShort();
+		public static implicit operator ushort(ByteBlock value) => value.ToUShort();
+		public static implicit operator int(ByteBlock value) => value.ToInt();
+		public static implicit operator uint(ByteBlock value) => value.ToUInt();
+		public static implicit operator long(ByteBlock value) => value.ToLong();
+		public static implicit operator ulong(ByteBlock value) => value.ToULong();
+		public static implicit operator char(ByteBlock value) => value.ToChar();
+		public static implicit operator string(ByteBlock value) => value.ToString();
+		#endregion
 
-        public static implicit operator ByteBlock(sbyte value)
-        {
-            return new ByteBlock(value);
-        }
-
-        public static implicit operator ByteBlock(short value)
-        {
-            return new ByteBlock(value);
-        }
-
-        public static implicit operator ByteBlock(ushort value)
-        {
-            return new ByteBlock(value);
-        }
-
-        public static implicit operator ByteBlock(int value)
-        {
-            return new ByteBlock(value);
-        }
-
-        public static implicit operator ByteBlock(uint value)
-        {
-            return new ByteBlock(value);
-        }
-
-        public static implicit operator ByteBlock(long value)
-        {
-            return new ByteBlock(value);
-        }
-
-        public static implicit operator ByteBlock(ulong value)
-        {
-            return new ByteBlock(value);
-        }
-
-        public static implicit operator ByteBlock(float value)
-        {
-            return new ByteBlock(value);
-        }
-
-        public static implicit operator ByteBlock(double value)
-        {
-            return new ByteBlock(value);
-        }
-
-        public static implicit operator ByteBlock(char value)
-        {
-            return new ByteBlock(value);
-        }
-
-        public static implicit operator ByteBlock(string value)
-        {
-            return new ByteBlock(value);
-        }
-
-        public static implicit operator bool(ByteBlock value)
-        {
-            return value.ToBool();
-        }
-
-        public static implicit operator byte(ByteBlock value)
-        {
-            return value.ToByte();
-        }
-
-        public static implicit operator sbyte(ByteBlock value)
-        {
-            return value.ToSByte();
-        }
-
-        public static implicit operator short(ByteBlock value)
-        {
-            return value.ToShort();
-        }
-
-        public static implicit operator ushort(ByteBlock value)
-        {
-            return value.ToUShort();
-        }
-
-        public static implicit operator int(ByteBlock value)
-        {
-            return value.ToInt();
-        }
-
-        public static implicit operator uint(ByteBlock value)
-        {
-            return value.ToUInt();
-        }
-
-        public static implicit operator long(ByteBlock value)
-        {
-            return value.ToLong();
-        }
-
-        public static implicit operator ulong(ByteBlock value)
-        {
-            return value.ToULong();
-        }
-
-        public static implicit operator char(ByteBlock value)
-        {
-            return value.ToChar();
-        }
-
-        public static implicit operator string(ByteBlock value)
-        {
-            return value.ToString();
-        }
-        #endregion
-
-        #region Conversions
-        public bool ToBool()
+		#region Conversions
+		public bool ToBool()
         {
 			if (Length != 1)
 			{

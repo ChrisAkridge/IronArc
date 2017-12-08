@@ -157,6 +157,7 @@
 			this.Controls.Add(this.toolStrip1);
 			this.Name = "LauncherForm";
 			this.Text = "IronArc";
+			this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.LauncherForm_FormClosing);
 			this.toolStrip1.ResumeLayout(false);
 			this.toolStrip1.PerformLayout();
 			this.ResumeLayout(false);

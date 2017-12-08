@@ -67,6 +67,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CoreHardwareProvider.cs" />
     <Compile Include="DebuggerForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -79,6 +80,7 @@
     <Compile Include="HardwareForm.Designer.cs">
       <DependentUpon>HardwareForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="HardwareSearcher.cs" />
     <Compile Include="LauncherForm.cs">
       <SubType>Form</SubType>
     </Compile>

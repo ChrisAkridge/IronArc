@@ -14,14 +14,15 @@ namespace IronArc.Hardware
 
 		public override HardwareDeviceStatus Status => HardwareDeviceStatus.Active;
 
-		public TerminalDevice(ITerminal terminal)
+		public TerminalDevice()
 		{
-			this.terminal = terminal;
+			terminal = HardwareProvider.Provider.CreateTerminal();
 		}
 
-		public override void HardwareCall(string functionName, Stack vmStack)
+		public override void HardwareCall(string functionName, VirtualMachine vm)
 		{
-			string text = vmStack.PopString();
+			string text = "";
+
 			if (functionName == "Write")
 			{
 				Write(text);

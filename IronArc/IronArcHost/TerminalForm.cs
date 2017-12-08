@@ -14,13 +14,9 @@ namespace IronArcHost
 {
 	public partial class TerminalForm : Form, ITerminal
 	{
-		private TerminalDevice hardwareTerminal;
-		public TerminalDevice HardwareTerminal => hardwareTerminal;
-
 		public TerminalForm()
 		{
 			InitializeComponent();
-			hardwareTerminal = new TerminalDevice(this);
 		}
 
 		public void Write(string text)

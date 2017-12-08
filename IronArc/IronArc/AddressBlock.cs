@@ -15,14 +15,6 @@ namespace IronArc
 		public const ulong RegisterPointerMask = ((ulong)1 << 7);
 		public const ulong RegisterHasOffsetMask = ((ulong)1 << 6);
 
-		public enum AddressType
-		{
-			MemoryAddress,
-			Register,
-			NumericLiteral,
-			StringEntry
-		}
-
 		// TODO: test the perf of using autoprops here to see if we can take the perf hit
 		public AddressType type;
 		public OperandSize size;

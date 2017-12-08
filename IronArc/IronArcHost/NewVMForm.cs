@@ -13,9 +13,20 @@ namespace IronArcHost
 {
 	public partial class NewVMForm : Form
 	{
+		public string ProgramPath { get; private set; }
+		public ulong MemorySize { get; private set; }
+		public ulong ProgramLoadAddress { get; private set; }
+
+		public List<string> HardwareDeviceNames { get; private set; }
+
 		public NewVMForm()
 		{
 			InitializeComponent();
+
+			foreach (var hardware in HardwareSearcher.HardwareDeviceTypes)
+			{
+				CLBInitialHardwareDevices.Items.Add(hardware.FullName, CheckState.Unchecked);
+			}
 		}
 
 		private void ButtonOK_Click(object sender, EventArgs e)
@@ -44,8 +55,18 @@ namespace IronArcHost
 				return;
 			}
 
-			// TODO: Add checks for the hardware devices
-			// TODO: Create a VM with these parameters and give it to the host
+			ProgramPath = initialProgramPath;
+			MemorySize = (ulong)systemMemorySize;
+			ProgramLoadAddress = (ulong)loadAddress;
+
+			HardwareDeviceNames = new List<string>();
+			for (int i = 0; i < CLBInitialHardwareDevices.Items.Count; i++)
+			{
+				if (CLBInitialHardwareDevices.GetItemCheckState(i) == CheckState.Checked)
+				{
+					HardwareDeviceNames.Add((string)CLBInitialHardwareDevices.Items[i]);
+				}
+			}
 
 			DialogResult = DialogResult.OK;
 		}

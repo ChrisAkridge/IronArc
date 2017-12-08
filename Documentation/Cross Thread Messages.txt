@@ -24,12 +24,6 @@ Messages to Worker Thread:
 	None
 		Used to indicate that there is no message for the worker; this message is to the UI thread.
 		WParam: ignored, LParam: ignored, Data: ignored.
-	AddVM
-		Instructs the worker to create a new virtual machine.
-		WParam: ignored, LParam: ignored, Data: A reference to a valid VMCreationParameters instance.
-	RemoveVM
-		Instructs the worker to remove a virtual machine.
-		WParam: The ID of the VM to remove. LParam: ignored, Data: ignored
 	QueryVMState
 		Requests the state of a virtual machine from the worker.
 		WParam: The ID of the VM to query. LParam: ignored, Data: ignored

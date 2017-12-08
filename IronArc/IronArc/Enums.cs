@@ -5,6 +5,14 @@ using System.Text;
 
 namespace IronArc
 {
+	public enum VMState
+	{
+		Paused,
+		Running,
+		Halted,
+		Error
+	}
+
 	public enum HardwareDeviceStatus
 	{
 		Active,
@@ -19,5 +27,29 @@ namespace IronArc
 		Word,
 		DWord,
 		QWord
+	}
+
+	public enum AddressType
+	{
+		MemoryAddress,
+		Register,
+		NumericLiteral,
+		StringEntry
+	}
+
+	public enum VMMessage
+	{
+		None,
+		QueryVMState,
+		SetVMState,
+		AddHardwareDevice,
+		RemoveHardwareDevice,
+		DebugYieldVM,
+		DebugResumeVM
+	}
+
+	public enum UIMessage
+	{
+		None
 	}
 }
