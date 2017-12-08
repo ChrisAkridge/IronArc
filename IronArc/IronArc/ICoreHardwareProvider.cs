@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -9,5 +10,7 @@ namespace IronArc
 	public interface ICoreHardwareProvider
 	{
 		ITerminal CreateTerminal();
+
+		ConcurrentQueue<Message> UIMessageQueue { get; }
 	}
 }

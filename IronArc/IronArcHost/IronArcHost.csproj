@@ -107,6 +107,7 @@
     <Compile Include="TerminalForm.Designer.cs">
       <DependentUpon>TerminalForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="VMManager.cs" />
     <EmbeddedResource Include="DebuggerForm.resx">
       <DependentUpon>DebuggerForm.cs</DependentUpon>
     </EmbeddedResource>

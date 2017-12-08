@@ -14,9 +14,10 @@ namespace IronArc.Hardware
 
 		public override HardwareDeviceStatus Status => HardwareDeviceStatus.Active;
 
-		public TerminalDevice()
+		public TerminalDevice(Guid machineID)
 		{
 			terminal = HardwareProvider.Provider.CreateTerminal();
+			terminal.MachineID = machineID;
 		}
 
 		public override void HardwareCall(string functionName, VirtualMachine vm)

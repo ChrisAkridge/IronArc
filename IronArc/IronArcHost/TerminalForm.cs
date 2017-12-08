@@ -14,6 +14,8 @@ namespace IronArcHost
 {
 	public partial class TerminalForm : Form, ITerminal
 	{
+		public Guid MachineID { get; set; }
+
 		public TerminalForm()
 		{
 			InitializeComponent();

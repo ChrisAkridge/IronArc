@@ -50,6 +50,7 @@ namespace IronArc
 
 	public enum UIMessage
 	{
-		None
+		None,
+		VMStateChanged
 	}
 }

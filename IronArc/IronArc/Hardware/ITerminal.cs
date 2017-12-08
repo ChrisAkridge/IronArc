@@ -7,6 +7,8 @@ namespace IronArc.Hardware
 {
 	public interface ITerminal
 	{
+		Guid MachineID { get; set; }
+
 		void Write(string text);
 		void WriteLine(string text);
 	}

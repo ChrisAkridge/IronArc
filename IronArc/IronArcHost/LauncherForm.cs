@@ -14,28 +14,23 @@ namespace IronArcHost
 {
 	public partial class LauncherForm : Form
 	{
-		public List<VirtualMachine> VirtualMachines = new List<VirtualMachine>();
-		public CoreHardwareProvider provider = new CoreHardwareProvider();
-
 		public LauncherForm()
 		{
 			InitializeComponent();
 
-			HardwareSearcher.FindHardwareInIronArc();
-			HardwareProvider.Provider = provider;
+			VMManager.Initialize();
+			VMManager.VMStateChangeEvent += LauncherForm_VMStateChangeEvent;
 		}
 
-		private void CreateVM(string programPath, ulong memorySize, ulong loadAddress,
-			IEnumerable<string> hardwareDeviceNames)
+		private void LauncherForm_VMStateChangeEvent(object sender, IronArc.Message e)
 		{
-			var vm = new VirtualMachine(memorySize, programPath, loadAddress,
-				hardwareDeviceNames);
-			VirtualMachines.Add(vm);
-
-			var lvi = new ListViewItem(vm.State.ToString());
-			lvi.SubItems.Add(memorySize.ToString());
-			lvi.SubItems.Add(vm.Hardware.Count.ToString());
-			ListVMs.Items.Add(lvi);
+			foreach (ListViewItem listItem in ListVMs.Items)
+			{
+				if (listItem.Text == e.MachineID.ToString())
+				{
+					listItem.SubItems[1].Text = ((VMState)e.WParam).ToString();
+				}
+			}
 		}
 
 		private void TSBAddVM_Click(object sender, EventArgs e)
@@ -43,20 +38,43 @@ namespace IronArcHost
 			var newVMForm = new NewVMForm();
 			if (newVMForm.ShowDialog() == DialogResult.OK)
 			{
-				CreateVM(newVMForm.ProgramPath, newVMForm.MemorySize, newVMForm.ProgramLoadAddress,
+				var newMachineID = VMManager.CreateVM(newVMForm.ProgramPath, newVMForm.MemorySize, newVMForm.ProgramLoadAddress,
 					newVMForm.HardwareDeviceNames);
+				
+				var vm = VMManager.Lookup(newMachineID);
+				var lvi = new ListViewItem(vm.MachineID.ToString());
+				lvi.SubItems.Add(vm.State.ToString());
+				lvi.SubItems.Add(newVMForm.MemorySize.ToString());
+				lvi.SubItems.Add(vm.Hardware.Count.ToString());
+				ListVMs.Items.Add(lvi);
+
+				VMManager.ResumeVM(newMachineID);
 			}
 		}
 
 		private void TSBToggleVMState_Click(object sender, EventArgs e)
 		{
+			ListViewItem lvi = ListVMs.SelectedItems[0];
+			var machineID = Guid.Parse(lvi.Text);
+			var state = lvi.SubItems[1].Text;
 
+			if (state == "Running")
+			{
+				VMManager.PauseVM(machineID);
+				TSBToggleVMState.Text = "Resume VM";
+			}
+			else if (state == "Paused")
+			{
+				VMManager.ResumeVM(machineID);
+				TSBToggleVMState.Text = "Pause VM";
+			}
 		}
 
 		private void TSBShowTerminal_Click(object sender, EventArgs e)
 		{
-			// temporary
-			new TerminalForm().ShowDialog();
+			var machineID = Guid.Parse(ListVMs.SelectedItems[0].Text);
+			var terminalForm = VMManager.Provider.Terminals.First(f => f.MachineID == machineID);
+			terminalForm.Show();
 		}
 
 		private void TSBShowDebugger_Click(object sender, EventArgs e)
@@ -73,9 +91,45 @@ namespace IronArcHost
 
 		private void LauncherForm_FormClosing(object sender, FormClosingEventArgs e)
 		{
-			foreach (var terminalForm in provider.Terminals)
+			foreach (var terminalForm in VMManager.Provider.Terminals)
 			{
 				terminalForm.Close();
+			}
+		}
+
+		private void TmrMessageQueueCheck_Tick(object sender, EventArgs e)
+		{
+			VMManager.CheckMessageQueue();
+		}
+
+		private void ListVMs_SelectedIndexChanged(object sender, EventArgs e)
+		{
+			if (ListVMs.SelectedItems.Count == 0)
+			{
+				TSBToggleVMState.Enabled = false;
+				TSBShowTerminal.Enabled = false;
+				TSBShowDebugger.Enabled = false;
+				TSBHardware.Enabled = false;
+				return;
+			}
+
+			TSBToggleVMState.Enabled = true;
+			TSBShowTerminal.Enabled = true;
+			TSBShowDebugger.Enabled = true;
+			TSBHardware.Enabled = true;
+
+			ListViewItem lvi = ListVMs.SelectedItems[0];
+			if (lvi.SubItems[1].Text == "Running")
+			{
+				TSBToggleVMState.Text = "Pause VM";
+			}
+			else if (lvi.SubItems[1].Text == "Paused")
+			{
+				TSBToggleVMState.Text = "Resume VM";
+			}
+			else
+			{
+				TSBToggleVMState.Enabled = false;
 			}
 		}
 	}
