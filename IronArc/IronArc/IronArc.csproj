@@ -67,7 +67,9 @@
     <Compile Include="AddressBlock.cs" />
     <Compile Include="ByteBlock.cs" />
     <Compile Include="CallStackFrame.cs" />
+    <Compile Include="EFlags.cs" />
     <Compile Include="Enums.cs" />
+    <Compile Include="ErrorTable.cs" />
     <Compile Include="HardwareDevice.cs" />
     <Compile Include="HardwareProvider.cs" />
     <Compile Include="Hardware\ITerminal.cs" />

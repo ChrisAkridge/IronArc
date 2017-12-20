@@ -52,7 +52,6 @@
 			this.TextTerminalWindow.ReadOnly = true;
 			this.TextTerminalWindow.Size = new System.Drawing.Size(412, 305);
 			this.TextTerminalWindow.TabIndex = 0;
-			this.TextTerminalWindow.Text = "Hello, world!";
 			// 
 			// TextBoxInput
 			// 
@@ -94,7 +93,7 @@
 			this.SFDSaveOutput.Filter = "Text File (*.txt)|*.txt|All files|*.*";
 			this.SFDSaveOutput.Title = "Save Terminal Output";
 			// 
-			// Terminal
+			// TerminalForm
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
@@ -102,9 +101,10 @@
 			this.Controls.Add(this.TextBoxInput);
 			this.Controls.Add(this.TextTerminalWindow);
 			this.Font = new System.Drawing.Font("Segoe UI", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-			this.Name = "Terminal";
+			this.Name = "TerminalForm";
 			this.ShowIcon = false;
 			this.Text = "VM Terminal";
+			this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.TerminalForm_FormClosing);
 			this.CMSTerminal.ResumeLayout(false);
 			this.ResumeLayout(false);
 			this.PerformLayout();

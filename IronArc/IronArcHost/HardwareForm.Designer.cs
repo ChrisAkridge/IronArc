@@ -55,10 +55,11 @@
             this.ColumnDeviceStatus});
 			this.ListSelectedDevices.Location = new System.Drawing.Point(12, 25);
 			this.ListSelectedDevices.Name = "ListSelectedDevices";
-			this.ListSelectedDevices.Size = new System.Drawing.Size(154, 280);
+			this.ListSelectedDevices.Size = new System.Drawing.Size(192, 337);
 			this.ListSelectedDevices.TabIndex = 1;
 			this.ListSelectedDevices.UseCompatibleStateImageBehavior = false;
 			this.ListSelectedDevices.View = System.Windows.Forms.View.Details;
+			this.ListSelectedDevices.SelectedIndexChanged += new System.EventHandler(this.ListSelectedDevices_SelectedIndexChanged);
 			// 
 			// ColumnDeviceName
 			// 
@@ -72,36 +73,39 @@
 			// ListAvailableDevices
 			// 
 			this.ListAvailableDevices.FormattingEnabled = true;
-			this.ListAvailableDevices.Location = new System.Drawing.Point(224, 25);
+			this.ListAvailableDevices.Location = new System.Drawing.Point(261, 25);
 			this.ListAvailableDevices.Name = "ListAvailableDevices";
-			this.ListAvailableDevices.Size = new System.Drawing.Size(120, 277);
+			this.ListAvailableDevices.Size = new System.Drawing.Size(177, 342);
 			this.ListAvailableDevices.TabIndex = 2;
+			this.ListAvailableDevices.SelectedIndexChanged += new System.EventHandler(this.ListAvailableDevices_SelectedIndexChanged);
 			// 
 			// ButtonAddDevice
 			// 
 			this.ButtonAddDevice.Enabled = false;
 			this.ButtonAddDevice.Font = new System.Drawing.Font("Segoe UI", 8.25F);
-			this.ButtonAddDevice.Location = new System.Drawing.Point(173, 133);
+			this.ButtonAddDevice.Location = new System.Drawing.Point(210, 161);
 			this.ButtonAddDevice.Name = "ButtonAddDevice";
 			this.ButtonAddDevice.Size = new System.Drawing.Size(45, 23);
 			this.ButtonAddDevice.TabIndex = 3;
 			this.ButtonAddDevice.Text = "<<";
 			this.ButtonAddDevice.UseVisualStyleBackColor = true;
+			this.ButtonAddDevice.Click += new System.EventHandler(this.ButtonAddDevice_Click);
 			// 
 			// ButtonRemoveDevice
 			// 
 			this.ButtonRemoveDevice.Enabled = false;
 			this.ButtonRemoveDevice.Font = new System.Drawing.Font("Segoe UI", 8.25F);
-			this.ButtonRemoveDevice.Location = new System.Drawing.Point(173, 162);
+			this.ButtonRemoveDevice.Location = new System.Drawing.Point(210, 190);
 			this.ButtonRemoveDevice.Name = "ButtonRemoveDevice";
 			this.ButtonRemoveDevice.Size = new System.Drawing.Size(45, 23);
 			this.ButtonRemoveDevice.TabIndex = 4;
 			this.ButtonRemoveDevice.Text = ">>";
 			this.ButtonRemoveDevice.UseVisualStyleBackColor = true;
+			this.ButtonRemoveDevice.Click += new System.EventHandler(this.ButtonRemoveDevice_Click);
 			// 
 			// ButtonChangeStatus
 			// 
-			this.ButtonChangeStatus.Location = new System.Drawing.Point(12, 312);
+			this.ButtonChangeStatus.Location = new System.Drawing.Point(12, 368);
 			this.ButtonChangeStatus.Name = "ButtonChangeStatus";
 			this.ButtonChangeStatus.Size = new System.Drawing.Size(154, 23);
 			this.ButtonChangeStatus.TabIndex = 5;
@@ -110,7 +114,7 @@
 			// 
 			// ButtonOK
 			// 
-			this.ButtonOK.Location = new System.Drawing.Point(224, 312);
+			this.ButtonOK.Location = new System.Drawing.Point(319, 368);
 			this.ButtonOK.Name = "ButtonOK";
 			this.ButtonOK.Size = new System.Drawing.Size(119, 23);
 			this.ButtonOK.TabIndex = 6;
@@ -122,7 +126,7 @@
 			this.AcceptButton = this.ButtonOK;
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-			this.ClientSize = new System.Drawing.Size(356, 340);
+			this.ClientSize = new System.Drawing.Size(450, 403);
 			this.Controls.Add(this.ButtonOK);
 			this.Controls.Add(this.ButtonChangeStatus);
 			this.Controls.Add(this.ButtonRemoveDevice);

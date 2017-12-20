@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -46,6 +47,8 @@ namespace IronArcHost
 				lvi.SubItems.Add(vm.State.ToString());
 				lvi.SubItems.Add(newVMForm.MemorySize.ToString());
 				lvi.SubItems.Add(vm.Hardware.Count.ToString());
+				lvi.SubItems.Add("0");
+				lvi.SubItems.Add("0");
 				ListVMs.Items.Add(lvi);
 
 				VMManager.ResumeVM(newMachineID);
@@ -85,8 +88,9 @@ namespace IronArcHost
 
 		private void TSBHardware_Click(object sender, EventArgs e)
 		{
-			// temporary
-			new HardwareForm().ShowDialog();
+			var machineID = Guid.Parse(ListVMs.SelectedItems[0].Text);
+			var hardwareForm = new HardwareForm(machineID);
+			hardwareForm.Show();
 		}
 
 		private void LauncherForm_FormClosing(object sender, FormClosingEventArgs e)
@@ -130,6 +134,20 @@ namespace IronArcHost
 			else
 			{
 				TSBToggleVMState.Enabled = false;
+			}
+		}
+
+		private void TmrUpdateInstructionCount_Tick(object sender, EventArgs e)
+		{
+			for (int i = 0; i < ListVMs.Items.Count; i++)
+			{
+				var item = ListVMs.Items[i];
+				var machineID = Guid.Parse(item.SubItems[0].Text);
+				var instructionCount = VMManager.ReadInstructionExecutedCount(machineID);
+				var lastInstructionCount = ulong.Parse(item.SubItems[4].Text, NumberStyles.AllowThousands);
+
+				item.SubItems[4].Text = $"{instructionCount:n0}";
+				item.SubItems[5].Text = $"{(instructionCount - lastInstructionCount):n0}";
 			}
 		}
 	}

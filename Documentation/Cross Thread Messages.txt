@@ -35,7 +35,7 @@ Messages to Worker Thread:
 		WParam: The ID of the VM to add the device to. LParam: ignored, Data: The instance of the hardware device to add.
 	RemoveHardwareDevice
 		Instructs the worker to remove a hardware device from a VM.
-		WParam: The ID of the VM to remove the device from. LParam: ignored, Data: The instance of the hardware device to remove.
+		WParam: The ID of the VM to remove the device from. LParam: ignored, Data: The type of the hardware device to remove.
 	DebugYieldVM
 		Instructs the worker to give the reference of a virtual machine to the UI so it can be used in the debugger.
 		WParam: The ID of the VM to yield. LParam: ignored, Data: ignored.

@@ -39,6 +39,7 @@ namespace IronArc
 				case AddressType.MemoryAddress:
 					value = memory.ReadULongAt(operandAddress);
 					isPointer = (value & MemoryPointerMask) != 0;
+					if (isPointer) { value &= 0x7FFF_FFFF_FFFF_FFFF; };
 					operandLength = 8UL;
 					break;
 				case AddressType.Register:
@@ -50,6 +51,10 @@ namespace IronArc
 						offset = memory.ReadIntAt(operandAddress + 1);
 						operandLength = 5UL;
 					}
+
+					// Clear the pointer and offset bits from the byte since we already know
+					// if this is a pointer/has an offset.
+					value = value & 0x3F;
 					break;
 				case AddressType.NumericLiteral:
 					switch (size)

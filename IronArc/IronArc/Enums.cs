@@ -53,4 +53,20 @@ namespace IronArc
 		None,
 		VMStateChanged
 	}
+
+	public static class EnumExtensions
+	{
+		public static ulong SizeInBytes(this OperandSize size)
+		{
+			switch (size)
+			{
+				case OperandSize.Byte: return 1UL;
+				case OperandSize.Word: return 2UL;
+				case OperandSize.DWord: return 4UL;
+				case OperandSize.QWord: return 8UL;
+				default:
+					throw new ArgumentException($"Implementation error: Invalid size {size}");
+			}
+		}
+	}
 }

@@ -9,8 +9,9 @@ namespace IronArc
 {
 	public interface ICoreHardwareProvider
 	{
-		ITerminal CreateTerminal();
-
 		ConcurrentQueue<Message> UIMessageQueue { get; }
+
+		ITerminal CreateTerminal();
+		void DestroyTerminal(ITerminal terminal);
 	}
 }

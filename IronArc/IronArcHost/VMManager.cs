@@ -70,6 +70,28 @@ namespace IronArcHost
 			vm.MessageQueue.Enqueue(message);
 		}
 
+		internal static void AddHardwareToVM(Guid machineID, string hwDeviceTypeName)
+		{
+			// Always ensure we actually make hardware on the main thread so we don't accidentally
+			// make forms on non-UI threads
+			var type = HardwareSearcher.LookupDeviceByName(hwDeviceTypeName);
+			var device = (HardwareDevice)Activator.CreateInstance(type, machineID);
+			var message = new Message(VMMessage.AddHardwareDevice, UIMessage.None, machineID, 0, 0L, device);
+
+			Lookup(machineID).MessageQueue.Enqueue(message);
+		}
+
+		internal static void RemoveHardwareFromVM(Guid machineID, string hwDeviceTypeName)
+		{
+			var type = HardwareSearcher.LookupDeviceByName(hwDeviceTypeName);
+			var message = new Message(VMMessage.RemoveHardwareDevice, UIMessage.None, machineID, 0, 0L, type);
+
+			Lookup(machineID).MessageQueue.Enqueue(message);
+		}
+
+		internal static ulong ReadInstructionExecutedCount(Guid machineID) =>
+			Lookup(machineID).InstructionExecutedCount;
+
 		public static void CheckMessageQueue()
 		{
 			// We can use TryDequeue by itself here since performance isn't a concern.
@@ -81,13 +103,21 @@ namespace IronArcHost
 				{
 					if ((VMState)message.WParam == VMState.Running)
 					{
-						
+
 					}
 					else if ((VMState)message.WParam == VMState.Paused)
 					{
 						// The MainLoop thread should already be done by this point
 						// If it's not, it will be soon
 						VMThreads.Remove(message.MachineID);
+					}
+					else if ((VMState)message.WParam == VMState.Error)
+					{
+						Error error = (Error)message.LParam;
+						System.Windows.Forms.MessageBox.Show(
+							$"An unhandled error occured on the VM.\r\n\r\nMachine ID: {message.MachineID}\r\nError: {error}",
+							"IronArc", System.Windows.Forms.MessageBoxButtons.OK, System.Windows.Forms.MessageBoxIcon.Error,
+							System.Windows.Forms.MessageBoxDefaultButton.Button1);
 					}
 
 					OnVMStateChanged(message);

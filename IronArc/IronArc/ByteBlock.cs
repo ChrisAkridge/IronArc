@@ -455,7 +455,7 @@ namespace IronArc
             return (char)ToShort();
         }
 
-        public string ReadStringAt(ulong length, ulong address)
+        public string ReadStringAt(ulong address, out uint lengthInBytes)
         {
 			int stringLength = ReadIntAt(address);
 			address += 4;
@@ -472,8 +472,32 @@ namespace IronArc
 				address++;
 			}
 
+			lengthInBytes = (uint)(utf8.Length + 4u);
 			return Encoding.UTF8.GetString(utf8);
         }
+
+		public string ReadStringAt(ulong address)
+		{
+			uint length;
+			return ReadStringAt(address, out length);
+		}
+
+		public ulong ReadDataAt(ulong address, OperandSize size)
+		{
+			switch (size)
+			{
+				case OperandSize.Byte:
+					return ReadByteAt(address);
+				case OperandSize.Word:
+					return ReadUShortAt(address);
+				case OperandSize.DWord:
+					return ReadUIntAt(address);
+				case OperandSize.QWord:
+					return ReadULongAt(address);
+				default:
+					throw new ArgumentException($"Implementation error: Invalid operand size {size}");
+			}
+		}
         #endregion
 
         #region Write At Methods
@@ -504,6 +528,17 @@ namespace IronArc
 				address++;
 			}
         }
+
+		public void WriteAt(ulong sourceAddress, ulong destAddress, uint length)
+		{
+			byte* sourceStart = pointer + sourceAddress;
+			byte* destStart = pointer + destAddress;
+
+			for (uint i = 0u; i < length; i++)
+			{
+				*(destStart + i) = *(sourceStart + i);
+			}
+		}
 
         public void WriteBoolAt(bool value, ulong address)
         {
@@ -619,6 +654,27 @@ namespace IronArc
 				address++;
 			}
         }
+
+		public void WriteDataAt(ulong data, ulong address, OperandSize size)
+		{
+			switch (size)
+			{
+				case OperandSize.Byte:
+					WriteByteAt((byte)data, address);
+					break;
+				case OperandSize.Word:
+					WriteUShortAt((ushort)data, address);
+					break;
+				case OperandSize.DWord:
+					WriteUIntAt((uint)data, address);
+					break;
+				case OperandSize.QWord:
+					WriteULongAt(data, address);
+					break;
+				default:
+					throw new ArgumentException($"Implementation error: Invalid operand size {size}");
+			}
+		}
         #endregion
 
 		#region IDisposable Methods

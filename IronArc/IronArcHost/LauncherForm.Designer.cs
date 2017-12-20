@@ -39,11 +39,14 @@
 			this.TSBShowDebugger = new System.Windows.Forms.ToolStripButton();
 			this.TSBHardware = new System.Windows.Forms.ToolStripButton();
 			this.ListVMs = new System.Windows.Forms.ListView();
+			this.LVCMachineID = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
 			this.LVCState = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
 			this.LVCMemory = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
 			this.LVCHardwareDeviceCount = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+			this.LVCInstructionExecutedCount = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
 			this.TmrMessageQueueCheck = new System.Windows.Forms.Timer(this.components);
-			this.LVCMachineID = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+			this.TmrUpdateInstructionCount = new System.Windows.Forms.Timer(this.components);
+			this.LVCInstructionsPerSecond = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
 			this.toolStrip1.SuspendLayout();
 			this.SuspendLayout();
 			// 
@@ -132,7 +135,9 @@
             this.LVCMachineID,
             this.LVCState,
             this.LVCMemory,
-            this.LVCHardwareDeviceCount});
+            this.LVCHardwareDeviceCount,
+            this.LVCInstructionExecutedCount,
+            this.LVCInstructionsPerSecond});
 			this.ListVMs.Dock = System.Windows.Forms.DockStyle.Fill;
 			this.ListVMs.Font = new System.Drawing.Font("Segoe UI", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
 			this.ListVMs.Location = new System.Drawing.Point(0, 25);
@@ -142,6 +147,11 @@
 			this.ListVMs.UseCompatibleStateImageBehavior = false;
 			this.ListVMs.View = System.Windows.Forms.View.Details;
 			this.ListVMs.SelectedIndexChanged += new System.EventHandler(this.ListVMs_SelectedIndexChanged);
+			// 
+			// LVCMachineID
+			// 
+			this.LVCMachineID.Text = "Machine ID";
+			this.LVCMachineID.Width = 104;
 			// 
 			// LVCState
 			// 
@@ -157,15 +167,25 @@
 			this.LVCHardwareDeviceCount.Text = "HW Device Count";
 			this.LVCHardwareDeviceCount.Width = 105;
 			// 
+			// LVCInstructionExecutedCount
+			// 
+			this.LVCInstructionExecutedCount.Text = "Instructions Executed";
+			this.LVCInstructionExecutedCount.Width = 137;
+			// 
 			// TmrMessageQueueCheck
 			// 
 			this.TmrMessageQueueCheck.Enabled = true;
 			this.TmrMessageQueueCheck.Tick += new System.EventHandler(this.TmrMessageQueueCheck_Tick);
 			// 
-			// LVCMachineID
+			// TmrUpdateInstructionCount
 			// 
-			this.LVCMachineID.Text = "Machine ID";
-			this.LVCMachineID.Width = 104;
+			this.TmrUpdateInstructionCount.Enabled = true;
+			this.TmrUpdateInstructionCount.Interval = 1000;
+			this.TmrUpdateInstructionCount.Tick += new System.EventHandler(this.TmrUpdateInstructionCount_Tick);
+			// 
+			// LVCInstructionsPerSecond
+			// 
+			this.LVCInstructionsPerSecond.Text = "IPS";
 			// 
 			// LauncherForm
 			// 
@@ -200,5 +220,8 @@
 		private System.Windows.Forms.ToolStripButton TSBHardware;
 		private System.Windows.Forms.Timer TmrMessageQueueCheck;
 		private System.Windows.Forms.ColumnHeader LVCMachineID;
+		private System.Windows.Forms.ColumnHeader LVCInstructionExecutedCount;
+		private System.Windows.Forms.Timer TmrUpdateInstructionCount;
+		private System.Windows.Forms.ColumnHeader LVCInstructionsPerSecond;
 	}
 }

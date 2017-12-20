@@ -29,5 +29,17 @@ namespace IronArcHost
 			Terminals.Add(terminalForm);
 			return terminalForm;
 		}
+
+		public void DestroyTerminal(ITerminal terminal)
+		{
+			var terminalForm = (TerminalForm)terminal;
+			terminalForm.Invoke((System.Windows.Forms.MethodInvoker)delegate
+			{
+				terminalForm.Close();
+				terminalForm.Dispose();
+			});
+
+			Terminals.Remove(terminalForm);
+		}
 	}
 }

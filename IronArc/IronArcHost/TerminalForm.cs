@@ -50,5 +50,12 @@ namespace IronArcHost
 				File.WriteAllText(filePath, TextTerminalWindow.Text);
 			}
 		}
+
+		private void TerminalForm_FormClosing(object sender, FormClosingEventArgs e)
+		{
+			// Terminals are tied to the VM, so we can't close them with the X
+			e.Cancel = true;
+			Hide();
+		}
 	}
 }

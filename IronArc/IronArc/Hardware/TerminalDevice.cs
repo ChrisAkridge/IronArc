@@ -22,7 +22,7 @@ namespace IronArc.Hardware
 
 		public override void HardwareCall(string functionName, VirtualMachine vm)
 		{
-			string text = "";
+			string text = "Hello, world!";
 
 			if (functionName == "Write")
 			{
@@ -36,5 +36,10 @@ namespace IronArc.Hardware
 
 		private void Write(string text) => terminal.Write(text);
 		private void WriteLine(string text) => terminal.WriteLine(text);
+
+		public override void Dispose()
+		{
+			HardwareProvider.Provider.DestroyTerminal(terminal);
+		}
 	}
 }
