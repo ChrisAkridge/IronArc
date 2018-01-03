@@ -11,5 +11,8 @@ namespace IronArc.Hardware
 
 		void Write(string text);
 		void WriteLine(string text);
+
+		char Read();
+		string ReadLine();
 	}
 }

@@ -27,16 +27,18 @@ namespace IronArc
 
 		public ulong stackArgsMarker;
 		private ByteBlock memory;
+		public ulong stringsTableAddress;
 
 		public Dictionary<string, List<InterruptHandler>> interruptTable;
 		public Dictionary<uint, ulong> errorTable;
 		public Stack<CallStackFrame> callStack;
 
 		public Processor(ByteBlock memory, ulong firstInstructionAddress, ulong programSize,
-			VirtualMachine vm)
+			ulong stringsTableAddress, VirtualMachine vm)
 		{
 			this.memory = memory;
 			this.vm = vm;
+			this.stringsTableAddress = stringsTableAddress;
 
 			interruptTable = new Dictionary<string, List<InterruptHandler>>();
 			errorTable = new Dictionary<uint, ulong>();
@@ -245,14 +247,28 @@ namespace IronArc
 					else
 					{ return valueWithOffset; }
 				case AddressType.NumericLiteral:
-				case AddressType.StringEntry:
 					RaiseError(Error.InvalidAddressType);
 					break;
+				case AddressType.StringEntry:
+					return LookupStringAddress((uint)block.value);
 				default:
 					throw new ArgumentException("Implementation error: An address block has a wrong type.");
 			}
 
 			return 0UL;
+		}
+
+		private ulong LookupStringAddress(uint stringIndex)
+		{
+			uint numberOfStrings = memory.ReadUIntAt(stringsTableAddress);
+			if (numberOfStrings <= stringIndex)
+			{
+				RaiseError(Error.StringIndexOutOfRange);
+				return 0UL;
+			}
+
+			ulong stringAddressAddress = stringsTableAddress + 4 + (8 * stringIndex);
+			return memory.ReadULongAt(stringAddressAddress);
 		}
 
 		private ulong ReadDataFromAddressBlock(AddressBlock block, OperandSize size)
@@ -265,6 +281,10 @@ namespace IronArc
 						return memory.ReadDataAt(memory.ReadULongAt(block.value), size);
 					}
 					return memory.ReadDataAt(block.value, size);
+					// WYLO: string table parsing is NOT working at all
+					// The address block doesn't have the right type and has a nonsensical value
+					// okay IronAssembler isn't emitting the flags byte for hwcall which probably
+					// should be necessary
 				case AddressType.Register:
 					if (block.offset != 0 && !block.isPointer)
 					{
@@ -283,7 +303,7 @@ namespace IronArc
 				case AddressType.NumericLiteral:
 					return block.value;
 				case AddressType.StringEntry:
-					throw new NotImplementedException();
+					return LookupStringAddress((uint)block.value);
 				default:
 					throw new ArgumentException($"Invalid address block type {block.type}");
 			}
@@ -397,6 +417,40 @@ namespace IronArc
 			// become part of the previous stack frame.
 
 			EIP = frame.returnAddress;
+		}
+		#endregion
+
+		#region External Helpers
+		public void PushExternal(byte[] bytes)
+		{
+			memory.WriteAt(bytes, ESP);
+			ESP += (ulong)bytes.Length;
+			if (ESP <= EBP)
+			{
+				RaiseError(Error.StackOverflow);
+			}
+		}
+
+		public ulong PopExternal(OperandSize size)
+		{
+			ulong sizeInBytes = (size == OperandSize.QWord) ? 8UL :
+				(size == OperandSize.DWord) ? 4UL :
+				(size == OperandSize.Word) ? 2UL : 1UL;
+			ulong dataStartAddress = ESP - sizeInBytes;
+			ESP -= sizeInBytes;
+
+			if (ESP < EBP)
+			{
+				RaiseError(Error.StackUnderflow);
+				return 0;
+			}
+
+			return memory.ReadDataAt(dataStartAddress, size);
+		}
+
+		public string ReadStringFromMemory(ulong stringAddress)
+		{
+			return memory.ReadStringAt(stringAddress);
 		}
 		#endregion
 
@@ -638,13 +692,10 @@ namespace IronArc
 			// Flags byte: 00XX0000 where XX is the type of the address block.
 
 			byte flagsByte = (byte)((ReadProgramByte() & 0x30) >> 4);
-			ulong stringAddress = 0UL;
-			if (flagsByte == 3)
-			{
-				// String Literal
-				RaiseError(Error.NotImplemented);
-			}
-			else { stringAddress = GetMemoryAddressFromAddressBlock(flagsByte); }
+			AddressBlock block = new AddressBlock(OperandSize.QWord, ReadAddressType(flagsByte),
+				memory, EIP);
+			EIP += block.operandLength;
+			ulong stringAddress = ReadDataFromAddressBlock(block, OperandSize.QWord);
 
 			string hwcall = memory.ReadStringAt(stringAddress);
 			vm.HardwareCall(hwcall);

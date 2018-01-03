@@ -10,6 +10,13 @@ namespace IronArc
 {
 	public sealed class VirtualMachine
 	{
+		public const ushort SpecificationMajorVersion = 0x0001;
+		public const ushort SpecificationMinorVersion = 0x0001;
+		public const uint MagicNumber = 0x45584549; // "IEXE"
+		private const ulong HeaderSize = 28UL;
+
+		private ulong stringsTableAddress;
+		
 		public Guid MachineID { get; }
 		public Processor Processor { get; }
 		public ByteBlock Memory { get; }
@@ -22,6 +29,7 @@ namespace IronArc
 			IEnumerable<string> hardwareDeviceNames)
 		{
 			byte[] program = File.ReadAllBytes(programPath);
+			ParseHeader(program);
 
 			MachineID = Guid.NewGuid();
 			MessageQueue = new ConcurrentQueue<Message>();
@@ -29,7 +37,9 @@ namespace IronArc
 			Memory = ByteBlock.FromLength(memorySize);
 			Memory.WriteAt(program, loadAddress);
 
-			Processor = new Processor(Memory, loadAddress, (ulong)program.Length, this);
+			Processor = new Processor(Memory, loadAddress, (ulong)program.Length + HeaderSize,
+				stringsTableAddress, this);
+			Processor.EIP += HeaderSize;
 			Hardware = new List<HardwareDevice>();
 
 			foreach (var hardwareName in hardwareDeviceNames)
@@ -39,6 +49,26 @@ namespace IronArc
 			}
 
 			State = VMState.Paused;
+		}
+
+		private void ParseHeader(byte[] program)
+		{
+			uint magicNumber = BitConverter.ToUInt32(program, 0);
+			if (magicNumber != MagicNumber)
+			{
+				Error((uint)IronArc.Error.HeaderInvalid);
+			}
+
+			uint specificationVersion = BitConverter.ToUInt32(program, 4);
+			ushort majorVersion = (ushort)(specificationVersion >> 16);
+			ushort minorVersion = (ushort)(specificationVersion & 0xFFFF);
+			if (majorVersion > SpecificationMajorVersion ||
+				(majorVersion == SpecificationMajorVersion && minorVersion > SpecificationMinorVersion))
+			{
+				Error((uint)IronArc.Error.HeaderInvalid);
+			}
+
+			stringsTableAddress = BitConverter.ToUInt64(program, 20);
 		}
 
 		public void AddHardwareDevice(Type hardwareDeviceType)

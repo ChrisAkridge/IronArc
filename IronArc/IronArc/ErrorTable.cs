@@ -14,6 +14,9 @@ namespace IronArc
 		NotImplemented,
 		HardwareDeviceNotPresent,
 		InvalidDestinationType,
-		StackOverflow
+		StackOverflow,
+		HeaderInvalid,
+		StringIndexOutOfRange,
+		StackUnderflow
 	}
 }

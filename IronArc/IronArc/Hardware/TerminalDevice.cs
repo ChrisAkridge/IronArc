@@ -22,15 +22,23 @@ namespace IronArc.Hardware
 
 		public override void HardwareCall(string functionName, VirtualMachine vm)
 		{
-			string text = "Hello, world!";
+			if (functionName.StartsWith("Write"))
+			{
+				ulong textAddress = vm.Processor.PopExternal(OperandSize.QWord);
+				string text = vm.Processor.ReadStringFromMemory(textAddress);
 
-			if (functionName == "Write")
-			{
-				Write(text);
+				if (functionName == "Write") { Write(text); }
+				else if (functionName == "WriteLine") { WriteLine(text); }
 			}
-			else if (functionName == "WriteLine")
+			else if (functionName == "Read")
 			{
-				WriteLine(text);
+				char character = terminal.Read();
+				vm.Processor.PushExternal(new[] { (byte)(character & 0xFF), (byte)(character >> 8) });
+			}
+			else if (functionName == "ReadLine")
+			{
+				string line = terminal.ReadLine();
+				vm.Processor.PushExternal(Extensions.ToLPString(line));
 			}
 		}
 

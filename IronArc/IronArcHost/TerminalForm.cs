@@ -6,6 +6,7 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using IronArc.Hardware;
@@ -14,7 +15,18 @@ namespace IronArcHost
 {
 	public partial class TerminalForm : Form, ITerminal
 	{
+		private enum InputWaitingState
+		{
+			NotWaiting,
+			WaitingForChar,
+			WaitingForLine,
+			InputReceived
+		}
+
 		public Guid MachineID { get; set; }
+		private InputWaitingState waitingState = InputWaitingState.NotWaiting;
+		private ManualResetEvent waitHandle = new ManualResetEvent(false);
+		private string receivedInput;
 
 		public TerminalForm()
 		{
@@ -42,6 +54,35 @@ namespace IronArcHost
 			Write(string.Concat(text, Environment.NewLine));
 		}
 
+		public char Read()
+		{
+			// How we block the VM while waiting for a keypress:
+			//	1. Set waitingState to WaitingForInput
+			//	2. Since the code calling ReadChar() is running on the VM thread, we can wait on
+			//	   input using an AutoResetEvent
+			//	3. The TextBoxInput_KeyDown handler runs on the UI thread and can set waitingState
+			//	   to InputReceived
+			//	4. VM thread sees that input is received and can invoke code to read the input
+			//	5. It then submits it to the TerminalDevice, which writes it to the stack
+
+			waitingState = InputWaitingState.WaitingForChar;
+			waitHandle.WaitOne();
+
+			// After the above line, the input should be available.
+
+			waitHandle.Reset();
+			return receivedInput[0];
+		}
+
+		public string ReadLine()
+		{
+			waitingState = InputWaitingState.WaitingForLine;
+			waitHandle.WaitOne();
+
+			waitHandle.Reset();
+			return receivedInput;
+		}
+
 		private void CMISaveOutput_Click(object sender, EventArgs e)
 		{
 			if (SFDSaveOutput.ShowDialog() == DialogResult.OK)
@@ -56,6 +97,28 @@ namespace IronArcHost
 			// Terminals are tied to the VM, so we can't close them with the X
 			e.Cancel = true;
 			Hide();
+		}
+
+		private void TextBoxInput_KeyDown(object sender, KeyEventArgs e)
+		{
+			if (waitingState == InputWaitingState.WaitingForChar)
+			{
+				if (TextBoxInput.Text == "") { receivedInput = "\r\n"; }
+				else { receivedInput = TextBoxInput.Text[0].ToString(); }
+				TextBoxInput.Text = "";
+				waitingState = InputWaitingState.NotWaiting;
+
+				waitHandle.Set();
+			}
+			else if (e.KeyCode == Keys.Enter && waitingState == InputWaitingState.WaitingForLine)
+			{
+				if (TextBoxInput.Text == "") { receivedInput = "\r\n"; }
+				else { receivedInput = TextBoxInput.Text; }
+				TextBoxInput.Text = "";
+				waitingState = InputWaitingState.NotWaiting;
+
+				waitHandle.Set();
+			}
 		}
 	}
 }

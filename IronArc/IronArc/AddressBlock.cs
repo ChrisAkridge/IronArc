@@ -80,9 +80,8 @@ namespace IronArc
 					}
 					break;
 				case AddressType.StringEntry:
-					// TODO: implement string tables
 					value = memory.ReadUIntAt(operandAddress);
-					operandLength = operandAddress + 4UL;
+					operandLength = 4UL;
 					break;
 				default:
 					throw new ArgumentException($"Invalid address type {type}.", nameof(type));

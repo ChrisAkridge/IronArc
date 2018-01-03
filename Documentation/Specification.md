@@ -176,16 +176,38 @@ If an instruction has a size operand, it always appears first and the top two bi
 
 Each operand appears after the flags byte.
 
-## IronArc Flat(-ish) Binary (IFB) Format
-The first, and simplest, format for IronArc binaries is the IronArc Flat Binary (IFB) format. It starts with a 32-bit unsigned integer that states the number of instructions, followed by only instructions and a string table, with no header or padding. All bytes in the file are executed sequentially until the processor enters an error state, halts, or executes its way through the memory space.
+## IronArc Binary (IEXE) Format
+The first, and simplest, format for IronArc binaries is the IronArc Binary (IEXE) format.
 
-At the end of the instruction space is a string table. The string table start with a 32-bit unsigned integer stating the number of strings in the table, followed by all the strings. Each string is prefixed with the number of bytes it is as a four-byte unsigned integer, followed by the text of the string in UTF-8 format.
+It starts with a header of the following form:
+```
+DWORD magicNumber = "IEXE";
+DWORD specificationVersion;
+DWORD assemblerVersion;
+QWORD firstInstructionAddress;
+QWORD stringTableAddress;
+```
 
-IronArc Flat Binary files are stored on the host machine as files with the IEXE extension, although any arbitrary file can be used as a program (most of them will crash the processor or invalidate state, though).
+The header is `4 + 4 + 4 + 8 + 8 = 28` bytes long.
+
+The file opens with a magic number `IEXE`, followed by an IronArc specification version and an assembler version. These versions are split into the high and low words for the major and minor version.
+
+**This specification is major version 1 and minor version 1.**
+
+The assembler version is written by whichever assembler made the program. If the program is composed by hand, the version should be major version 0 and minor version 0.
+
+
+Up next is the address of the start of the first instruction, followed by the start of the string table.
+
+Immediately following the header is all the instruction of the program. The `EIP` register is initialiazed to this value and execution begins here. It will continue through the memory space unless control flow is changed by the control flow instructions.
+
+At the end of the instruction space is a string table. The string table start with a 32-bit unsigned integer stating the number of strings in the table. An array of addresses to the start of each string follows, then the strings themselves. Each string is prefixed with the number of bytes it is as a four-byte unsigned integer, followed by the text of the string in UTF-8 format.
+
+IronArc Binary files are stored on the host machine as files with the IEXE extension, although any arbitrary file can be used as a program (most of them will crash the processor or invalidate state, though).
 
 These programs are loaded at a start address specified when starting the VM in the memory space. If the program is larger than the assigned memory space, the processor will immediately fail. EIP and ERP is set to the specified address and execution begins from EIP. The remainder of memory is initialized to zeroes. The stack immediately follows (unless set to another address when starting the VM), as reflected by ESP = EBP = (start address + program size).
 
-**The size of the program, in bytes, will be initially stored in the EAX register when the program is loaded. All IFB-format programs must account for this and all implementations must place the size of the program within EAX.** The program is free to use or clear this value as necessary.
+**The size of the program, with the header and string table, in bytes, will be initially stored in the EAX register when the program is loaded. All IFB-format programs must account for this and all implementations must place the size of the program within EAX.** The program is free to use or clear this value as necessary.
 
 ## Hardware
 
