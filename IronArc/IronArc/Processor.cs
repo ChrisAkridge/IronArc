@@ -117,7 +117,16 @@ namespace IronArc
 						case 0x00: MoveData(); break;
 						case 0x01: MoveDataWithLength(); break;
 						case 0x02: PushToStack(); break;
+						case 0x03: PopFromStack(); break;
+						case 0x04: ArrayRead(); break;
+						case 0x05: ArrayWrite(); break;
 						default: break;
+					}
+					break;
+				case 0x02:
+					if ((opcode & 0xFF) <= 0x23 /* 0x0223 is Long Comparison */)
+					{
+						PerformStackOperation(opcode);
 					}
 					break;
 				default:
@@ -431,11 +440,16 @@ namespace IronArc
 			}
 		}
 
+		public void PushExternal(ulong data, OperandSize size)
+		{
+			ulong sizeInBytes = size.GetSizeInBytes();
+			memory.WriteDataAt(data, ESP, size);
+			ESP += sizeInBytes;
+		}
+
 		public ulong PopExternal(OperandSize size)
 		{
-			ulong sizeInBytes = (size == OperandSize.QWord) ? 8UL :
-				(size == OperandSize.DWord) ? 4UL :
-				(size == OperandSize.Word) ? 2UL : 1UL;
+			ulong sizeInBytes = size.GetSizeInBytes();
 			ulong dataStartAddress = ESP - sizeInBytes;
 			ESP -= sizeInBytes;
 
@@ -803,6 +817,214 @@ namespace IronArc
 			{
 				RaiseError(Error.StackOverflow);
 				return;
+			}
+		}
+
+		private void PopFromStack()
+		{
+			// pop <SIZE> <dest>
+			//	<SIZE>: The size of the data to pop.
+			//	<value>: An address block containing the destination to pop the value to.
+			// Errors:
+			//	InvalidDestinationType: Raised if the destination is a numeric literal or string table entry.
+			//	AddressOutOfRange: Raised if the destination address is out of the bounds of memory.
+			//	StackUnderflow: Raised if popping the data off the stack causes ESP to become less than EBP.
+			// Flags Byte: SSDD0000, where SS is the size and DD is the destination type.
+
+			byte flagsByte = ReadProgramByte();
+			var size = ReadOperandSize((byte)(flagsByte >> 6));
+			var sizeInBytes = size.GetSizeInBytes();
+			var destType = ReadAddressType((byte)((flagsByte & 0x30) >> 4));
+
+			if (destType == AddressType.NumericLiteral || destType == AddressType.StringEntry)
+			{
+				RaiseError(Error.InvalidDestinationType);
+			}
+
+			var destBlock = new AddressBlock(size, destType, memory, EIP);
+			EIP += destBlock.operandLength;
+
+			if (ESP - sizeInBytes < EBP)
+			{
+				RaiseError(Error.StackUnderflow);
+			}
+
+			ulong data = memory.ReadDataAt(ESP - sizeInBytes, size);
+			ESP -= sizeInBytes;
+			WriteDataToAddressBlock(data, destBlock, size);
+		}
+
+		private void ArrayRead()
+		{
+			// arrayread <SIZE> <index>
+			//	<SIZE>: The size of all elements of the array.
+			//	<index>: A DWORD containing the zero-based index of the element to read in the array.
+			// Errors:
+			//	StackUnderflow: Raised if the value atop the stack is less than 8 bytes.
+			//	AddressOutOfRange: Raised if the index is beyond the edge of memory.
+			// Flags byte: SSII0000, where SS is the size of the array elements, and II is the
+			//	type of the address block of the index into the array.
+
+			byte flagsByte = ReadProgramByte();
+			var size = ReadOperandSize((byte)(flagsByte >> 6));
+			var type = ReadAddressType((byte)((flagsByte & 0x30) >> 4));
+			var elementSizeInBytes = size.GetSizeInBytes();
+
+			if (ESP - 8 < EBP)
+			{
+				RaiseError(Error.StackUnderflow);
+			}
+
+			ulong arrayStartAddress = PopExternal(OperandSize.QWord);
+			var indexBlock = new AddressBlock(OperandSize.DWord, type, memory, EIP);
+			EIP += indexBlock.operandLength;
+
+			uint arrayIndex = (uint)ReadDataFromAddressBlock(indexBlock, size);
+			PushExternal(memory.ReadDataAt(arrayStartAddress + (arrayIndex * elementSizeInBytes),
+				size), size);
+		}
+
+		private void ArrayWrite()
+		{
+			// arraywrite <SIZE> <index> <data>
+			//	<SIZE>: The size of all elements of the array.
+			//	<index>: A DWORD containing the zero-based index of the element to write in the array.
+			//	<data>: An address block containing the data to write.
+			// Errors:
+			//	StackUnderflow: Raised if the value atop the stack is less than 8 bytes.
+			//	AddressOutOfRange: Raised if the index is beyond the edge of memory.
+			// Flags byte: SSIIDD00, where SS is the size of the array elements, II is the type of
+			//	address block containing the index of the array element, and DD is the type of the
+			//	address block containing the data.
+
+			byte flagsByte = ReadProgramByte();
+			var size = ReadOperandSize((byte)(flagsByte >> 6));
+			var indexType = ReadAddressType((byte)((flagsByte & 0x30) >> 4));
+			var dataType = ReadAddressType((byte)((flagsByte & 0x0C) >> 2));
+			var elementSizeInBytes = size.GetSizeInBytes();
+
+			if (ESP - 8 < EBP)
+			{
+				RaiseError(Error.StackUnderflow);
+			}
+
+			ulong arrayStartAddress = PopExternal(OperandSize.QWord);
+			var indexBlock = new AddressBlock(OperandSize.DWord, indexType, memory, EIP);
+			EIP += indexBlock.operandLength;
+			var dataBlock = new AddressBlock(size, dataType, memory, EIP);
+			EIP += indexBlock.operandLength;
+
+			uint arrayIndex = (uint)ReadDataFromAddressBlock(indexBlock, size);
+			ulong arrayIndexAddress = arrayStartAddress + (arrayIndex * elementSizeInBytes);
+			memory.WriteDataAt(ReadDataFromAddressBlock(dataBlock, size), arrayIndexAddress,
+				size);
+		}
+		#endregion
+
+		#region Integral/Bitwise Operations
+		private NumericOperation OpcodeToNumericOperation(ushort opcode)
+		{
+			switch ((opcode & 0xFF) % 18)
+			{
+				case 0: return NumericOperation.Add;
+				case 1: return NumericOperation.Subtract;
+				case 2: return NumericOperation.Multiply;
+				case 3: return NumericOperation.Divide;
+				case 4: return NumericOperation.ModDivide;
+				case 5: return NumericOperation.Increment;
+				case 6: return NumericOperation.Decrement;
+				case 7: return NumericOperation.BitwiseAND;
+				case 8: return NumericOperation.BitwiseOR;
+				case 9: return NumericOperation.BitwiseXOR;
+				case 10: return NumericOperation.BitwiseNOT;
+				case 11: return NumericOperation.BitwiseShiftLeft;
+				case 12: return NumericOperation.BitwiseShiftRight;
+				case 13: return NumericOperation.LogicalAND;
+				case 14: return NumericOperation.LogicalOR;
+				case 15: return NumericOperation.LogicalXOR;
+				case 16: return NumericOperation.LogicalNOT;
+				case 17: return NumericOperation.Compare;
+				default: throw new ArgumentException($"Implementation error: Invalid opcode {opcode}");
+			}
+		}
+
+		private int StackArgumentsToPop(NumericOperation operation)
+		{
+			switch (operation)
+			{
+				case NumericOperation.Add:
+				case NumericOperation.Subtract:
+				case NumericOperation.Multiply:
+				case NumericOperation.Divide:
+				case NumericOperation.ModDivide:
+				case NumericOperation.BitwiseAND:
+				case NumericOperation.BitwiseOR:
+				case NumericOperation.BitwiseXOR:
+				case NumericOperation.BitwiseShiftLeft:
+				case NumericOperation.BitwiseShiftRight:
+				case NumericOperation.LogicalAND:
+				case NumericOperation.LogicalOR:
+				case NumericOperation.LogicalXOR:
+				case NumericOperation.Compare:
+					return 2;
+				case NumericOperation.Increment:
+				case NumericOperation.Decrement:
+				case NumericOperation.BitwiseNOT:
+				case NumericOperation.LogicalNOT:
+					return 1;
+				default:
+					throw new ArgumentException($"Implementation error: Invalid operation {operation}");
+			}
+		}
+
+		private void PerformStackOperation(ushort opcode)
+		{
+			// op <SIZE>
+			//	<SIZE>: The size of the operands and the result.
+			// Errors:
+			//	StackUnderflow: Occurs if popping the operands causes ESP to be less than EBP.
+			// Flags byte: SS000000, where SS is the size of the operands.
+
+			var operation = OpcodeToNumericOperation(opcode);
+			var stackArgsToPop = StackArgumentsToPop(operation);
+
+			var flagsByte = ReadProgramByte();
+			var size = ReadOperandSize((byte)(flagsByte >> 6));
+
+			ulong right = PopExternal(size);
+			ulong left = (stackArgsToPop == 2) ? PopExternal(size) : 0UL;
+			ulong result = PerformNumericOperation(operation, left, right);
+			PushExternal(result, size);
+		}
+
+		private ulong PerformNumericOperation(NumericOperation operation, ulong left, ulong right)
+		{
+			switch (operation)
+			{
+				case NumericOperation.Add: return left + right;
+				case NumericOperation.Subtract: return left - right;
+				case NumericOperation.Multiply: return left * right;
+				case NumericOperation.Divide: return left / right;
+				case NumericOperation.ModDivide: return left % right;
+				case NumericOperation.Increment: return right + 1;
+				case NumericOperation.Decrement: return right - 1;
+				case NumericOperation.BitwiseAND: return left & right;
+				case NumericOperation.BitwiseOR: return left | right;
+				case NumericOperation.BitwiseXOR: return left ^ right;
+				case NumericOperation.BitwiseNOT: return ~right;
+				case NumericOperation.BitwiseShiftLeft: return left << (int)right;
+				case NumericOperation.BitwiseShiftRight: return left >> (int)right;
+				case NumericOperation.LogicalAND: return ((left != 0) && (right != 0)) ? 1UL : 0UL;
+				case NumericOperation.LogicalOR: return ((left != 0) || (right != 0)) ? 1UL : 0UL;
+				case NumericOperation.LogicalXOR: return ((left != 0) ^ (right != 0)) ? 1UL : 0UL;
+				case NumericOperation.LogicalNOT: return (right == 0) ? 1UL : 0UL;
+				case NumericOperation.Compare: return (ulong)left.CompareTo(right);
+				default: throw new ArgumentException($"Implementation error: Invalid operation {operation}");
+
+				// WYLO: implement the long form of these instructions
+				// you just need to test a few of them (two-operand and one-operand, preferably)
+				// the core math logic is the same
+				// oh also cmp pushes 0 items on the stack and sets EFLAGS
 			}
 		}
 		#endregion

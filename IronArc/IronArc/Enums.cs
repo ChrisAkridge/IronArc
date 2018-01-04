@@ -54,6 +54,28 @@ namespace IronArc
 		VMStateChanged
 	}
 
+	public enum NumericOperation
+	{
+		Add,
+		Subtract,
+		Multiply,
+		Divide,
+		ModDivide,
+		Increment,
+		Decrement,
+		BitwiseAND,
+		BitwiseOR,
+		BitwiseXOR,
+		BitwiseNOT,
+		BitwiseShiftLeft,
+		BitwiseShiftRight,
+		LogicalAND,
+		LogicalOR,
+		LogicalXOR,
+		LogicalNOT,
+		Compare
+	}
+
 	public static class EnumExtensions
 	{
 		public static ulong SizeInBytes(this OperandSize size)
