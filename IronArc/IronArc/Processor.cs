@@ -124,9 +124,18 @@ namespace IronArc
 					}
 					break;
 				case 0x02:
-					if ((opcode & 0xFF) <= 0x23 /* 0x0223 is Long Comparison */)
+					int operation = opcode & 0xFF;
+					if (operation <= 0x11 /* 0x0211 is Stack Comparison */)
 					{
 						PerformStackOperation(opcode);
+					}
+					else if (operation <= 0x23 /* 0x0223 is Long Comparison */)
+					{
+						PerformLongOperation(opcode);
+					}
+					else if (operation >= 0x80 && operation <= 0x86)
+					{
+						PerformFloatingStackOperation(opcode);
 					}
 					break;
 				default:
@@ -994,7 +1003,68 @@ namespace IronArc
 			ulong right = PopExternal(size);
 			ulong left = (stackArgsToPop == 2) ? PopExternal(size) : 0UL;
 			ulong result = PerformNumericOperation(operation, left, right);
-			PushExternal(result, size);
+
+			if (operation != NumericOperation.Compare) { PushExternal(result, size); }
+		}
+
+		private void PerformLongOperation(ushort opcode)
+		{
+			// op <SIZE> <left> <right> <dest>
+			//	<SIZE>: The size of the operands and the destination.
+			//	<left>: The left operand.
+			//	<right>: The right operand. Omitted for increment, decrement, bitwise and logical NOT.
+			//	<dest>: The destination in which the operation should be stored in. Omitted for compare.
+			// Errors:
+			//	AddressOutOfRange: Raised if any operand is beyond the range of memory.
+			//	InvalidDestinationType: Raised if the destination is a numeric literal or string table entry.
+			// Flags byte: SSLLRRDD, where SS is the size, LL and RR are the types of the operands, and DD
+			//	is the type of the destination. RR is always 00 if the instruction has no right operand
+			//	(such as incl or decl).
+
+			var operation = OpcodeToNumericOperation(opcode);
+			var flagsByte = ReadProgramByte();
+
+			var size = ReadOperandSize((byte)(flagsByte >> 6));
+			var leftType = ReadAddressType((byte)((flagsByte & 0x30) >> 4));
+			var rightType = ReadAddressType((byte)((flagsByte & 0x0C) >> 2));
+			var destType = ReadAddressType((byte)(flagsByte & 0x03));
+
+			bool isBinaryOperation = (StackArgumentsToPop(operation) == 2);
+
+			var leftBlock = new AddressBlock(size, leftType, memory, EIP);
+			EIP += leftBlock.operandLength;
+			AddressBlock rightBlock = new AddressBlock();
+			AddressBlock destBlock = new AddressBlock();
+			if (isBinaryOperation)
+			{
+				rightBlock = new AddressBlock(size, rightType, memory, EIP);
+				EIP += rightBlock.operandLength;
+			}
+			if (operation != NumericOperation.Compare)
+			{
+				destBlock = new AddressBlock(size, destType, memory, EIP);
+				EIP += destBlock.operandLength;
+			}
+
+			ulong left = ReadDataFromAddressBlock(leftBlock, size);
+			ulong right = (isBinaryOperation) ? ReadDataFromAddressBlock(rightBlock, size) : 0UL;
+			// ugh, so unary stack operations use right as the operand, but unary long operations
+			// would want to use left instead. So let's just flip the operands. Not preferable, but...
+			if (!isBinaryOperation)
+			{
+				ulong temp = left;
+				left = right;
+				right = temp;
+			}
+
+			ulong result = PerformNumericOperation(operation, left, right);
+
+			
+
+			if (operation != NumericOperation.Compare)
+			{
+				WriteDataToAddressBlock(result, destBlock, size);
+			}
 		}
 
 		private ulong PerformNumericOperation(NumericOperation operation, ulong left, ulong right)
@@ -1018,13 +1088,94 @@ namespace IronArc
 				case NumericOperation.LogicalOR: return ((left != 0) || (right != 0)) ? 1UL : 0UL;
 				case NumericOperation.LogicalXOR: return ((left != 0) ^ (right != 0)) ? 1UL : 0UL;
 				case NumericOperation.LogicalNOT: return (right == 0) ? 1UL : 0UL;
-				case NumericOperation.Compare: return (ulong)left.CompareTo(right);
+				case NumericOperation.Compare:
+					SetFlagsByComparison(left.CompareTo(right));
+					return 0UL;	// Compare doesn't push anything to the stack, but we still need to return something
 				default: throw new ArgumentException($"Implementation error: Invalid operation {operation}");
+			}
+		}
 
-				// WYLO: implement the long form of these instructions
-				// you just need to test a few of them (two-operand and one-operand, preferably)
-				// the core math logic is the same
-				// oh also cmp pushes 0 items on the stack and sets EFLAGS
+		private NumericOperation OpcodeToFloatingOperation(ushort opcode)
+		{
+			switch (opcode & 0x7F)
+			{
+				case 0x00: return NumericOperation.Add;
+				case 0x01: return NumericOperation.Subtract;
+				case 0x02: return NumericOperation.Multiply;
+				case 0x03: return NumericOperation.Divide;
+				case 0x04: return NumericOperation.ModDivide;
+				case 0x05: return NumericOperation.Compare;
+				case 0x06: return NumericOperation.SquareRoot;
+				default: throw new ArgumentException($"Implementation error: Invalid opcode {opcode}");
+			}
+		}
+
+		private void PerformFloatingStackOperation(ushort opcode)
+		{
+			var operation = OpcodeToFloatingOperation(opcode);
+			var stackArgsToPop = (operation != NumericOperation.SquareRoot) ? 2 : 1;
+
+			var flagsByte = ReadProgramByte();
+			var size = ReadOperandSize((byte)(flagsByte >> 6));
+
+			if ((int)size < 2 /* size != OperandSize.DWord || size != OperandSize.QWord */)
+			{
+				throw new InvalidOperationException($"The operand size {size} is not valid. Floating operations must use DWORD (single) or QWORD (double).");
+			}
+
+			ulong rightBytes = PopExternal(size);
+			ulong leftBytes = (stackArgsToPop == 2) ? PopExternal(size) : 0UL;
+
+			double right = (size == OperandSize.QWord) ? BitConverter.Int64BitsToDouble((long)rightBytes) :
+				((uint)rightBytes).ToFloatBitwise();
+			double left = (size == OperandSize.QWord) ? BitConverter.Int64BitsToDouble((long)leftBytes) :
+				((uint)leftBytes).ToFloatBitwise();
+			double result = PerformFloatingOperations(left, right, operation);
+
+			if (operation != NumericOperation.Compare)
+			{
+				if (size == OperandSize.DWord) { PushExternal(((float)result).ToUIntBitwise(), size); }
+				else { PushExternal((ulong)BitConverter.DoubleToInt64Bits(result), size); }
+			}
+		}
+
+		private double PerformFloatingOperations(double left, double right, NumericOperation operation)
+		{
+			switch (operation)
+			{
+				case NumericOperation.Add: return left + right;
+				case NumericOperation.Subtract: return left - right;
+				case NumericOperation.Multiply: return left * right;
+				case NumericOperation.Divide: return left / right;
+				case NumericOperation.ModDivide: return left % right;
+				case NumericOperation.Compare:
+					SetFlagsByComparison(left.CompareTo(right));
+					return 0UL;
+				case NumericOperation.SquareRoot: return Math.Sqrt(right);
+				default: throw new InvalidOperationException($"Invalid floating operation {operation}.");
+			}
+		}
+
+		private void SetFlagsByComparison(int comparison)
+		{
+			EFLAGS &= (~EFlags.EqualFlag);
+			EFLAGS &= (~EFlags.LessThanFlag);
+			EFLAGS &= (~EFlags.GreaterThanFlag);
+			EFLAGS &= (~EFlags.LessThanOrEqualToFlag);
+			EFLAGS &= (~EFlags.GreaterThanOrEqualToFlag);
+			if (comparison < 0)
+			{
+				EFLAGS |= EFlags.LessThanFlag;
+			}
+			else if (comparison > 0)
+			{
+				EFLAGS |= EFlags.GreaterThanFlag;
+			}
+			else
+			{
+				EFLAGS |= EFlags.EqualFlag;
+				EFLAGS |= EFlags.LessThanOrEqualToFlag;
+				EFLAGS |= EFlags.GreaterThanOrEqualToFlag;
 			}
 		}
 		#endregion

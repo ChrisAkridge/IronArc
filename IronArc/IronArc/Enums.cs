@@ -73,7 +73,8 @@ namespace IronArc
 		LogicalOR,
 		LogicalXOR,
 		LogicalNOT,
-		Compare
+		Compare,
+		SquareRoot
 	}
 
 	public static class EnumExtensions
