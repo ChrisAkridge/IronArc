@@ -76,14 +76,21 @@ namespace IronArcHost
 		private void TSBShowTerminal_Click(object sender, EventArgs e)
 		{
 			var machineID = Guid.Parse(ListVMs.SelectedItems[0].Text);
-			var terminalForm = VMManager.Provider.Terminals.First(f => f.MachineID == machineID);
-			terminalForm.Show();
+			var terminalForm = VMManager.Provider.Terminals.FirstOrDefault(f => f.MachineID == machineID);
+			if (terminalForm != null)
+			{
+				terminalForm.Show();
+			}
+			else
+			{
+				MessageBox.Show("No terminal was attached to this VM.", "IronArc", MessageBoxButtons.OK,
+					MessageBoxIcon.Error);
+			}
 		}
 
 		private void TSBShowDebugger_Click(object sender, EventArgs e)
 		{
-			// temporary
-			new DebuggerForm().ShowDialog();
+			MessageBox.Show("Debugger support coming soon!", "IronArc", MessageBoxButtons.OK, MessageBoxIcon.Information);
 		}
 
 		private void TSBHardware_Click(object sender, EventArgs e)

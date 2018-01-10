@@ -120,6 +120,7 @@
 			this.ButtonOK.TabIndex = 6;
 			this.ButtonOK.Text = "&OK";
 			this.ButtonOK.UseVisualStyleBackColor = true;
+			this.ButtonOK.Click += new System.EventHandler(this.ButtonOK_Click);
 			// 
 			// HardwareForm
 			// 
@@ -136,6 +137,7 @@
 			this.Controls.Add(this.StaticLabelSelectedDevices);
 			this.Font = new System.Drawing.Font("Segoe UI", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
 			this.Name = "HardwareForm";
+			this.ShowIcon = false;
 			this.Text = "Hardware Devices";
 			this.ResumeLayout(false);
 			this.PerformLayout();

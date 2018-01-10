@@ -1,0 +1,11 @@
+To create a new release for IronArc:
+
+1. Update the version info in the properties for all projects, along with any other info.
+2. Build IronArc, IronArcHost, IronAssembler, and IronAssemblerCLI all on Release mode.
+3. Place all binaries, prerequisites, and any IEXE samples into a folder.
+4. Place a readme and the license in the folder. The readme should include installation and usage instruction, plus links to the source code and the project page on Akridgetech.
+5. Zip it all up and record the zip file's hash.
+6. Upload the zip to Akridgetech.
+7. Create a blog post about the release.
+8. Update the project page on Akridgetech to point to the zip file and include the file hash.
+9. Post a tweet about the update.

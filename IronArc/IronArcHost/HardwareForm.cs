@@ -76,5 +76,10 @@ namespace IronArcHost
 			ListSelectedDevices.Items.RemoveAt(deviceIndex);
 			ListAvailableDevices.Items.Add(hwDeviceTypeName);
 		}
+
+		private void ButtonOK_Click(object sender, EventArgs e)
+		{
+			Close();
+		}
 	}
 }

@@ -64,8 +64,6 @@
 			this.TextBoxInput.Name = "TextBoxInput";
 			this.TextBoxInput.Size = new System.Drawing.Size(412, 23);
 			this.TextBoxInput.TabIndex = 1;
-			this.TextBoxInput.Text = "Input";
-			this.TextBoxInput.KeyDown += TextBoxInput_KeyDown;
 			// 
 			// CMSTerminal
 			// 

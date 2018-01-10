@@ -6,12 +6,12 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("IronArcHost")]
-[assembly: AssemblyDescription("A program that can run and debug IronArc virtual machines. Uses icons by Devendra Karkar (http://bit.ly/2mnGFuB).")]
+[assembly: AssemblyTitle("IronArc")]
+[assembly: AssemblyDescription("A virtual processor architecture that can run programs written in a new instruction set and binary format.")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("IronArcHost")]
-[assembly: AssemblyCopyright("Copyright ©  2014")]
+[assembly: AssemblyCompany("Chris Akridge")]
+[assembly: AssemblyProduct("IronArc")]
+[assembly: AssemblyCopyright("2014-2018 Chris Akridge")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -21,7 +21,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("28838e38-c39c-4265-9fc9-89f7404d5751")]
+[assembly: Guid("f1e684bf-1fea-4965-ab18-3fa35b10dfdb")]
 
 // Version information for an assembly consists of the following four values:
 //
@@ -30,10 +30,7 @@ using System.Runtime.InteropServices;
 //      Build Number
 //      Revision
 //
-// You can specify all the values or you can default the Build and Revision Numbers 
-// by using the '*' as shown below:
-// [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("1.0.0.0")]
+[assembly: AssemblyVersion("0.1.0.0")]
 [assembly: AssemblyFileVersion("1.0.0.0")]
 [assembly: NeutralResourcesLanguage("en-US")]
 

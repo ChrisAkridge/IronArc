@@ -44,9 +44,9 @@
 			this.LVCMemory = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
 			this.LVCHardwareDeviceCount = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
 			this.LVCInstructionExecutedCount = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+			this.LVCInstructionsPerSecond = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
 			this.TmrMessageQueueCheck = new System.Windows.Forms.Timer(this.components);
 			this.TmrUpdateInstructionCount = new System.Windows.Forms.Timer(this.components);
-			this.LVCInstructionsPerSecond = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
 			this.toolStrip1.SuspendLayout();
 			this.SuspendLayout();
 			// 
@@ -172,6 +172,10 @@
 			this.LVCInstructionExecutedCount.Text = "Instructions Executed";
 			this.LVCInstructionExecutedCount.Width = 137;
 			// 
+			// LVCInstructionsPerSecond
+			// 
+			this.LVCInstructionsPerSecond.Text = "IPS";
+			// 
 			// TmrMessageQueueCheck
 			// 
 			this.TmrMessageQueueCheck.Enabled = true;
@@ -183,10 +187,6 @@
 			this.TmrUpdateInstructionCount.Interval = 1000;
 			this.TmrUpdateInstructionCount.Tick += new System.EventHandler(this.TmrUpdateInstructionCount_Tick);
 			// 
-			// LVCInstructionsPerSecond
-			// 
-			this.LVCInstructionsPerSecond.Text = "IPS";
-			// 
 			// LauncherForm
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -194,8 +194,9 @@
 			this.ClientSize = new System.Drawing.Size(566, 348);
 			this.Controls.Add(this.ListVMs);
 			this.Controls.Add(this.toolStrip1);
+			this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
 			this.Name = "LauncherForm";
-			this.Text = "IronArc";
+			this.Text = "IronArc Host";
 			this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.LauncherForm_FormClosing);
 			this.toolStrip1.ResumeLayout(false);
 			this.toolStrip1.PerformLayout();

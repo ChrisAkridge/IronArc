@@ -41,38 +41,38 @@
 			this.TSSeparator2 = new System.Windows.Forms.ToolStripSeparator();
 			this.TSBAnimate = new System.Windows.Forms.ToolStripButton();
 			this.GroupRegisters = new System.Windows.Forms.GroupBox();
+			this.TextERP = new System.Windows.Forms.TextBox();
+			this.TextESP = new System.Windows.Forms.TextBox();
+			this.TextEHX = new System.Windows.Forms.TextBox();
+			this.TextEGX = new System.Windows.Forms.TextBox();
+			this.TextEFX = new System.Windows.Forms.TextBox();
+			this.TextEEX = new System.Windows.Forms.TextBox();
+			this.LinkERP = new System.Windows.Forms.LinkLabel();
+			this.LinkEFLAGS = new System.Windows.Forms.LinkLabel();
+			this.LinkESP = new System.Windows.Forms.LinkLabel();
+			this.textBox3 = new System.Windows.Forms.TextBox();
 			this.LinkEHX = new System.Windows.Forms.LinkLabel();
+			this.textBox2 = new System.Windows.Forms.TextBox();
+			this.textBox1 = new System.Windows.Forms.TextBox();
+			this.LinkEIP = new System.Windows.Forms.LinkLabel();
 			this.LinkEGX = new System.Windows.Forms.LinkLabel();
-			this.LinkEFX = new System.Windows.Forms.LinkLabel();
-			this.LinkEEX = new System.Windows.Forms.LinkLabel();
 			this.TextEDX = new System.Windows.Forms.TextBox();
 			this.LinkEDX = new System.Windows.Forms.LinkLabel();
-			this.TextECX = new System.Windows.Forms.TextBox();
-			this.LinkECX = new System.Windows.Forms.LinkLabel();
-			this.TextEBX = new System.Windows.Forms.TextBox();
-			this.LinkEBX = new System.Windows.Forms.LinkLabel();
 			this.TextEAX = new System.Windows.Forms.TextBox();
+			this.LinkEFX = new System.Windows.Forms.LinkLabel();
+			this.LinkEBP = new System.Windows.Forms.LinkLabel();
 			this.LinkLabelEAX = new System.Windows.Forms.LinkLabel();
+			this.LinkEEX = new System.Windows.Forms.LinkLabel();
+			this.TextEBX = new System.Windows.Forms.TextBox();
+			this.LinkECX = new System.Windows.Forms.LinkLabel();
+			this.TextECX = new System.Windows.Forms.TextBox();
+			this.LinkEBX = new System.Windows.Forms.LinkLabel();
 			this.GroupMemory = new System.Windows.Forms.GroupBox();
 			this.HexMemoryViewer = new HexControlLibrary.HexControl();
 			this.GroupCallStackViewer = new System.Windows.Forms.GroupBox();
 			this.ListCallStackViewer = new System.Windows.Forms.ListView();
 			this.ColumnCalledAddress = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
 			this.ColumnEBP = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-			this.LinkEBP = new System.Windows.Forms.LinkLabel();
-			this.LinkESP = new System.Windows.Forms.LinkLabel();
-			this.LinkEIP = new System.Windows.Forms.LinkLabel();
-			this.LinkERP = new System.Windows.Forms.LinkLabel();
-			this.LinkEFLAGS = new System.Windows.Forms.LinkLabel();
-			this.textBox1 = new System.Windows.Forms.TextBox();
-			this.textBox2 = new System.Windows.Forms.TextBox();
-			this.textBox3 = new System.Windows.Forms.TextBox();
-			this.TextEEX = new System.Windows.Forms.TextBox();
-			this.TextEFX = new System.Windows.Forms.TextBox();
-			this.TextEGX = new System.Windows.Forms.TextBox();
-			this.TextEHX = new System.Windows.Forms.TextBox();
-			this.TextESP = new System.Windows.Forms.TextBox();
-			this.TextERP = new System.Windows.Forms.TextBox();
 			this.GroupBoxDisassembly.SuspendLayout();
 			this.ToolStripDebugger.SuspendLayout();
 			this.GroupRegisters.SuspendLayout();
@@ -88,7 +88,7 @@
 			this.GroupBoxDisassembly.Size = new System.Drawing.Size(351, 267);
 			this.GroupBoxDisassembly.TabIndex = 0;
 			this.GroupBoxDisassembly.TabStop = false;
-			this.GroupBoxDisassembly.Text = "Disassembly (Main Program)";
+			this.GroupBoxDisassembly.Text = "Disassembly";
 			// 
 			// ListDisassembly
 			// 
@@ -208,6 +208,99 @@
 			this.GroupRegisters.TabStop = false;
 			this.GroupRegisters.Text = "Registers";
 			// 
+			// TextERP
+			// 
+			this.TextERP.Font = new System.Drawing.Font("Consolas", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+			this.TextERP.Location = new System.Drawing.Point(180, 150);
+			this.TextERP.Name = "TextERP";
+			this.TextERP.Size = new System.Drawing.Size(104, 20);
+			this.TextERP.TabIndex = 28;
+			this.TextERP.Text = "0000000000000000";
+			// 
+			// TextESP
+			// 
+			this.TextESP.Font = new System.Drawing.Font("Consolas", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+			this.TextESP.Location = new System.Drawing.Point(180, 124);
+			this.TextESP.Name = "TextESP";
+			this.TextESP.Size = new System.Drawing.Size(104, 20);
+			this.TextESP.TabIndex = 27;
+			this.TextESP.Text = "0000000000000000";
+			// 
+			// TextEHX
+			// 
+			this.TextEHX.Font = new System.Drawing.Font("Consolas", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+			this.TextEHX.Location = new System.Drawing.Point(180, 98);
+			this.TextEHX.Name = "TextEHX";
+			this.TextEHX.Size = new System.Drawing.Size(104, 20);
+			this.TextEHX.TabIndex = 26;
+			this.TextEHX.Text = "0000000000000000";
+			// 
+			// TextEGX
+			// 
+			this.TextEGX.Font = new System.Drawing.Font("Consolas", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+			this.TextEGX.Location = new System.Drawing.Point(180, 72);
+			this.TextEGX.Name = "TextEGX";
+			this.TextEGX.Size = new System.Drawing.Size(104, 20);
+			this.TextEGX.TabIndex = 25;
+			this.TextEGX.Text = "0000000000000000";
+			// 
+			// TextEFX
+			// 
+			this.TextEFX.Font = new System.Drawing.Font("Consolas", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+			this.TextEFX.Location = new System.Drawing.Point(180, 46);
+			this.TextEFX.Name = "TextEFX";
+			this.TextEFX.Size = new System.Drawing.Size(104, 20);
+			this.TextEFX.TabIndex = 24;
+			this.TextEFX.Text = "0000000000000000";
+			// 
+			// TextEEX
+			// 
+			this.TextEEX.Font = new System.Drawing.Font("Consolas", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+			this.TextEEX.Location = new System.Drawing.Point(180, 20);
+			this.TextEEX.Name = "TextEEX";
+			this.TextEEX.Size = new System.Drawing.Size(104, 20);
+			this.TextEEX.TabIndex = 23;
+			this.TextEEX.Text = "0000000000000000";
+			// 
+			// LinkERP
+			// 
+			this.LinkERP.AutoSize = true;
+			this.LinkERP.Location = new System.Drawing.Point(149, 152);
+			this.LinkERP.Name = "LinkERP";
+			this.LinkERP.Size = new System.Drawing.Size(26, 13);
+			this.LinkERP.TabIndex = 21;
+			this.LinkERP.TabStop = true;
+			this.LinkERP.Text = "ERP";
+			// 
+			// LinkEFLAGS
+			// 
+			this.LinkEFLAGS.AutoSize = true;
+			this.LinkEFLAGS.Location = new System.Drawing.Point(7, 178);
+			this.LinkEFLAGS.Name = "LinkEFLAGS";
+			this.LinkEFLAGS.Size = new System.Drawing.Size(45, 13);
+			this.LinkEFLAGS.TabIndex = 22;
+			this.LinkEFLAGS.TabStop = true;
+			this.LinkEFLAGS.Text = "EFLAGS";
+			// 
+			// LinkESP
+			// 
+			this.LinkESP.AutoSize = true;
+			this.LinkESP.Location = new System.Drawing.Point(149, 126);
+			this.LinkESP.Name = "LinkESP";
+			this.LinkESP.Size = new System.Drawing.Size(25, 13);
+			this.LinkESP.TabIndex = 19;
+			this.LinkESP.TabStop = true;
+			this.LinkESP.Text = "ESP";
+			// 
+			// textBox3
+			// 
+			this.textBox3.Font = new System.Drawing.Font("Consolas", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+			this.textBox3.Location = new System.Drawing.Point(58, 176);
+			this.textBox3.Name = "textBox3";
+			this.textBox3.Size = new System.Drawing.Size(104, 20);
+			this.textBox3.TabIndex = 21;
+			this.textBox3.Text = "0000000000000000";
+			// 
 			// LinkEHX
 			// 
 			this.LinkEHX.AutoSize = true;
@@ -219,6 +312,34 @@
 			this.LinkEHX.Text = "EHX";
 			this.LinkEHX.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.LinkEHX_LinkClicked);
 			// 
+			// textBox2
+			// 
+			this.textBox2.Font = new System.Drawing.Font("Consolas", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+			this.textBox2.Location = new System.Drawing.Point(39, 150);
+			this.textBox2.Name = "textBox2";
+			this.textBox2.Size = new System.Drawing.Size(104, 20);
+			this.textBox2.TabIndex = 19;
+			this.textBox2.Text = "0000000000000000";
+			// 
+			// textBox1
+			// 
+			this.textBox1.Font = new System.Drawing.Font("Consolas", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+			this.textBox1.Location = new System.Drawing.Point(39, 124);
+			this.textBox1.Name = "textBox1";
+			this.textBox1.Size = new System.Drawing.Size(104, 20);
+			this.textBox1.TabIndex = 8;
+			this.textBox1.Text = "0000000000000000";
+			// 
+			// LinkEIP
+			// 
+			this.LinkEIP.AutoSize = true;
+			this.LinkEIP.Location = new System.Drawing.Point(11, 152);
+			this.LinkEIP.Name = "LinkEIP";
+			this.LinkEIP.Size = new System.Drawing.Size(22, 13);
+			this.LinkEIP.TabIndex = 20;
+			this.LinkEIP.TabStop = true;
+			this.LinkEIP.Text = "EIP";
+			// 
 			// LinkEGX
 			// 
 			this.LinkEGX.AutoSize = true;
@@ -229,28 +350,6 @@
 			this.LinkEGX.TabStop = true;
 			this.LinkEGX.Text = "EGX";
 			this.LinkEGX.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.LinkEGX_LinkClicked);
-			// 
-			// LinkEFX
-			// 
-			this.LinkEFX.AutoSize = true;
-			this.LinkEFX.Location = new System.Drawing.Point(149, 48);
-			this.LinkEFX.Name = "LinkEFX";
-			this.LinkEFX.Size = new System.Drawing.Size(25, 13);
-			this.LinkEFX.TabIndex = 12;
-			this.LinkEFX.TabStop = true;
-			this.LinkEFX.Text = "EFX";
-			this.LinkEFX.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.LinkEFX_LinkClicked);
-			// 
-			// LinkEEX
-			// 
-			this.LinkEEX.AutoSize = true;
-			this.LinkEEX.Location = new System.Drawing.Point(149, 22);
-			this.LinkEEX.Name = "LinkEEX";
-			this.LinkEEX.Size = new System.Drawing.Size(25, 13);
-			this.LinkEEX.TabIndex = 10;
-			this.LinkEEX.TabStop = true;
-			this.LinkEEX.Text = "EEX";
-			this.LinkEEX.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.LinkEEX_LinkClicked);
 			// 
 			// TextEDX
 			// 
@@ -272,14 +371,66 @@
 			this.LinkEDX.Text = "EDX";
 			this.LinkEDX.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.LinkEDX_LinkClicked);
 			// 
-			// TextECX
+			// TextEAX
 			// 
-			this.TextECX.Font = new System.Drawing.Font("Consolas", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-			this.TextECX.Location = new System.Drawing.Point(39, 72);
-			this.TextECX.Name = "TextECX";
-			this.TextECX.Size = new System.Drawing.Size(104, 20);
-			this.TextECX.TabIndex = 5;
-			this.TextECX.Text = "0000000000000000";
+			this.TextEAX.Font = new System.Drawing.Font("Consolas", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+			this.TextEAX.Location = new System.Drawing.Point(39, 20);
+			this.TextEAX.Name = "TextEAX";
+			this.TextEAX.Size = new System.Drawing.Size(104, 20);
+			this.TextEAX.TabIndex = 1;
+			this.TextEAX.Text = "0000000000000000";
+			// 
+			// LinkEFX
+			// 
+			this.LinkEFX.AutoSize = true;
+			this.LinkEFX.Location = new System.Drawing.Point(149, 48);
+			this.LinkEFX.Name = "LinkEFX";
+			this.LinkEFX.Size = new System.Drawing.Size(25, 13);
+			this.LinkEFX.TabIndex = 12;
+			this.LinkEFX.TabStop = true;
+			this.LinkEFX.Text = "EFX";
+			this.LinkEFX.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.LinkEFX_LinkClicked);
+			// 
+			// LinkEBP
+			// 
+			this.LinkEBP.AutoSize = true;
+			this.LinkEBP.Location = new System.Drawing.Point(7, 126);
+			this.LinkEBP.Name = "LinkEBP";
+			this.LinkEBP.Size = new System.Drawing.Size(26, 13);
+			this.LinkEBP.TabIndex = 18;
+			this.LinkEBP.TabStop = true;
+			this.LinkEBP.Text = "EBP";
+			// 
+			// LinkLabelEAX
+			// 
+			this.LinkLabelEAX.AutoSize = true;
+			this.LinkLabelEAX.Location = new System.Drawing.Point(7, 22);
+			this.LinkLabelEAX.Name = "LinkLabelEAX";
+			this.LinkLabelEAX.Size = new System.Drawing.Size(26, 13);
+			this.LinkLabelEAX.TabIndex = 0;
+			this.LinkLabelEAX.TabStop = true;
+			this.LinkLabelEAX.Text = "EAX";
+			this.LinkLabelEAX.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.LinkLabelEAX_LinkClicked);
+			// 
+			// LinkEEX
+			// 
+			this.LinkEEX.AutoSize = true;
+			this.LinkEEX.Location = new System.Drawing.Point(149, 22);
+			this.LinkEEX.Name = "LinkEEX";
+			this.LinkEEX.Size = new System.Drawing.Size(25, 13);
+			this.LinkEEX.TabIndex = 10;
+			this.LinkEEX.TabStop = true;
+			this.LinkEEX.Text = "EEX";
+			this.LinkEEX.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.LinkEEX_LinkClicked);
+			// 
+			// TextEBX
+			// 
+			this.TextEBX.Font = new System.Drawing.Font("Consolas", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+			this.TextEBX.Location = new System.Drawing.Point(39, 46);
+			this.TextEBX.Name = "TextEBX";
+			this.TextEBX.Size = new System.Drawing.Size(104, 20);
+			this.TextEBX.TabIndex = 3;
+			this.TextEBX.Text = "0000000000000000";
 			// 
 			// LinkECX
 			// 
@@ -292,14 +443,14 @@
 			this.LinkECX.Text = "ECX";
 			this.LinkECX.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.LinkECX_LinkClicked);
 			// 
-			// TextEBX
+			// TextECX
 			// 
-			this.TextEBX.Font = new System.Drawing.Font("Consolas", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-			this.TextEBX.Location = new System.Drawing.Point(39, 46);
-			this.TextEBX.Name = "TextEBX";
-			this.TextEBX.Size = new System.Drawing.Size(104, 20);
-			this.TextEBX.TabIndex = 3;
-			this.TextEBX.Text = "0000000000000000";
+			this.TextECX.Font = new System.Drawing.Font("Consolas", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+			this.TextECX.Location = new System.Drawing.Point(39, 72);
+			this.TextECX.Name = "TextECX";
+			this.TextECX.Size = new System.Drawing.Size(104, 20);
+			this.TextECX.TabIndex = 5;
+			this.TextECX.Text = "0000000000000000";
 			// 
 			// LinkEBX
 			// 
@@ -311,26 +462,6 @@
 			this.LinkEBX.TabStop = true;
 			this.LinkEBX.Text = "EBX";
 			this.LinkEBX.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.LinkEBX_LinkClicked);
-			// 
-			// TextEAX
-			// 
-			this.TextEAX.Font = new System.Drawing.Font("Consolas", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-			this.TextEAX.Location = new System.Drawing.Point(39, 20);
-			this.TextEAX.Name = "TextEAX";
-			this.TextEAX.Size = new System.Drawing.Size(104, 20);
-			this.TextEAX.TabIndex = 1;
-			this.TextEAX.Text = "0000000000000000";
-			// 
-			// LinkLabelEAX
-			// 
-			this.LinkLabelEAX.AutoSize = true;
-			this.LinkLabelEAX.Location = new System.Drawing.Point(7, 22);
-			this.LinkLabelEAX.Name = "LinkLabelEAX";
-			this.LinkLabelEAX.Size = new System.Drawing.Size(26, 13);
-			this.LinkLabelEAX.TabIndex = 0;
-			this.LinkLabelEAX.TabStop = true;
-			this.LinkLabelEAX.Text = "EAX";
-			this.LinkLabelEAX.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.LinkLabelEAX_LinkClicked);
 			// 
 			// GroupMemory
 			// 
@@ -383,137 +514,6 @@
 			// ColumnEBP
 			// 
 			this.ColumnEBP.Text = "Stack Base";
-			// 
-			// LinkEBP
-			// 
-			this.LinkEBP.AutoSize = true;
-			this.LinkEBP.Location = new System.Drawing.Point(7, 126);
-			this.LinkEBP.Name = "LinkEBP";
-			this.LinkEBP.Size = new System.Drawing.Size(26, 13);
-			this.LinkEBP.TabIndex = 18;
-			this.LinkEBP.TabStop = true;
-			this.LinkEBP.Text = "EBP";
-			// 
-			// LinkESP
-			// 
-			this.LinkESP.AutoSize = true;
-			this.LinkESP.Location = new System.Drawing.Point(149, 126);
-			this.LinkESP.Name = "LinkESP";
-			this.LinkESP.Size = new System.Drawing.Size(25, 13);
-			this.LinkESP.TabIndex = 19;
-			this.LinkESP.TabStop = true;
-			this.LinkESP.Text = "ESP";
-			// 
-			// LinkEIP
-			// 
-			this.LinkEIP.AutoSize = true;
-			this.LinkEIP.Location = new System.Drawing.Point(11, 152);
-			this.LinkEIP.Name = "LinkEIP";
-			this.LinkEIP.Size = new System.Drawing.Size(22, 13);
-			this.LinkEIP.TabIndex = 20;
-			this.LinkEIP.TabStop = true;
-			this.LinkEIP.Text = "EIP";
-			// 
-			// LinkERP
-			// 
-			this.LinkERP.AutoSize = true;
-			this.LinkERP.Location = new System.Drawing.Point(149, 152);
-			this.LinkERP.Name = "LinkERP";
-			this.LinkERP.Size = new System.Drawing.Size(26, 13);
-			this.LinkERP.TabIndex = 21;
-			this.LinkERP.TabStop = true;
-			this.LinkERP.Text = "ERP";
-			// 
-			// LinkEFLAGS
-			// 
-			this.LinkEFLAGS.AutoSize = true;
-			this.LinkEFLAGS.Location = new System.Drawing.Point(7, 178);
-			this.LinkEFLAGS.Name = "LinkEFLAGS";
-			this.LinkEFLAGS.Size = new System.Drawing.Size(45, 13);
-			this.LinkEFLAGS.TabIndex = 22;
-			this.LinkEFLAGS.TabStop = true;
-			this.LinkEFLAGS.Text = "EFLAGS";
-			// 
-			// textBox1
-			// 
-			this.textBox1.Font = new System.Drawing.Font("Consolas", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-			this.textBox1.Location = new System.Drawing.Point(39, 124);
-			this.textBox1.Name = "textBox1";
-			this.textBox1.Size = new System.Drawing.Size(104, 20);
-			this.textBox1.TabIndex = 8;
-			this.textBox1.Text = "0000000000000000";
-			// 
-			// textBox2
-			// 
-			this.textBox2.Font = new System.Drawing.Font("Consolas", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-			this.textBox2.Location = new System.Drawing.Point(39, 150);
-			this.textBox2.Name = "textBox2";
-			this.textBox2.Size = new System.Drawing.Size(104, 20);
-			this.textBox2.TabIndex = 19;
-			this.textBox2.Text = "0000000000000000";
-			// 
-			// textBox3
-			// 
-			this.textBox3.Font = new System.Drawing.Font("Consolas", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-			this.textBox3.Location = new System.Drawing.Point(58, 176);
-			this.textBox3.Name = "textBox3";
-			this.textBox3.Size = new System.Drawing.Size(104, 20);
-			this.textBox3.TabIndex = 21;
-			this.textBox3.Text = "0000000000000000";
-			// 
-			// TextEEX
-			// 
-			this.TextEEX.Font = new System.Drawing.Font("Consolas", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-			this.TextEEX.Location = new System.Drawing.Point(180, 20);
-			this.TextEEX.Name = "TextEEX";
-			this.TextEEX.Size = new System.Drawing.Size(104, 20);
-			this.TextEEX.TabIndex = 23;
-			this.TextEEX.Text = "0000000000000000";
-			// 
-			// TextEFX
-			// 
-			this.TextEFX.Font = new System.Drawing.Font("Consolas", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-			this.TextEFX.Location = new System.Drawing.Point(180, 46);
-			this.TextEFX.Name = "TextEFX";
-			this.TextEFX.Size = new System.Drawing.Size(104, 20);
-			this.TextEFX.TabIndex = 24;
-			this.TextEFX.Text = "0000000000000000";
-			// 
-			// TextEGX
-			// 
-			this.TextEGX.Font = new System.Drawing.Font("Consolas", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-			this.TextEGX.Location = new System.Drawing.Point(180, 72);
-			this.TextEGX.Name = "TextEGX";
-			this.TextEGX.Size = new System.Drawing.Size(104, 20);
-			this.TextEGX.TabIndex = 25;
-			this.TextEGX.Text = "0000000000000000";
-			// 
-			// TextEHX
-			// 
-			this.TextEHX.Font = new System.Drawing.Font("Consolas", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-			this.TextEHX.Location = new System.Drawing.Point(180, 98);
-			this.TextEHX.Name = "TextEHX";
-			this.TextEHX.Size = new System.Drawing.Size(104, 20);
-			this.TextEHX.TabIndex = 26;
-			this.TextEHX.Text = "0000000000000000";
-			// 
-			// TextESP
-			// 
-			this.TextESP.Font = new System.Drawing.Font("Consolas", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-			this.TextESP.Location = new System.Drawing.Point(180, 124);
-			this.TextESP.Name = "TextESP";
-			this.TextESP.Size = new System.Drawing.Size(104, 20);
-			this.TextESP.TabIndex = 27;
-			this.TextESP.Text = "0000000000000000";
-			// 
-			// TextERP
-			// 
-			this.TextERP.Font = new System.Drawing.Font("Consolas", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-			this.TextERP.Location = new System.Drawing.Point(180, 150);
-			this.TextERP.Name = "TextERP";
-			this.TextERP.Size = new System.Drawing.Size(104, 20);
-			this.TextERP.TabIndex = 28;
-			this.TextERP.Text = "0000000000000000";
 			// 
 			// DebuggerForm
 			// 

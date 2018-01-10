@@ -1,0 +1,8 @@
+main:
+	push QWORD str:1
+	hwcall str:0
+	end
+
+strings:
+	0: "Terminal::WriteLine"
+	1: "Hello, world!"
