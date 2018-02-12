@@ -1,0 +1,11 @@
+main:
+	mov QWORD 128 ebp
+	mov QWORD 128 esp
+	hwcall str:0
+	push QWORD ebp
+	hwcall str:1
+	end
+	
+strings:
+	0: "Terminal::ReadLine"
+	1: "Terminal::WriteLine"
