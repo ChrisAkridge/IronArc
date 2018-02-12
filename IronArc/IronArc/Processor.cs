@@ -265,7 +265,14 @@ namespace IronArc
 					else
 					{ return valueWithOffset; }
 				case AddressType.NumericLiteral:
-					RaiseError(Error.InvalidAddressType);
+					if (block.size != OperandSize.QWord)
+					{
+						RaiseError(Error.InvalidAddressType);
+					}
+					else
+					{
+						return block.value;
+					}
 					break;
 				case AddressType.StringEntry:
 					return LookupStringAddress((uint)block.value);
@@ -678,7 +685,7 @@ namespace IronArc
 				return;
 			}
 
-			if (((EFLAGS & EFlags.GreaterThanFlag) != 0) && ((EFLAGS & EFlags.EqualFlag) != 0))
+			if (((EFLAGS & EFlags.GreaterThanFlag) != 0) || ((EFLAGS & EFlags.EqualFlag) != 0))
 			{
 				EIP = jumpAddress;
 			}
