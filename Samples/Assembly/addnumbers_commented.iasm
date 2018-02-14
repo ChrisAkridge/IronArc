@@ -1,0 +1,334 @@
+// addnumbers_commented.iasm
+// Adds two user-supplied numbers, digit-by-digit, and prints the sum
+// This file maps lines from addnumbers.c to their equivalent IronArc code
+// IronArc Assembly does not yet support comments; please use addnumbers.iasm to actually assemble this
+
+main:
+	// Set up the stack
+	mov QWORD 2048 ebp
+	mov QWORD 2048 esp
+
+	// hwcall("Terminal::WriteLine", "Enter a number:");
+	push QWORD str:0
+	hwcall str:1
+	
+	// *(0x1000) = hwcall("Terminal::ReadLine");
+	hwcall str:2
+	mov DWORD *ebp eax
+	addl QWORD eax 4 eax
+	movln *ebp 4096 eax
+	mov QWORD ebp esp
+	
+	// lpstring* addend1 = (lpstring*)0x1004;
+	push QWORD 4100
+	
+	// hwcall("Terminal::WriteLine", "Enter a second number:");
+	push QWORD str:3
+	hwcall str:1
+	
+	// *(0x2000) = hwcall("Terminal::ReadLine");
+	hwcall str:2
+	mov DWORD *ebp+8 eax
+	addl QWORD eax 4 eax
+	movln *ebp+8 8192 eax
+	mov QWORD ebp esp
+	addl QWORD esp 8 esp
+	
+	// lpstring* addend2 = (lpstring*)0x2004;
+	push QWORD 8196
+	
+	// int addend1Length = *(int*)(addend1 - 4);
+	mov QWORD *ebp eax
+	subl QWORD eax 4 eax
+	push DWORD *eax
+	
+	// int addend2Length = *(int*)(addend2 - 4);
+	mov QWORD *ebp+8 eax
+	subl QWORD eax 4 eax
+	push DWORD *eax
+	
+	// convertStringToDigits(((byte*)addend1), addend1Length);
+	stackargs
+	push QWORD *ebp		// stringFirstChar
+	push DWORD *ebp+16	// strlen
+	call convertStringToDigits
+	
+	// convertStringToDigits(((byte*)addend2), addend2Length);
+	stackargs
+	push QWORD *ebp+8	// stringFirstChar
+	push DWORD *ebp+20	// strlen
+	call convertStringToDigits
+	
+	// int min = 0;
+	push DWORD 0
+	
+	// if (addend1Length >= addend2Length)
+	push DWORD *ebp+16
+	push DWORD *ebp+20
+	cmp DWORD
+	jgte main__if_0_true
+	jlt main__if_0_false
+	
+main__if_0_true:
+	// min = addend2Length;
+	mov DWORD *ebp+20 *ebp+24
+	jmp main__if_0_after
+	
+main__if_0_false:
+	// min = addend1Length;
+	mov DWORD *ebp+16 *ebp+24
+	jmp main__if_0_after:
+	
+main__if_0_after:
+	// int max = 0;
+	push DWORD 0
+	
+	// if (addend1Length >= addend2Length)
+	push DWORD *ebp+16
+	push DWORD *ebp+20
+	cmp DWORD
+	jgte main__if_1_true
+	jlt main__if_1_false
+	
+main__if_1_true:
+	// max = addend1Length;
+	mov DWORD *ebp+16 *ebp+28
+	jmp main__if_1_after
+	
+main__if_1_false:
+	// max = addend2Length;
+	mov DWORD *ebp+20 *ebp+28
+	jmp main__if_1_after
+	
+main__if_1_after:
+	// byte* result = (byte*)0x3004;
+	push QWORD 12292
+	
+	// if (max == addend1Length)
+	hwcall str:4
+	push DWORD *ebp+28
+	push DWORD *ebp+16
+	cmp DWORD
+	je main__copy_addend1
+	jne main__copy_addend2
+
+main__copy_after:
+	// byte* current1 = ((byte*)addend1) + (addend1Length - 1);
+	push DWORD *ebp+16
+	push DWORD 1
+	sub DWORD
+	pop DWORD eax
+	push QWORD *ebp
+	push QWORD eax
+	add QWORD
+	
+	// byte* current2 = ((byte*)addend2) + (addend2Length - 1);
+	push DWORD *ebp+20
+	push DWORD 1
+	sub DWORD
+	pop DWORD eax
+	push QWORD *ebp+8
+	push QWORD eax
+	add QWORD
+	
+	// byte* currentResult = result + (max - 1);
+	push DWORD *ebp+28
+	push DWORD 1
+	sub DWORD
+	pop DWORD eax
+	push QWORD *ebp+32
+	push QWORD eax
+	add QWORD
+	
+	// byte carryFlag = 0;
+	push BYTE 0
+	
+	// int i = 0;
+	push DWORD 0
+	
+	// while (i < min)
+	jmp main__while_0_cmp
+
+main__while_0_cmp:
+	push DWORD *ebp+65
+	push DWORD *ebp+24
+	cmp DWORD
+	jlt main__while_0_main
+	jgte main__while_0_after
+	
+main__while_0_main:
+	// byte digit1 = *current1;
+	mov QWORD *ebp+40 eax
+	push BYTE *eax
+	
+	// byte digit2 = *current2;
+	mov QWORD *ebp+48 eax
+	push BYTE *eax
+	
+	// byte sum = digit1 + digit2 + carryFlag;
+	push BYTE *ebp+69
+	push BYTE *ebp+70
+	add BYTE
+	push BYTE *ebp+64
+	add BYTE
+	
+	// if (sum >= 10)
+	push BYTE *ebp+71
+	push BYTE 10
+	cmp BYTE
+	jgte main__if_2_true
+	jlt main__if_2_false
+	
+main__if_2_true:
+	// sum %= 10;
+	modl BYTE *ebp+71 10 *ebp+71
+	
+	// carryFlag = 1;
+	mov BYTE 1 *ebp+64
+	jmp main__if_2_after
+	
+main__if_2_false:
+	// carryFlag = 0;
+	mov BYTE 0 *ebp+64
+	jmp main__if_2_after
+	
+main__if_2_after:
+	// *currentResult = sum;
+	mov QWORD *ebp+56 eax
+	mov BYTE *ebp+71 *eax
+	
+	// current1--;
+	decl QWORD *ebp+40 *ebp+40
+	
+	// current2--;
+	decl QWORD *ebp+48 *ebp+48
+	
+	// currentResult--;
+	decl QWORD *ebp+56 *ebp+56
+	
+	// i++;
+	incl DWORD *ebp+65 *ebp+65
+	
+	// clear the variables in the while scope
+	subl QWORD esp 3 esp
+	jmp main__while_0_cmp
+
+main__while_0_after:
+	// convertStringToDigits(result, max)
+	stackargs
+	push QWORD *ebp+32
+	push DWORD *ebp+28
+	call convertDigitsToString
+	
+	// hwcall("Terminal::WriteLine", *(lpstring*)(result - 4));
+	push QWORD *ebp+32
+	push QWORD 4
+	sub QWORD
+	hwcall str:1
+	
+main__copy_addend1:
+	// memcpy((addend1 - 4), (result - 4), addend1Length + 4);
+	mov QWORD *ebp ecx
+	subl QWORD ecx 4 ecx
+	mov QWORD *ebp+32 edx
+	subl QWORD edx 4 edx
+	mov DWORD *ebp+16 eex
+	addl QWORD eex 4 eex
+	movln ecx edx eex
+	mov QWORD ecx 0
+	mov QWORD edx 0
+	mov QWORD eex 0
+	jmp main__copy_after
+	
+main__copy_addend2:
+	// memcpy((addend2 - 4), (result - 4), addend2Length + 4);
+	mov QWORD *ebp+8 ecx
+	subl QWORD ecx 4 ecx
+	mov QWORD *ebp+32 edx
+	subl QWORD edx 4 edx
+	mov DWORD *ebp+20 eex
+	addl QWORD eex 4 eex
+	movln ecx edx eex
+	mov QWORD ecx 0
+	mov QWORD edx 0
+	mov QWORD eex 0
+	jmp main__copy_after
+	
+convertStringToDigits:
+	// byte* current = stringFirstChar;
+	push QWORD *ebp
+	
+	// int i = 0;
+	push DWORD 0
+	
+	// while (i < strlen)
+	jmp convertStringToDigits__while_0_cmp
+
+convertStringToDigits__while_0_cmp:
+	push DWORD *ebp+20
+	push DWORD *ebp+8
+	cmp
+	jlt convertStringToDigits__while_0_main
+	jgte convertStringToDigits__while_0_after
+
+convertStringToDigits__while_0_main:
+	// *current -= 0x30;
+	mov QWORD *ebp+12 eax
+	subl BYTE *eax 48 *eax
+	
+	// current++;
+	incl QWORD *ebp+12 *ebp+12
+	
+	// i++;
+	incl DWORD *ebp+20 *ebp+20
+	jmp convertStringToDigits__while_0_cmp
+
+convertStringToDigits__while_0_after:
+	mov QWORD ebp esp
+	ret
+	
+convertDigitsToString:
+	// byte* current = digitsFirstDigit;
+	push QWORD *ebp
+	
+	// int i = 0;
+	push DWORD 0
+	
+	// while (i < digitLen)
+	jmp convertDigitsToString__while_0_cmp
+
+convertDigitsToString__while_0_cmp:
+	push DWORD *ebp+20
+	push DWORD *ebp+8
+	cmp
+	jlt convertDigitsToString__while_0_main
+	jgte convertDigitsToString__while_0_after
+
+convertDigitsToString__while_0_main:
+	// *current += 0x30;
+	mov QWORD *ebp+12 eax
+	addl BYTE *eax 48 *eax
+	
+	// current++;
+	incl QWORD *ebp+12 *ebp+12
+	
+	// i++;
+	incl DWORD *ebp+20 *ebp+20
+	jmp convertDigitsToString__while_0_cmp
+
+convertDigitsToString__while_0_after:
+	// *(int*)(digitFirstDigit - 4) = digitLen;
+	push QWORD *ebp
+	push QWORD 4
+	subl QWORD
+	mov QWORD *ebp+24 eax
+	mov DWORD *ebp+8 *eax
+
+	mov QWORD ebp esp
+	ret
+	
+strings:
+	0: "Enter a number:"
+	1: "Terminal::WriteLine"
+	2: "Terminal::ReadLine"
+	3: "Enter a second number:"
