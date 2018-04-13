@@ -15,6 +15,8 @@ namespace IronArcHost
 {
 	public partial class LauncherForm : Form
 	{
+		private Guid? machineIDWaitingToDebug;
+
 		public LauncherForm()
 		{
 			InitializeComponent();
@@ -31,6 +33,12 @@ namespace IronArcHost
 				{
 					listItem.SubItems[1].Text = ((VMState)e.WParam).ToString();
 				}
+			}
+
+			if (machineIDWaitingToDebug == e.MachineID)
+			{
+				machineIDWaitingToDebug = null;
+				new DebuggerForm(VMManager.Lookup(e.MachineID)).ShowDialog();
 			}
 		}
 
@@ -90,7 +98,11 @@ namespace IronArcHost
 
 		private void TSBShowDebugger_Click(object sender, EventArgs e)
 		{
-			MessageBox.Show("Debugger support coming soon!", "IronArc", MessageBoxButtons.OK, MessageBoxIcon.Information);
+			ListViewItem lvi = ListVMs.SelectedItems[0];
+			var machineID = Guid.Parse(lvi.Text);
+			machineIDWaitingToDebug = machineID;
+
+			VMManager.PauseVM(machineID);
 		}
 
 		private void TSBHardware_Click(object sender, EventArgs e)

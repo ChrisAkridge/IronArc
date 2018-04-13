@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -14,6 +15,7 @@ namespace IronArc
 		private byte* pointer;
 
 		public ulong Length { get; private set; }
+		public IntPtr Pointer => (IntPtr)pointer;
 
         public byte this[ulong index]
         {
@@ -31,6 +33,8 @@ namespace IronArc
 
 			return result;
         }
+
+		public UnmanagedMemoryStream CreateStream() => new UnmanagedMemoryStream(pointer, (long)Length);
 
         #region Constructors
         /// <summary>

@@ -199,7 +199,7 @@ The assembler version is written by whichever assembler made the program. If the
 
 Up next is the address of the start of the first instruction, followed by the start of the string table.
 
-Immediately following the header is all the instruction of the program. The `EIP` register is initialiazed to this value and execution begins here. It will continue through the memory space unless control flow is changed by the control flow instructions.
+Immediately following the header is all the instructions of the program. The `EIP` register is initialiazed to this value and execution begins here. It will continue through the memory space unless control flow is changed by the control flow instructions.
 
 At the end of the instruction space is a string table. The string table start with a 32-bit unsigned integer stating the number of strings in the table. An array of addresses to the start of each string follows, then the strings themselves. Each string is prefixed with the number of bytes it is as a four-byte unsigned integer, followed by the text of the string in UTF-8 format.
 

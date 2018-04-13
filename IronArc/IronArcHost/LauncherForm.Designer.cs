@@ -111,7 +111,6 @@
 			// 
 			// TSBShowDebugger
 			// 
-			this.TSBShowDebugger.Enabled = false;
 			this.TSBShowDebugger.Image = ((System.Drawing.Image)(resources.GetObject("TSBShowDebugger.Image")));
 			this.TSBShowDebugger.ImageTransparentColor = System.Drawing.Color.Magenta;
 			this.TSBShowDebugger.Name = "TSBShowDebugger";
