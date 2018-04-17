@@ -73,6 +73,7 @@
     <Compile Include="AddressBlock.cs" />
     <Compile Include="ByteBlock.cs" />
     <Compile Include="CallStackFrame.cs" />
+    <Compile Include="DebugVM.cs" />
     <Compile Include="EFlags.cs" />
     <Compile Include="Enums.cs" />
     <Compile Include="ErrorTable.cs" />

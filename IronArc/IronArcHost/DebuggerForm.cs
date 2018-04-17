@@ -15,28 +15,23 @@ namespace IronArcHost
 {
 	public partial class DebuggerForm : Form
 	{
-		private VirtualMachine vm;
-		private IntPtr vmMemoryPointer;
-		private ulong vmMemoryLength;
+		private DebugVM vm;
 
 		private DisassemblyWindow disassemblyWindow;
 
-		public DebuggerForm(VirtualMachine vm)
+		public DebuggerForm(DebugVM vm)
 		{
 			this.vm = vm;
-			vmMemoryPointer = vm.Memory.Pointer;
-			vmMemoryLength = vm.Memory.Length;
 
 			InitializeComponent();
 
-			disassemblyWindow = new DisassemblyWindow(vm.Memory.CreateStream(),
+			disassemblyWindow = new DisassemblyWindow(vm.CreateMemoryStream(),
 				(ListDisassembly.Height / ListDisassembly.ItemHeight));
 			disassemblyWindow.InstructionsChanged += DisassemblyWindow_InstructionsChanged;
 
 			RefreshDisassemblyList();
-			// WYLO: implementing debugger features. I downloaded Be.HexEditor, which is in my
-			// source code folder; it has the same IByteProvider mechanism that HexControlLibrary
-			// does, so go ahead and add that
+
+			HexMemory.ByteProvider = new VMMemoryByteProvider(vm);
 		}
 
 		private void DisassemblyWindow_InstructionsChanged(object sender, EventArgs e)
@@ -57,29 +52,26 @@ namespace IronArcHost
 
 		private void DebuggerForm_Load(object sender, EventArgs e)
 		{
-			HexMemoryViewer.Model.ByteProvider = new UnmanagedByteProvider(vmMemoryPointer, (int)vmMemoryLength);
-			// WYLO: the hex view control here may not be good enough
-			// we may be able to fix it, but check for other options
-			// right now scrollbars aren't appearing and scrolling doesn't work
+			
 
 			UpdateRegisterDisplay();
 		}
 
 		private void UpdateRegisterDisplay()
 		{
-			TextEAX.Text = vm.Processor.EAX.ToString("X16");
-			TextEBX.Text = vm.Processor.EBX.ToString("X16");
-			TextECX.Text = vm.Processor.ECX.ToString("X16");
-			TextEDX.Text = vm.Processor.EDX.ToString("X16");
-			TextEEX.Text = vm.Processor.EEX.ToString("X16");
-			TextEFX.Text = vm.Processor.EFX.ToString("X16");
-			TextEGX.Text = vm.Processor.EGX.ToString("X16");
-			TextEHX.Text = vm.Processor.EHX.ToString("X16");
-			TextEBP.Text = vm.Processor.EBP.ToString("X16");
-			TextESP.Text = vm.Processor.ESP.ToString("X16");
-			TextEIP.Text = vm.Processor.EIP.ToString("X16");
-			TextERP.Text = vm.Processor.ERP.ToString("X16");
-			TextEFLAGS.Text = vm.Processor.EFLAGS.ToString("X16");
+			TextEAX.Text = vm.EAX.ToString("X16");
+			TextEBX.Text = vm.EBX.ToString("X16");
+			TextECX.Text = vm.ECX.ToString("X16");
+			TextEDX.Text = vm.EDX.ToString("X16");
+			TextEEX.Text = vm.EEX.ToString("X16");
+			TextEFX.Text = vm.EFX.ToString("X16");
+			TextEGX.Text = vm.EGX.ToString("X16");
+			TextEHX.Text = vm.EHX.ToString("X16");
+			TextEBP.Text = vm.EBP.ToString("X16");
+			TextESP.Text = vm.ESP.ToString("X16");
+			TextEIP.Text = vm.EIP.ToString("X16");
+			TextERP.Text = vm.ERP.ToString("X16");
+			TextEFLAGS.Text = vm.EFLAGS.ToString("X16");
 		}
 
 		private void LinkLabelEAX_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
@@ -140,11 +132,6 @@ namespace IronArcHost
 		private void TextIP_TextChanged(object sender, EventArgs e)
 		{
 
-		}
-
-		private void HexMemoryViewer_Load(object sender, EventArgs e)
-		{
-			
 		}
 	}
 }

@@ -30,6 +30,8 @@
 		{
 			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(DebuggerForm));
 			this.GroupBoxDisassembly = new System.Windows.Forms.GroupBox();
+			this.ButtonDisassemblyDown = new System.Windows.Forms.Button();
+			this.ButtonDisassemblyUp = new System.Windows.Forms.Button();
 			this.ListDisassembly = new System.Windows.Forms.ListBox();
 			this.ToolStripDebugger = new System.Windows.Forms.ToolStrip();
 			this.TSBRun = new System.Windows.Forms.ToolStripButton();
@@ -68,13 +70,11 @@
 			this.TextECX = new System.Windows.Forms.TextBox();
 			this.LinkEBX = new System.Windows.Forms.LinkLabel();
 			this.GroupMemory = new System.Windows.Forms.GroupBox();
-			this.HexMemoryViewer = new HexControlLibrary.HexControl();
+			this.HexMemory = new Be.Windows.Forms.HexBox();
 			this.GroupCallStackViewer = new System.Windows.Forms.GroupBox();
 			this.ListCallStackViewer = new System.Windows.Forms.ListView();
 			this.ColumnCalledAddress = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
 			this.ColumnEBP = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-			this.ButtonDisassemblyUp = new System.Windows.Forms.Button();
-			this.ButtonDisassemblyDown = new System.Windows.Forms.Button();
 			this.GroupBoxDisassembly.SuspendLayout();
 			this.ToolStripDebugger.SuspendLayout();
 			this.GroupRegisters.SuspendLayout();
@@ -93,6 +93,24 @@
 			this.GroupBoxDisassembly.TabIndex = 0;
 			this.GroupBoxDisassembly.TabStop = false;
 			this.GroupBoxDisassembly.Text = "Disassembly";
+			// 
+			// ButtonDisassemblyDown
+			// 
+			this.ButtonDisassemblyDown.Location = new System.Drawing.Point(322, 62);
+			this.ButtonDisassemblyDown.Name = "ButtonDisassemblyDown";
+			this.ButtonDisassemblyDown.Size = new System.Drawing.Size(23, 23);
+			this.ButtonDisassemblyDown.TabIndex = 2;
+			this.ButtonDisassemblyDown.Text = "v";
+			this.ButtonDisassemblyDown.UseVisualStyleBackColor = true;
+			// 
+			// ButtonDisassemblyUp
+			// 
+			this.ButtonDisassemblyUp.Location = new System.Drawing.Point(322, 33);
+			this.ButtonDisassemblyUp.Name = "ButtonDisassemblyUp";
+			this.ButtonDisassemblyUp.Size = new System.Drawing.Size(23, 23);
+			this.ButtonDisassemblyUp.TabIndex = 1;
+			this.ButtonDisassemblyUp.Text = "^";
+			this.ButtonDisassemblyUp.UseVisualStyleBackColor = true;
 			// 
 			// ListDisassembly
 			// 
@@ -469,7 +487,10 @@
 			// 
 			// GroupMemory
 			// 
-			this.GroupMemory.Controls.Add(this.HexMemoryViewer);
+			this.GroupMemory.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+			this.GroupMemory.Controls.Add(this.HexMemory);
 			this.GroupMemory.Location = new System.Drawing.Point(369, 32);
 			this.GroupMemory.Name = "GroupMemory";
 			this.GroupMemory.Size = new System.Drawing.Size(383, 267);
@@ -477,20 +498,27 @@
 			this.GroupMemory.TabStop = false;
 			this.GroupMemory.Text = "Memory";
 			// 
-			// HexMemoryViewer
+			// HexMemory
 			// 
-			this.HexMemoryViewer.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+			this.HexMemory.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-			this.HexMemoryViewer.Font = new System.Drawing.Font("Consolas", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-			this.HexMemoryViewer.Location = new System.Drawing.Point(6, 22);
-			this.HexMemoryViewer.Name = "HexMemoryViewer";
-			this.HexMemoryViewer.Size = new System.Drawing.Size(367, 238);
-			this.HexMemoryViewer.TabIndex = 2;
-			this.HexMemoryViewer.Load += new System.EventHandler(this.HexMemoryViewer_Load);
+			this.HexMemory.BytesPerLine = 8;
+			this.HexMemory.Font = new System.Drawing.Font("Consolas", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+			this.HexMemory.LineInfoVisible = true;
+			this.HexMemory.Location = new System.Drawing.Point(10, 21);
+			this.HexMemory.Name = "HexMemory";
+			this.HexMemory.ShadowSelectionColor = System.Drawing.Color.FromArgb(((int)(((byte)(100)))), ((int)(((byte)(60)))), ((int)(((byte)(188)))), ((int)(((byte)(255)))));
+			this.HexMemory.Size = new System.Drawing.Size(367, 239);
+			this.HexMemory.StringViewVisible = true;
+			this.HexMemory.TabIndex = 0;
+			this.HexMemory.UseFixedBytesPerLine = true;
+			this.HexMemory.VScrollBarVisible = true;
 			// 
 			// GroupCallStackViewer
 			// 
+			this.GroupCallStackViewer.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
 			this.GroupCallStackViewer.Controls.Add(this.ListCallStackViewer);
 			this.GroupCallStackViewer.Location = new System.Drawing.Point(369, 305);
 			this.GroupCallStackViewer.Name = "GroupCallStackViewer";
@@ -501,6 +529,9 @@
 			// 
 			// ListCallStackViewer
 			// 
+			this.ListCallStackViewer.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
 			this.ListCallStackViewer.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
             this.ColumnCalledAddress,
             this.ColumnEBP});
@@ -518,24 +549,6 @@
 			// ColumnEBP
 			// 
 			this.ColumnEBP.Text = "Stack Base";
-			// 
-			// ButtonDisassemblyUp
-			// 
-			this.ButtonDisassemblyUp.Location = new System.Drawing.Point(322, 33);
-			this.ButtonDisassemblyUp.Name = "ButtonDisassemblyUp";
-			this.ButtonDisassemblyUp.Size = new System.Drawing.Size(23, 23);
-			this.ButtonDisassemblyUp.TabIndex = 1;
-			this.ButtonDisassemblyUp.Text = "^";
-			this.ButtonDisassemblyUp.UseVisualStyleBackColor = true;
-			// 
-			// ButtonDisassemblyDown
-			// 
-			this.ButtonDisassemblyDown.Location = new System.Drawing.Point(322, 62);
-			this.ButtonDisassemblyDown.Name = "ButtonDisassemblyDown";
-			this.ButtonDisassemblyDown.Size = new System.Drawing.Size(23, 23);
-			this.ButtonDisassemblyDown.TabIndex = 2;
-			this.ButtonDisassemblyDown.Text = "v";
-			this.ButtonDisassemblyDown.UseVisualStyleBackColor = true;
 			// 
 			// DebuggerForm
 			// 
@@ -591,7 +604,6 @@
 		private System.Windows.Forms.TextBox TextEAX;
 		private System.Windows.Forms.LinkLabel LinkEAX;
 		private System.Windows.Forms.GroupBox GroupMemory;
-		private HexControlLibrary.HexControl HexMemoryViewer;
 		private System.Windows.Forms.GroupBox GroupCallStackViewer;
 		private System.Windows.Forms.ListView ListCallStackViewer;
 		private System.Windows.Forms.ColumnHeader ColumnCalledAddress;
@@ -612,5 +624,6 @@
 		private System.Windows.Forms.LinkLabel LinkEBP;
 		private System.Windows.Forms.Button ButtonDisassemblyDown;
 		private System.Windows.Forms.Button ButtonDisassemblyUp;
+		private Be.Windows.Forms.HexBox HexMemory;
 	}
 }

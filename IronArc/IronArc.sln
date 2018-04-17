@@ -7,7 +7,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IronArc", "IronArc\IronArc.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IronArcHost", "IronArcHost\IronArcHost.csproj", "{7632530B-84C0-4927-942F-0EAEB3724EBF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HexControlLibrary", "SimpleHexViewControl\HexControlLibrary\HexControlLibrary.csproj", "{02DF89C8-A523-4A0F-A7C5-20DD043652CC}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Be.Windows.Forms.HexBox", "..\..\..\Files\Programming\Source Code\Be.HexEditor-1.6.0\sources\Be.Windows.Forms.HexBox\Be.Windows.Forms.HexBox.csproj", "{26C5F25F-B450-4CAF-AD8B-B8D11AE73457}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -40,16 +40,18 @@ Global
 		{7632530B-84C0-4927-942F-0EAEB3724EBF}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{7632530B-84C0-4927-942F-0EAEB3724EBF}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{7632530B-84C0-4927-942F-0EAEB3724EBF}.Release|x86.ActiveCfg = Release|Any CPU
-		{02DF89C8-A523-4A0F-A7C5-20DD043652CC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{02DF89C8-A523-4A0F-A7C5-20DD043652CC}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{02DF89C8-A523-4A0F-A7C5-20DD043652CC}.Debug|Mixed Platforms.ActiveCfg = Debug|x86
-		{02DF89C8-A523-4A0F-A7C5-20DD043652CC}.Debug|Mixed Platforms.Build.0 = Debug|x86
-		{02DF89C8-A523-4A0F-A7C5-20DD043652CC}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{02DF89C8-A523-4A0F-A7C5-20DD043652CC}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{02DF89C8-A523-4A0F-A7C5-20DD043652CC}.Release|Any CPU.Build.0 = Release|Any CPU
-		{02DF89C8-A523-4A0F-A7C5-20DD043652CC}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
-		{02DF89C8-A523-4A0F-A7C5-20DD043652CC}.Release|Mixed Platforms.Build.0 = Release|Any CPU
-		{02DF89C8-A523-4A0F-A7C5-20DD043652CC}.Release|x86.ActiveCfg = Release|Any CPU
+		{26C5F25F-B450-4CAF-AD8B-B8D11AE73457}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{26C5F25F-B450-4CAF-AD8B-B8D11AE73457}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{26C5F25F-B450-4CAF-AD8B-B8D11AE73457}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{26C5F25F-B450-4CAF-AD8B-B8D11AE73457}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{26C5F25F-B450-4CAF-AD8B-B8D11AE73457}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{26C5F25F-B450-4CAF-AD8B-B8D11AE73457}.Debug|x86.Build.0 = Debug|Any CPU
+		{26C5F25F-B450-4CAF-AD8B-B8D11AE73457}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{26C5F25F-B450-4CAF-AD8B-B8D11AE73457}.Release|Any CPU.Build.0 = Release|Any CPU
+		{26C5F25F-B450-4CAF-AD8B-B8D11AE73457}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{26C5F25F-B450-4CAF-AD8B-B8D11AE73457}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{26C5F25F-B450-4CAF-AD8B-B8D11AE73457}.Release|x86.ActiveCfg = Release|Any CPU
+		{26C5F25F-B450-4CAF-AD8B-B8D11AE73457}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
