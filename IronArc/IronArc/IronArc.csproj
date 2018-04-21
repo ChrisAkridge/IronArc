@@ -71,6 +71,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AddressBlock.cs" />
+    <Compile Include="Breakpoint.cs" />
     <Compile Include="ByteBlock.cs" />
     <Compile Include="CallStackFrame.cs" />
     <Compile Include="DebugVM.cs" />

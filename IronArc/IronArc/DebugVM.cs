@@ -10,15 +10,19 @@ namespace IronArc
 	public sealed class DebugVM
 	{
 		private VirtualMachine vm;
+		private List<Breakpoint> breakpoints;
 
 		public event EventHandler<EventArgs> CallOccurred;
 		public event EventHandler<EventHandler> ReturnOccurred;
 
 		public long MemorySize => (long)vm.Memory.Length;
 
+		public IReadOnlyList<Breakpoint> Breakpoints => breakpoints.AsReadOnly();
+
 		public DebugVM(VirtualMachine vm)
 		{
 			this.vm = vm;
+			breakpoints = new List<Breakpoint>();
 		}
 
 		#region Register Properties
@@ -114,5 +118,23 @@ namespace IronArc
 
 		public byte ReadByte(long address) => vm.Memory.ReadByteAt((ulong)address);
 		public void WriteByte(long address, byte value) => vm.Memory.WriteByteAt(value, (ulong)address);
+
+		public void AddBreakpoint(ulong address, bool isUserVisible) =>
+			breakpoints.Add(new Breakpoint(address, isUserVisible));
+
+		public bool RemoveBreakpoint(ulong address) =>
+			breakpoints.RemoveAll(b => b.Address == address) > 0;
+
+		public bool AddressHasUserVisibleBreakpoint(ulong address)
+		{
+			foreach (Breakpoint breakpoint in breakpoints)
+			{
+				if (breakpoint.Address == address)
+				{
+					return breakpoint.IsUserVisible;
+				}
+			}
+			return false;
+		}
 	}
 }

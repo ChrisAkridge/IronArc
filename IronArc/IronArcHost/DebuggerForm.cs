@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -15,6 +16,8 @@ namespace IronArcHost
 {
 	public partial class DebuggerForm : Form
 	{
+		private const int AddressTextLength = 18;
+
 		private DebugVM vm;
 
 		private DisassemblyWindow disassemblyWindow;
@@ -46,14 +49,20 @@ namespace IronArcHost
 			int numberOfItems = (ListDisassembly.Height / ListDisassembly.ItemHeight);
 			for (int i = 0; i < numberOfItems; i++)
 			{
-				ListDisassembly.Items.Add(disassemblyWindow.GetInstructionAtWindowPosition(i));
+				WindowInstruction instruction = disassemblyWindow.GetInstructionAtWindowPosition(i);
+				var lvi = new ListViewItem();
+				lvi.Text = instruction.ToString();
+				if (vm.AddressHasUserVisibleBreakpoint(instruction.Address))
+				{
+					lvi.ForeColor = Color.Red;
+				}
+
+				ListDisassembly.Items.Add(lvi);
 			}
 		}
 
 		private void DebuggerForm_Load(object sender, EventArgs e)
 		{
-			
-
 			UpdateRegisterDisplay();
 		}
 
@@ -132,6 +141,33 @@ namespace IronArcHost
 		private void TextIP_TextChanged(object sender, EventArgs e)
 		{
 
+		}
+
+		private void ButtonSetBreakpoint_Click(object sender, EventArgs e)
+		{
+			if (ListDisassembly.SelectedIndex < 0) { return; }
+
+			ListViewItem lvi = (ListViewItem)(ListDisassembly.Items[ListDisassembly.SelectedIndex]);
+			string addressText = lvi.Text.Substring(2, 16);
+			ulong address = ulong.Parse(addressText, NumberStyles.AllowHexSpecifier);
+
+			vm.AddBreakpoint(address, isUserVisible: true);
+			lvi.ForeColor = Color.Red;
+		}
+
+		private void ButtonClearBreakpoint_Click(object sender, EventArgs e)
+		{
+			if (ListDisassembly.SelectedIndex < 0) { return; }
+
+			ListViewItem lvi = (ListViewItem)(ListDisassembly.Items[ListDisassembly.SelectedIndex]);
+			string addressText = lvi.Text.Substring(2, 16);
+			ulong address = ulong.Parse(addressText, NumberStyles.HexNumber);
+
+			if (vm.AddressHasUserVisibleBreakpoint(address))
+			{
+				vm.RemoveBreakpoint(address);
+				lvi.ForeColor = Color.Black;
+			}
 		}
 	}
 }

@@ -75,6 +75,8 @@
 			this.ListCallStackViewer = new System.Windows.Forms.ListView();
 			this.ColumnCalledAddress = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
 			this.ColumnEBP = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+			this.ButtonSetBreakpoint = new System.Windows.Forms.Button();
+			this.ButtonClearBreakpoint = new System.Windows.Forms.Button();
 			this.GroupBoxDisassembly.SuspendLayout();
 			this.ToolStripDebugger.SuspendLayout();
 			this.GroupRegisters.SuspendLayout();
@@ -84,6 +86,8 @@
 			// 
 			// GroupBoxDisassembly
 			// 
+			this.GroupBoxDisassembly.Controls.Add(this.ButtonClearBreakpoint);
+			this.GroupBoxDisassembly.Controls.Add(this.ButtonSetBreakpoint);
 			this.GroupBoxDisassembly.Controls.Add(this.ButtonDisassemblyDown);
 			this.GroupBoxDisassembly.Controls.Add(this.ButtonDisassemblyUp);
 			this.GroupBoxDisassembly.Controls.Add(this.ListDisassembly);
@@ -117,7 +121,7 @@
 			this.ListDisassembly.FormattingEnabled = true;
 			this.ListDisassembly.Location = new System.Drawing.Point(7, 22);
 			this.ListDisassembly.Name = "ListDisassembly";
-			this.ListDisassembly.Size = new System.Drawing.Size(308, 238);
+			this.ListDisassembly.Size = new System.Drawing.Size(308, 212);
 			this.ListDisassembly.TabIndex = 0;
 			// 
 			// ToolStripDebugger
@@ -550,6 +554,26 @@
 			// 
 			this.ColumnEBP.Text = "Stack Base";
 			// 
+			// ButtonSetBreakpoint
+			// 
+			this.ButtonSetBreakpoint.Location = new System.Drawing.Point(7, 240);
+			this.ButtonSetBreakpoint.Name = "ButtonSetBreakpoint";
+			this.ButtonSetBreakpoint.Size = new System.Drawing.Size(121, 23);
+			this.ButtonSetBreakpoint.TabIndex = 3;
+			this.ButtonSetBreakpoint.Text = "Set Breakpoint Here";
+			this.ButtonSetBreakpoint.UseVisualStyleBackColor = true;
+			this.ButtonSetBreakpoint.Click += new System.EventHandler(this.ButtonSetBreakpoint_Click);
+			// 
+			// ButtonClearBreakpoint
+			// 
+			this.ButtonClearBreakpoint.Location = new System.Drawing.Point(134, 240);
+			this.ButtonClearBreakpoint.Name = "ButtonClearBreakpoint";
+			this.ButtonClearBreakpoint.Size = new System.Drawing.Size(108, 23);
+			this.ButtonClearBreakpoint.TabIndex = 4;
+			this.ButtonClearBreakpoint.Text = "Clear Breakpoint";
+			this.ButtonClearBreakpoint.UseVisualStyleBackColor = true;
+			this.ButtonClearBreakpoint.Click += new System.EventHandler(this.ButtonClearBreakpoint_Click);
+			// 
 			// DebuggerForm
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -625,5 +649,7 @@
 		private System.Windows.Forms.Button ButtonDisassemblyDown;
 		private System.Windows.Forms.Button ButtonDisassemblyUp;
 		private Be.Windows.Forms.HexBox HexMemory;
+		private System.Windows.Forms.Button ButtonClearBreakpoint;
+		private System.Windows.Forms.Button ButtonSetBreakpoint;
 	}
 }
