@@ -16,7 +16,7 @@ namespace IronArcHost
 {
 	public partial class DebuggerForm : Form
 	{
-		private const int AddressTextLength = 18;
+		private const int DisassemblyDisplayedItems = 12;
 
 		private DebugVM vm;
 
@@ -28,13 +28,31 @@ namespace IronArcHost
 
 			InitializeComponent();
 
-			disassemblyWindow = new DisassemblyWindow(vm.CreateMemoryStream(),
-				(ListDisassembly.Height / ListDisassembly.ItemHeight));
+			disassemblyWindow = new DisassemblyWindow(vm.CreateMemoryStream(), DisassemblyDisplayedItems);
 			disassemblyWindow.InstructionsChanged += DisassemblyWindow_InstructionsChanged;
 
 			RefreshDisassemblyList();
 
 			HexMemory.ByteProvider = new VMMemoryByteProvider(vm);
+
+			SubscribeRegisterLinkClickEvents();
+		}
+
+		private void SubscribeRegisterLinkClickEvents()
+		{
+			LinkEAX.Click += (sender, e) => EditRegister(vm.EAX, v => vm.EAX = v);
+			LinkEBX.Click += (sender, e) => EditRegister(vm.EBX, v => vm.EBX = v);
+			LinkECX.Click += (sender, e) => EditRegister(vm.ECX, v => vm.ECX = v);
+			LinkEDX.Click += (sender, e) => EditRegister(vm.EDX, v => vm.EDX = v);
+			LinkEEX.Click += (sender, e) => EditRegister(vm.EEX, v => vm.EEX = v);
+			LinkEFX.Click += (sender, e) => EditRegister(vm.EFX, v => vm.EFX = v);
+			LinkEGX.Click += (sender, e) => EditRegister(vm.EGX, v => vm.EGX = v);
+			LinkEHX.Click += (sender, e) => EditRegister(vm.EHX, v => vm.EHX = v);
+			LinkEBP.Click += (sender, e) => EditRegister(vm.EBP, v => vm.EBP = v);
+			LinkESP.Click += (sender, e) => EditRegister(vm.ESP, v => vm.ESP = v);
+			LinkEIP.Click += (sender, e) => EditRegister(vm.EIP, v => vm.EIP = v);
+			LinkERP.Click += (sender, e) => EditRegister(vm.ERP, v => vm.ERP = v);
+			LinkEFLAGS.Click += (sender, e) => EditRegister(vm.EFLAGS, v => vm.EFLAGS = v);
 		}
 
 		private void DisassemblyWindow_InstructionsChanged(object sender, EventArgs e)
@@ -46,7 +64,7 @@ namespace IronArcHost
 		{
 			ListDisassembly.Items.Clear();
 
-			int numberOfItems = (ListDisassembly.Height / ListDisassembly.ItemHeight);
+			int numberOfItems = DisassemblyDisplayedItems;
 			for (int i = 0; i < numberOfItems; i++)
 			{
 				WindowInstruction instruction = disassemblyWindow.GetInstructionAtWindowPosition(i);
@@ -83,71 +101,22 @@ namespace IronArcHost
 			TextEFLAGS.Text = vm.EFLAGS.ToString("X16");
 		}
 
-		private void LinkLabelEAX_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+		private void EditRegister(ulong registerValue, Action<ulong> writeRegisterAction)
 		{
-			new RegisterEditor().ShowDialog();
-		}
+			var editor = new RegisterEditor(registerValue);
+			if (editor.ShowDialog() == DialogResult.OK)
+			{
+				writeRegisterAction(editor.RegisterValue);
+			}
 
-		private void LinkEBX_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
-		{
-
-		}
-
-		private void LinkECX_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
-		{
-
-		}
-
-		private void LinkEDX_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
-		{
-
-		}
-
-		private void LinkEEX_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
-		{
-
-		}
-
-		private void LinkEFX_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
-		{
-
-		}
-
-		private void LinkEGX_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
-		{
-
-		}
-
-		private void LinkEHX_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
-		{
-
-		}
-
-		private void LinkIP_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
-		{
-
-		}
-
-		private void LinkEBASE_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
-		{
-
-		}
-
-		private void LinkEFLAGS_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
-		{
-
-		}
-
-		private void TextIP_TextChanged(object sender, EventArgs e)
-		{
-
+			UpdateRegisterDisplay();
 		}
 
 		private void ButtonSetBreakpoint_Click(object sender, EventArgs e)
 		{
-			if (ListDisassembly.SelectedIndex < 0) { return; }
+			if (ListDisassembly.SelectedItems.Count == 0) { return; }
 
-			ListViewItem lvi = (ListViewItem)(ListDisassembly.Items[ListDisassembly.SelectedIndex]);
+			ListViewItem lvi = ListDisassembly.SelectedItems[0];
 			string addressText = lvi.Text.Substring(2, 16);
 			ulong address = ulong.Parse(addressText, NumberStyles.AllowHexSpecifier);
 
@@ -157,9 +126,9 @@ namespace IronArcHost
 
 		private void ButtonClearBreakpoint_Click(object sender, EventArgs e)
 		{
-			if (ListDisassembly.SelectedIndex < 0) { return; }
+			if (ListDisassembly.SelectedItems.Count == 0) { return; }
 
-			ListViewItem lvi = (ListViewItem)(ListDisassembly.Items[ListDisassembly.SelectedIndex]);
+			ListViewItem lvi = ListDisassembly.SelectedItems[0];
 			string addressText = lvi.Text.Substring(2, 16);
 			ulong address = ulong.Parse(addressText, NumberStyles.HexNumber);
 
@@ -168,6 +137,14 @@ namespace IronArcHost
 				vm.RemoveBreakpoint(address);
 				lvi.ForeColor = Color.Black;
 			}
+		}
+
+		private void TSBStepInto_Click(object sender, EventArgs e)
+		{
+			vm.StepInto();
+
+			disassemblyWindow.SeekToAddress(vm.EIP);
+			UpdateRegisterDisplay();
 		}
 	}
 }

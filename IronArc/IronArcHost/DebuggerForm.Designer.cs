@@ -30,9 +30,11 @@
 		{
 			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(DebuggerForm));
 			this.GroupBoxDisassembly = new System.Windows.Forms.GroupBox();
+			this.ListDisassembly = new System.Windows.Forms.ListView();
+			this.ButtonClearBreakpoint = new System.Windows.Forms.Button();
+			this.ButtonSetBreakpoint = new System.Windows.Forms.Button();
 			this.ButtonDisassemblyDown = new System.Windows.Forms.Button();
 			this.ButtonDisassemblyUp = new System.Windows.Forms.Button();
-			this.ListDisassembly = new System.Windows.Forms.ListBox();
 			this.ToolStripDebugger = new System.Windows.Forms.ToolStrip();
 			this.TSBRun = new System.Windows.Forms.ToolStripButton();
 			this.TSBPause = new System.Windows.Forms.ToolStripButton();
@@ -75,8 +77,6 @@
 			this.ListCallStackViewer = new System.Windows.Forms.ListView();
 			this.ColumnCalledAddress = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
 			this.ColumnEBP = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-			this.ButtonSetBreakpoint = new System.Windows.Forms.Button();
-			this.ButtonClearBreakpoint = new System.Windows.Forms.Button();
 			this.GroupBoxDisassembly.SuspendLayout();
 			this.ToolStripDebugger.SuspendLayout();
 			this.GroupRegisters.SuspendLayout();
@@ -86,17 +86,48 @@
 			// 
 			// GroupBoxDisassembly
 			// 
+			this.GroupBoxDisassembly.Controls.Add(this.ListDisassembly);
 			this.GroupBoxDisassembly.Controls.Add(this.ButtonClearBreakpoint);
 			this.GroupBoxDisassembly.Controls.Add(this.ButtonSetBreakpoint);
 			this.GroupBoxDisassembly.Controls.Add(this.ButtonDisassemblyDown);
 			this.GroupBoxDisassembly.Controls.Add(this.ButtonDisassemblyUp);
-			this.GroupBoxDisassembly.Controls.Add(this.ListDisassembly);
 			this.GroupBoxDisassembly.Location = new System.Drawing.Point(12, 32);
 			this.GroupBoxDisassembly.Name = "GroupBoxDisassembly";
 			this.GroupBoxDisassembly.Size = new System.Drawing.Size(351, 267);
 			this.GroupBoxDisassembly.TabIndex = 0;
 			this.GroupBoxDisassembly.TabStop = false;
 			this.GroupBoxDisassembly.Text = "Disassembly";
+			// 
+			// ListDisassembly
+			// 
+			this.ListDisassembly.Alignment = System.Windows.Forms.ListViewAlignment.Left;
+			this.ListDisassembly.AutoArrange = false;
+			this.ListDisassembly.Location = new System.Drawing.Point(7, 21);
+			this.ListDisassembly.Name = "ListDisassembly";
+			this.ListDisassembly.Size = new System.Drawing.Size(309, 213);
+			this.ListDisassembly.TabIndex = 5;
+			this.ListDisassembly.UseCompatibleStateImageBehavior = false;
+			this.ListDisassembly.View = System.Windows.Forms.View.List;
+			// 
+			// ButtonClearBreakpoint
+			// 
+			this.ButtonClearBreakpoint.Location = new System.Drawing.Point(134, 240);
+			this.ButtonClearBreakpoint.Name = "ButtonClearBreakpoint";
+			this.ButtonClearBreakpoint.Size = new System.Drawing.Size(108, 23);
+			this.ButtonClearBreakpoint.TabIndex = 4;
+			this.ButtonClearBreakpoint.Text = "Clear Breakpoint";
+			this.ButtonClearBreakpoint.UseVisualStyleBackColor = true;
+			this.ButtonClearBreakpoint.Click += new System.EventHandler(this.ButtonClearBreakpoint_Click);
+			// 
+			// ButtonSetBreakpoint
+			// 
+			this.ButtonSetBreakpoint.Location = new System.Drawing.Point(7, 240);
+			this.ButtonSetBreakpoint.Name = "ButtonSetBreakpoint";
+			this.ButtonSetBreakpoint.Size = new System.Drawing.Size(121, 23);
+			this.ButtonSetBreakpoint.TabIndex = 3;
+			this.ButtonSetBreakpoint.Text = "Set Breakpoint Here";
+			this.ButtonSetBreakpoint.UseVisualStyleBackColor = true;
+			this.ButtonSetBreakpoint.Click += new System.EventHandler(this.ButtonSetBreakpoint_Click);
 			// 
 			// ButtonDisassemblyDown
 			// 
@@ -115,14 +146,6 @@
 			this.ButtonDisassemblyUp.TabIndex = 1;
 			this.ButtonDisassemblyUp.Text = "^";
 			this.ButtonDisassemblyUp.UseVisualStyleBackColor = true;
-			// 
-			// ListDisassembly
-			// 
-			this.ListDisassembly.FormattingEnabled = true;
-			this.ListDisassembly.Location = new System.Drawing.Point(7, 22);
-			this.ListDisassembly.Name = "ListDisassembly";
-			this.ListDisassembly.Size = new System.Drawing.Size(308, 212);
-			this.ListDisassembly.TabIndex = 0;
 			// 
 			// ToolStripDebugger
 			// 
@@ -169,6 +192,7 @@
 			this.TSBStepInto.Name = "TSBStepInto";
 			this.TSBStepInto.Size = new System.Drawing.Size(74, 22);
 			this.TSBStepInto.Text = "Step &Into";
+			this.TSBStepInto.Click += new System.EventHandler(this.TSBStepInto_Click);
 			// 
 			// TSBStepOver
 			// 
@@ -336,7 +360,6 @@
 			this.LinkEHX.TabIndex = 16;
 			this.LinkEHX.TabStop = true;
 			this.LinkEHX.Text = "EHX";
-			this.LinkEHX.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.LinkEHX_LinkClicked);
 			// 
 			// TextEIP
 			// 
@@ -375,7 +398,6 @@
 			this.LinkEGX.TabIndex = 14;
 			this.LinkEGX.TabStop = true;
 			this.LinkEGX.Text = "EGX";
-			this.LinkEGX.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.LinkEGX_LinkClicked);
 			// 
 			// TextEDX
 			// 
@@ -395,7 +417,6 @@
 			this.LinkEDX.TabIndex = 6;
 			this.LinkEDX.TabStop = true;
 			this.LinkEDX.Text = "EDX";
-			this.LinkEDX.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.LinkEDX_LinkClicked);
 			// 
 			// TextEAX
 			// 
@@ -415,7 +436,6 @@
 			this.LinkEFX.TabIndex = 12;
 			this.LinkEFX.TabStop = true;
 			this.LinkEFX.Text = "EFX";
-			this.LinkEFX.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.LinkEFX_LinkClicked);
 			// 
 			// LinkEBP
 			// 
@@ -436,7 +456,6 @@
 			this.LinkEAX.TabIndex = 0;
 			this.LinkEAX.TabStop = true;
 			this.LinkEAX.Text = "EAX";
-			this.LinkEAX.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.LinkLabelEAX_LinkClicked);
 			// 
 			// LinkEEX
 			// 
@@ -447,7 +466,6 @@
 			this.LinkEEX.TabIndex = 10;
 			this.LinkEEX.TabStop = true;
 			this.LinkEEX.Text = "EEX";
-			this.LinkEEX.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.LinkEEX_LinkClicked);
 			// 
 			// TextEBX
 			// 
@@ -467,7 +485,6 @@
 			this.LinkECX.TabIndex = 4;
 			this.LinkECX.TabStop = true;
 			this.LinkECX.Text = "ECX";
-			this.LinkECX.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.LinkECX_LinkClicked);
 			// 
 			// TextECX
 			// 
@@ -487,7 +504,6 @@
 			this.LinkEBX.TabIndex = 2;
 			this.LinkEBX.TabStop = true;
 			this.LinkEBX.Text = "EBX";
-			this.LinkEBX.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.LinkEBX_LinkClicked);
 			// 
 			// GroupMemory
 			// 
@@ -554,26 +570,6 @@
 			// 
 			this.ColumnEBP.Text = "Stack Base";
 			// 
-			// ButtonSetBreakpoint
-			// 
-			this.ButtonSetBreakpoint.Location = new System.Drawing.Point(7, 240);
-			this.ButtonSetBreakpoint.Name = "ButtonSetBreakpoint";
-			this.ButtonSetBreakpoint.Size = new System.Drawing.Size(121, 23);
-			this.ButtonSetBreakpoint.TabIndex = 3;
-			this.ButtonSetBreakpoint.Text = "Set Breakpoint Here";
-			this.ButtonSetBreakpoint.UseVisualStyleBackColor = true;
-			this.ButtonSetBreakpoint.Click += new System.EventHandler(this.ButtonSetBreakpoint_Click);
-			// 
-			// ButtonClearBreakpoint
-			// 
-			this.ButtonClearBreakpoint.Location = new System.Drawing.Point(134, 240);
-			this.ButtonClearBreakpoint.Name = "ButtonClearBreakpoint";
-			this.ButtonClearBreakpoint.Size = new System.Drawing.Size(108, 23);
-			this.ButtonClearBreakpoint.TabIndex = 4;
-			this.ButtonClearBreakpoint.Text = "Clear Breakpoint";
-			this.ButtonClearBreakpoint.UseVisualStyleBackColor = true;
-			this.ButtonClearBreakpoint.Click += new System.EventHandler(this.ButtonClearBreakpoint_Click);
-			// 
 			// DebuggerForm
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -613,7 +609,6 @@
 		private System.Windows.Forms.ToolStripButton TSBStepOut;
 		private System.Windows.Forms.ToolStripSeparator TSSeparator2;
 		private System.Windows.Forms.ToolStripButton TSBAnimate;
-		private System.Windows.Forms.ListBox ListDisassembly;
 		private System.Windows.Forms.GroupBox GroupRegisters;
 		private System.Windows.Forms.LinkLabel LinkEHX;
 		private System.Windows.Forms.LinkLabel LinkEGX;
@@ -651,5 +646,6 @@
 		private Be.Windows.Forms.HexBox HexMemory;
 		private System.Windows.Forms.Button ButtonClearBreakpoint;
 		private System.Windows.Forms.Button ButtonSetBreakpoint;
+		private System.Windows.Forms.ListView ListDisassembly;
 	}
 }

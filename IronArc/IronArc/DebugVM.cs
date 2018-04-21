@@ -136,5 +136,10 @@ namespace IronArc
 			}
 			return false;
 		}
+
+		public void StepInto()
+		{
+			vm.ExecuteOneInstruction();
+		}
 	}
 }

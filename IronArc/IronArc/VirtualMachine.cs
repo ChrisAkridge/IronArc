@@ -187,6 +187,12 @@ namespace IronArc
 			}
 		}
 
+		public void ExecuteOneInstruction()
+		{
+			Processor.ExecuteNextInstruction();
+			InstructionExecutedCount++;
+		}
+
 		internal void HardwareCall(string hwcall)
 		{
 			string[] hwcallParts = hwcall.Split(new[] { "::" }, StringSplitOptions.None);

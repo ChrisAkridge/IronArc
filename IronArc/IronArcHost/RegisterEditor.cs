@@ -15,12 +15,21 @@ namespace IronArcHost
 	{
 		private bool withinSetValuesCall = false;
 
-		public RegisterEditor()
+		public ulong RegisterValue { get; private set; }
+
+		public RegisterEditor(ulong registerValue)
 		{
 			InitializeComponent();
+			RegisterValue = registerValue;
+
+			SetValue(registerValue);
+			SetBigEndianValue(registerValue);
+			SetSigned(registerValue);
+			SetUnsigned(registerValue);
+			SetFloatingPoint(registerValue);
 		}
 
-		private void SetValues(RegisterEditorTextBoxes textBox)
+		private void SetValuesOfOtherTextboxes(RegisterEditorTextBoxes textBox)
 		{
 			withinSetValuesCall = true;
 			switch (textBox)
@@ -28,6 +37,7 @@ namespace IronArcHost
 				case RegisterEditorTextBoxes.Value:
 					ulong value;
 					if (!ulong.TryParse(TextValue.Text, NumberStyles.HexNumber, null, out value)) { goto cleanup; }
+					RegisterValue = value;
 
 					SetBigEndianValue(value);
 					SetSigned(value);
@@ -37,6 +47,7 @@ namespace IronArcHost
 				case RegisterEditorTextBoxes.BigEndianValue:
 					ulong valueBigEndian = 0UL;
 					if (!ulong.TryParse(BigEndianToLittleEndian(TextAsBigEndian.Text.PadLeft(16, '0')), NumberStyles.HexNumber, null, out valueBigEndian)) { goto cleanup; }
+					RegisterValue = valueBigEndian;
 
 					SetValue(valueBigEndian);
 					SetSigned(valueBigEndian);
@@ -46,6 +57,7 @@ namespace IronArcHost
 				case RegisterEditorTextBoxes.Signed:
 					long valueSigned = 0L;
 					if (!long.TryParse(TextSigned.Text, out valueSigned)) { goto cleanup; }
+					RegisterValue = unchecked((ulong)valueSigned);
 
 					unchecked
 					{
@@ -58,6 +70,7 @@ namespace IronArcHost
 				case RegisterEditorTextBoxes.Unsigned:
 					ulong valueUnsigned = 0UL;
 					if (!ulong.TryParse(TextUnsigned.Text, out valueUnsigned)) { goto cleanup; }
+					RegisterValue = valueUnsigned;
 
 					SetValue(valueUnsigned);
 					SetBigEndianValue(valueUnsigned);
@@ -68,6 +81,7 @@ namespace IronArcHost
 					double valueFloating = 0d;
 					if (!double.TryParse(TextFloatingPoint.Text, out valueFloating)) { goto cleanup; }
 					ulong valueFloatingAsULong = unchecked((ulong)BitConverter.DoubleToInt64Bits(valueFloating));
+					RegisterValue = valueFloatingAsULong;
 
 					SetValue(valueFloatingAsULong);
 					SetBigEndianValue(valueFloatingAsULong);
@@ -127,7 +141,7 @@ namespace IronArcHost
 					TextValue.Text = TextValue.Text.Substring(0, 16);
 				}
 
-				SetValues(RegisterEditorTextBoxes.Value);
+				SetValuesOfOtherTextboxes(RegisterEditorTextBoxes.Value);
 			}
 		}
 
@@ -142,7 +156,7 @@ namespace IronArcHost
 					TextAsBigEndian.Text = TextAsBigEndian.Text.Substring(0, 16);
 				}
 
-				SetValues(RegisterEditorTextBoxes.BigEndianValue);
+				SetValuesOfOtherTextboxes(RegisterEditorTextBoxes.BigEndianValue);
 			}
 		}
 
@@ -157,7 +171,7 @@ namespace IronArcHost
 					TextSigned.Text = TextSigned.Text.Substring(0, 20);
 				}
 
-				SetValues(RegisterEditorTextBoxes.Signed);
+				SetValuesOfOtherTextboxes(RegisterEditorTextBoxes.Signed);
 			}
 		}
 
@@ -165,7 +179,7 @@ namespace IronArcHost
 		{
 			if (!withinSetValuesCall)
 			{
-				// where you left off: fix below line, finish the floating point textchanged thing, 
+				// WYLO: fix below line, finish the floating point textchanged thing, 
 				// add a public method to get the ulong that the register should be set to
 				TextUnsigned.Text = RemoveInvalidCharacters(TextUnsigned.Text, RemoveCharactersFor.UnsignedDecimal);
 
@@ -174,7 +188,7 @@ namespace IronArcHost
 					TextUnsigned.Text = TextUnsigned.Text.Substring(0, 20);
 				}
 
-				SetValues(RegisterEditorTextBoxes.Unsigned);
+				SetValuesOfOtherTextboxes(RegisterEditorTextBoxes.Unsigned);
 			}
 		}
 
@@ -184,7 +198,12 @@ namespace IronArcHost
 			{
 				TextFloatingPoint.Text = RemoveInvalidCharacters(TextFloatingPoint.Text, RemoveCharactersFor.FloatingPoint);
 
-				SetValues(RegisterEditorTextBoxes.Floating);
+				if (TextFloatingPoint.Text.Length > 20)
+				{
+					TextFloatingPoint.Text = TextFloatingPoint.Text.Substring(0, 20);
+				}
+
+				SetValuesOfOtherTextboxes(RegisterEditorTextBoxes.Floating);
 			}
 		}
 
@@ -227,6 +246,18 @@ namespace IronArcHost
 			}
 
 			return littleEndianBuilder.ToString();
+		}
+
+		private void ButtonOK_Click(object sender, EventArgs e)
+		{
+			DialogResult = DialogResult.OK;
+			Close();
+		}
+
+		private void ButtonCancel_Click(object sender, EventArgs e)
+		{
+			DialogResult = DialogResult.Cancel;
+			Close();
 		}
 	}
 

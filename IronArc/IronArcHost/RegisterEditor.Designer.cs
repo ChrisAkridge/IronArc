@@ -47,7 +47,7 @@
 			this.StaticLabelValue.AutoSize = true;
 			this.StaticLabelValue.Location = new System.Drawing.Point(55, 12);
 			this.StaticLabelValue.Name = "StaticLabelValue";
-			this.StaticLabelValue.Size = new System.Drawing.Size(39, 13);
+			this.StaticLabelValue.Size = new System.Drawing.Size(38, 13);
 			this.StaticLabelValue.TabIndex = 0;
 			this.StaticLabelValue.Text = "Value:";
 			// 
@@ -146,6 +146,7 @@
 			this.ButtonCancel.TabIndex = 10;
 			this.ButtonCancel.Text = "C&ancel";
 			this.ButtonCancel.UseVisualStyleBackColor = true;
+			this.ButtonCancel.Click += new System.EventHandler(this.ButtonCancel_Click);
 			// 
 			// ButtonOK
 			// 
@@ -155,6 +156,7 @@
 			this.ButtonOK.TabIndex = 11;
 			this.ButtonOK.Text = "&OK";
 			this.ButtonOK.UseVisualStyleBackColor = true;
+			this.ButtonOK.Click += new System.EventHandler(this.ButtonOK_Click);
 			// 
 			// RegisterEditor
 			// 
