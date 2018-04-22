@@ -16,8 +16,8 @@ namespace IronArcHost
 		public string ProgramPath { get; private set; }
 		public ulong MemorySize { get; private set; }
 		public ulong ProgramLoadAddress { get; private set; }
-
 		public List<string> HardwareDeviceNames { get; private set; }
+		public bool StartInDebugger => CheckStartInDebugger.Checked;
 
 		public NewVMForm()
 		{

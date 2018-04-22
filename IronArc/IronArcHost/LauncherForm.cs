@@ -38,7 +38,7 @@ namespace IronArcHost
 			if (machineIDWaitingToDebug == e.MachineID)
 			{
 				machineIDWaitingToDebug = null;
-				new DebuggerForm(new DebugVM(VMManager.Lookup(e.MachineID))).ShowDialog();
+				new DebuggerForm(VMManager.Lookup(e.MachineID)).ShowDialog();
 			}
 		}
 
@@ -59,7 +59,14 @@ namespace IronArcHost
 				lvi.SubItems.Add("0");
 				ListVMs.Items.Add(lvi);
 
-				VMManager.ResumeVM(newMachineID);
+				if (!newVMForm.StartInDebugger)
+				{
+					VMManager.ResumeVM(newMachineID);
+				}
+				else
+				{
+					new DebuggerForm(vm).ShowDialog();
+				}
 			}
 		}
 

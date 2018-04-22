@@ -28,6 +28,7 @@
 		/// </summary>
 		private void InitializeComponent()
 		{
+			this.components = new System.ComponentModel.Container();
 			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(DebuggerForm));
 			this.GroupBoxDisassembly = new System.Windows.Forms.GroupBox();
 			this.ListDisassembly = new System.Windows.Forms.ListView();
@@ -77,6 +78,7 @@
 			this.ListCallStackViewer = new System.Windows.Forms.ListView();
 			this.ColumnCalledAddress = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
 			this.ColumnEBP = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+			this.TmrQueueListener = new System.Windows.Forms.Timer(this.components);
 			this.GroupBoxDisassembly.SuspendLayout();
 			this.ToolStripDebugger.SuspendLayout();
 			this.GroupRegisters.SuspendLayout();
@@ -201,6 +203,7 @@
 			this.TSBStepOver.Name = "TSBStepOver";
 			this.TSBStepOver.Size = new System.Drawing.Size(78, 22);
 			this.TSBStepOver.Text = "Step &Over";
+			this.TSBStepOver.Click += new System.EventHandler(this.TSBStepOver_Click);
 			// 
 			// TSBStepOut
 			// 
@@ -209,6 +212,7 @@
 			this.TSBStepOut.Name = "TSBStepOut";
 			this.TSBStepOut.Size = new System.Drawing.Size(73, 22);
 			this.TSBStepOut.Text = "Step O&ut";
+			this.TSBStepOut.Click += new System.EventHandler(this.TSBStepOut_Click);
 			// 
 			// TSSeparator2
 			// 
@@ -570,6 +574,11 @@
 			// 
 			this.ColumnEBP.Text = "Stack Base";
 			// 
+			// TmrQueueListener
+			// 
+			this.TmrQueueListener.Enabled = true;
+			this.TmrQueueListener.Tick += new System.EventHandler(this.TmrQueueListener_Tick);
+			// 
 			// DebuggerForm
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -647,5 +656,6 @@
 		private System.Windows.Forms.Button ButtonClearBreakpoint;
 		private System.Windows.Forms.Button ButtonSetBreakpoint;
 		private System.Windows.Forms.ListView ListDisassembly;
+		private System.Windows.Forms.Timer TmrQueueListener;
 	}
 }

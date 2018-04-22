@@ -1,0 +1,17 @@
+main:
+	mov QWORD 0x1000 ebp
+	mov QWORD 0x1000 esp
+	push DWORD 3
+	push DWORD 2
+	push DWORD 1
+	call somewhere_else
+	pop DWORD eax
+	pop DWORD ebx
+	pop DWORD ecx
+	call somewhere_else
+	end
+	
+somewhere_else:
+	push BYTE 137
+	mov QWORD ebp esp
+	ret

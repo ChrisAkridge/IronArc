@@ -42,6 +42,7 @@
 			this.ButtonCancel = new System.Windows.Forms.Button();
 			this.ButtonOK = new System.Windows.Forms.Button();
 			this.OFDInitialProgram = new System.Windows.Forms.OpenFileDialog();
+			this.CheckStartInDebugger = new System.Windows.Forms.CheckBox();
 			((System.ComponentModel.ISupportInitialize)(this.NumUDLoadAtAddress)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.NumUDSystemMemory)).BeginInit();
 			this.SuspendLayout();
@@ -184,6 +185,16 @@
 			this.OFDInitialProgram.Filter = "All files|*.*";
 			this.OFDInitialProgram.Title = "Select Initial Program";
 			// 
+			// CheckStartInDebugger
+			// 
+			this.CheckStartInDebugger.AutoSize = true;
+			this.CheckStartInDebugger.Location = new System.Drawing.Point(16, 248);
+			this.CheckStartInDebugger.Name = "CheckStartInDebugger";
+			this.CheckStartInDebugger.Size = new System.Drawing.Size(117, 17);
+			this.CheckStartInDebugger.TabIndex = 17;
+			this.CheckStartInDebugger.Text = "Start in debugger";
+			this.CheckStartInDebugger.UseVisualStyleBackColor = true;
+			// 
 			// NewVMForm
 			// 
 			this.AcceptButton = this.ButtonOK;
@@ -191,6 +202,7 @@
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.CancelButton = this.ButtonCancel;
 			this.ClientSize = new System.Drawing.Size(371, 277);
+			this.Controls.Add(this.CheckStartInDebugger);
 			this.Controls.Add(this.ButtonOK);
 			this.Controls.Add(this.ButtonCancel);
 			this.Controls.Add(this.CLBInitialHardwareDevices);
@@ -235,5 +247,6 @@
 		private System.Windows.Forms.Button ButtonCancel;
 		private System.Windows.Forms.Button ButtonOK;
 		private System.Windows.Forms.OpenFileDialog OFDInitialProgram;
+		private System.Windows.Forms.CheckBox CheckStartInDebugger;
 	}
 }

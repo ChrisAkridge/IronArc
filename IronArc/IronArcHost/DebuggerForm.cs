@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -19,25 +20,26 @@ namespace IronArcHost
 		private const int DisassemblyDisplayedItems = 12;
 
 		private DebugVM vm;
-
 		private DisassemblyWindow disassemblyWindow;
-
-		public DebuggerForm(DebugVM vm)
+		private ConcurrentQueue<IronArc.Message> messageQueue;
+		
+		public DebuggerForm(VirtualMachine vm)
 		{
-			this.vm = vm;
+			messageQueue = new ConcurrentQueue<IronArc.Message>();
+			this.vm = new DebugVM(vm, messageQueue);
 
 			InitializeComponent();
 
-			disassemblyWindow = new DisassemblyWindow(vm.CreateMemoryStream(), DisassemblyDisplayedItems);
+			disassemblyWindow = new DisassemblyWindow(this.vm.CreateMemoryStream(), DisassemblyDisplayedItems);
 			disassemblyWindow.InstructionsChanged += DisassemblyWindow_InstructionsChanged;
 
 			RefreshDisassemblyList();
 
-			HexMemory.ByteProvider = new VMMemoryByteProvider(vm);
+			HexMemory.ByteProvider = new VMMemoryByteProvider(this.vm);
 
 			SubscribeRegisterLinkClickEvents();
+			this.vm.DebugDisplayInvalidated += Vm_DebugDisplayInvalidated;
 		}
-
 		private void SubscribeRegisterLinkClickEvents()
 		{
 			LinkEAX.Click += (sender, e) => EditRegister(vm.EAX, v => vm.EAX = v);
@@ -53,11 +55,6 @@ namespace IronArcHost
 			LinkEIP.Click += (sender, e) => EditRegister(vm.EIP, v => vm.EIP = v);
 			LinkERP.Click += (sender, e) => EditRegister(vm.ERP, v => vm.ERP = v);
 			LinkEFLAGS.Click += (sender, e) => EditRegister(vm.EFLAGS, v => vm.EFLAGS = v);
-		}
-
-		private void DisassemblyWindow_InstructionsChanged(object sender, EventArgs e)
-		{
-			RefreshDisassemblyList();
 		}
 
 		private void RefreshDisassemblyList()
@@ -77,11 +74,6 @@ namespace IronArcHost
 
 				ListDisassembly.Items.Add(lvi);
 			}
-		}
-
-		private void DebuggerForm_Load(object sender, EventArgs e)
-		{
-			UpdateRegisterDisplay();
 		}
 
 		private void UpdateRegisterDisplay()
@@ -109,6 +101,47 @@ namespace IronArcHost
 				writeRegisterAction(editor.RegisterValue);
 			}
 
+			UpdateRegisterDisplay();
+		}
+
+		private void SetControlsEnabledOnVMStateChange(bool vmPaused)
+		{
+			TSBRun.Enabled = vmPaused;
+			TSBStepInto.Enabled = vmPaused;
+			TSBStepOver.Enabled = vmPaused;
+			TSBStepOut.Enabled = vmPaused;
+			TSBAnimate.Enabled = vmPaused;
+			ListDisassembly.Enabled = vmPaused;
+			HexMemory.Enabled = vmPaused;
+			ListCallStackViewer.Enabled = vmPaused;
+			ButtonDisassemblyUp.Enabled = vmPaused;
+			ButtonDisassemblyDown.Enabled = vmPaused;
+			ButtonSetBreakpoint.Enabled = vmPaused;
+			ButtonClearBreakpoint.Enabled = vmPaused;
+			LinkEAX.Enabled = vmPaused;
+			LinkEBX.Enabled = vmPaused;
+			LinkECX.Enabled = vmPaused;
+			LinkEDX.Enabled = vmPaused;
+			LinkEEX.Enabled = vmPaused;
+			LinkEFX.Enabled = vmPaused;
+			LinkEGX.Enabled = vmPaused;
+			LinkEHX.Enabled = vmPaused;
+			LinkEBP.Enabled = vmPaused;
+			LinkESP.Enabled = vmPaused;
+			LinkERP.Enabled = vmPaused;
+			LinkEIP.Enabled = vmPaused;
+			LinkEFLAGS.Enabled = vmPaused;
+
+			TSBPause.Enabled = !vmPaused;
+		}
+
+		private void DisassemblyWindow_InstructionsChanged(object sender, EventArgs e)
+		{
+			RefreshDisassemblyList();
+		}
+
+		private void DebuggerForm_Load(object sender, EventArgs e)
+		{
 			UpdateRegisterDisplay();
 		}
 
@@ -142,9 +175,58 @@ namespace IronArcHost
 		private void TSBStepInto_Click(object sender, EventArgs e)
 		{
 			vm.StepInto();
+		}
 
+		private void TmrQueueListener_Tick(object sender, EventArgs e)
+		{
+			if (!messageQueue.IsEmpty)
+			{
+				messageQueue.TryDequeue(out IronArc.Message message);
+				if (message.UIMessage == UIMessage.VMStateChanged)
+				{
+					if ((VMState)message.WParam == VMState.Paused)
+					{
+						SetControlsEnabledOnVMStateChange(vmPaused: true);
+						UpdateDebugDisplay();
+					}
+					else if ((VMState)message.WParam == VMState.Running)
+					{
+						SetControlsEnabledOnVMStateChange(vmPaused: false);
+						UpdateDebugDisplay();
+					}
+				}
+			}
+		}
+
+		private void TSBStepOver_Click(object sender, EventArgs e)
+		{
+			// Step over: if the next instruction to be executed is not a call instruction,
+			// run it by itself. If it is a call instruction, start the VM on a thread, processing
+			// instructions until it reaches the instruction immediately after the call.
+			vm.StepOver();
+		}
+
+		private void Vm_DebugDisplayInvalidated(object sender, EventArgs e)
+		{
+			UpdateDebugDisplay();
+		}
+
+		private void UpdateDebugDisplay()
+		{
 			disassemblyWindow.SeekToAddress(vm.EIP);
 			UpdateRegisterDisplay();
+
+			if (vm.VMState == VMState.Halted || vm.VMState == VMState.Error)
+			{
+				SetControlsEnabledOnVMStateChange(vmPaused: false);
+				TSBPause.Enabled = false;
+				TmrQueueListener.Enabled = false;
+			}
+		}
+
+		private void TSBStepOut_Click(object sender, EventArgs e)
+		{
+			vm.StepOut();
 		}
 	}
 }

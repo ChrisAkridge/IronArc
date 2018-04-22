@@ -13,6 +13,13 @@ namespace IronArc
 		Error
 	}
 
+	public enum DebugRunUntilType
+	{
+		NotRunning,
+		StepOver,
+		StepOut
+	}
+
 	public enum HardwareDeviceStatus
 	{
 		Active,
