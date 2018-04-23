@@ -32,18 +32,30 @@ namespace IronArc.Hardware
 			}
 			else if (functionName == "Read")
 			{
-				char character = terminal.Read();
+				char character = Read();
 				vm.Processor.PushExternal(new[] { (byte)(character & 0xFF), (byte)(character >> 8) });
 			}
 			else if (functionName == "ReadLine")
 			{
-				string line = terminal.ReadLine();
+				string line = ReadLine();
 				vm.Processor.PushExternal(Extensions.ToLPString(line));
 			}
 		}
 
 		private void Write(string text) => terminal.Write(text);
 		private void WriteLine(string text) => terminal.WriteLine(text);
+
+		private char Read()
+		{
+			if (terminal.CanPerformWaitingRead) { return terminal.Read(); }
+			else { return terminal.NonWaitingRead(); }
+		}
+
+		private string ReadLine()
+		{
+			if (terminal.CanPerformWaitingRead) { return terminal.ReadLine(); }
+			else { return terminal.NonWaitingReadLine(); }
+		}
 
 		public override void Dispose()
 		{

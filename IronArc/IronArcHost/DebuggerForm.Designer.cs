@@ -79,6 +79,7 @@
 			this.ColumnCalledAddress = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
 			this.ColumnEBP = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
 			this.TmrQueueListener = new System.Windows.Forms.Timer(this.components);
+			this.TimerAnimateExecution = new System.Windows.Forms.Timer(this.components);
 			this.GroupBoxDisassembly.SuspendLayout();
 			this.ToolStripDebugger.SuspendLayout();
 			this.GroupRegisters.SuspendLayout();
@@ -173,6 +174,7 @@
 			this.TSBRun.Name = "TSBRun";
 			this.TSBRun.Size = new System.Drawing.Size(48, 22);
 			this.TSBRun.Text = "&Run";
+			this.TSBRun.Click += new System.EventHandler(this.TSBRun_Click);
 			// 
 			// TSBPause
 			// 
@@ -181,6 +183,7 @@
 			this.TSBPause.Name = "TSBPause";
 			this.TSBPause.Size = new System.Drawing.Size(58, 22);
 			this.TSBPause.Text = "&Pause";
+			this.TSBPause.Click += new System.EventHandler(this.TSBPause_Click);
 			// 
 			// TSSeparator1
 			// 
@@ -226,6 +229,7 @@
 			this.TSBAnimate.Name = "TSBAnimate";
 			this.TSBAnimate.Size = new System.Drawing.Size(72, 22);
 			this.TSBAnimate.Text = "&Animate";
+			this.TSBAnimate.Click += new System.EventHandler(this.TSBAnimate_Click);
 			// 
 			// GroupRegisters
 			// 
@@ -267,6 +271,7 @@
 			this.TextERP.Font = new System.Drawing.Font("Consolas", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
 			this.TextERP.Location = new System.Drawing.Point(180, 150);
 			this.TextERP.Name = "TextERP";
+			this.TextERP.ReadOnly = true;
 			this.TextERP.Size = new System.Drawing.Size(104, 20);
 			this.TextERP.TabIndex = 28;
 			this.TextERP.Text = "0000000000000000";
@@ -276,6 +281,7 @@
 			this.TextESP.Font = new System.Drawing.Font("Consolas", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
 			this.TextESP.Location = new System.Drawing.Point(180, 124);
 			this.TextESP.Name = "TextESP";
+			this.TextESP.ReadOnly = true;
 			this.TextESP.Size = new System.Drawing.Size(104, 20);
 			this.TextESP.TabIndex = 27;
 			this.TextESP.Text = "0000000000000000";
@@ -285,6 +291,7 @@
 			this.TextEHX.Font = new System.Drawing.Font("Consolas", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
 			this.TextEHX.Location = new System.Drawing.Point(180, 98);
 			this.TextEHX.Name = "TextEHX";
+			this.TextEHX.ReadOnly = true;
 			this.TextEHX.Size = new System.Drawing.Size(104, 20);
 			this.TextEHX.TabIndex = 26;
 			this.TextEHX.Text = "0000000000000000";
@@ -294,6 +301,7 @@
 			this.TextEGX.Font = new System.Drawing.Font("Consolas", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
 			this.TextEGX.Location = new System.Drawing.Point(180, 72);
 			this.TextEGX.Name = "TextEGX";
+			this.TextEGX.ReadOnly = true;
 			this.TextEGX.Size = new System.Drawing.Size(104, 20);
 			this.TextEGX.TabIndex = 25;
 			this.TextEGX.Text = "0000000000000000";
@@ -303,6 +311,7 @@
 			this.TextEFX.Font = new System.Drawing.Font("Consolas", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
 			this.TextEFX.Location = new System.Drawing.Point(180, 46);
 			this.TextEFX.Name = "TextEFX";
+			this.TextEFX.ReadOnly = true;
 			this.TextEFX.Size = new System.Drawing.Size(104, 20);
 			this.TextEFX.TabIndex = 24;
 			this.TextEFX.Text = "0000000000000000";
@@ -312,6 +321,7 @@
 			this.TextEEX.Font = new System.Drawing.Font("Consolas", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
 			this.TextEEX.Location = new System.Drawing.Point(180, 20);
 			this.TextEEX.Name = "TextEEX";
+			this.TextEEX.ReadOnly = true;
 			this.TextEEX.Size = new System.Drawing.Size(104, 20);
 			this.TextEEX.TabIndex = 23;
 			this.TextEEX.Text = "0000000000000000";
@@ -351,6 +361,7 @@
 			this.TextEFLAGS.Font = new System.Drawing.Font("Consolas", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
 			this.TextEFLAGS.Location = new System.Drawing.Point(58, 176);
 			this.TextEFLAGS.Name = "TextEFLAGS";
+			this.TextEFLAGS.ReadOnly = true;
 			this.TextEFLAGS.Size = new System.Drawing.Size(104, 20);
 			this.TextEFLAGS.TabIndex = 21;
 			this.TextEFLAGS.Text = "0000000000000000";
@@ -370,6 +381,7 @@
 			this.TextEIP.Font = new System.Drawing.Font("Consolas", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
 			this.TextEIP.Location = new System.Drawing.Point(39, 150);
 			this.TextEIP.Name = "TextEIP";
+			this.TextEIP.ReadOnly = true;
 			this.TextEIP.Size = new System.Drawing.Size(104, 20);
 			this.TextEIP.TabIndex = 19;
 			this.TextEIP.Text = "0000000000000000";
@@ -379,6 +391,7 @@
 			this.TextEBP.Font = new System.Drawing.Font("Consolas", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
 			this.TextEBP.Location = new System.Drawing.Point(39, 124);
 			this.TextEBP.Name = "TextEBP";
+			this.TextEBP.ReadOnly = true;
 			this.TextEBP.Size = new System.Drawing.Size(104, 20);
 			this.TextEBP.TabIndex = 8;
 			this.TextEBP.Text = "0000000000000000";
@@ -408,6 +421,7 @@
 			this.TextEDX.Font = new System.Drawing.Font("Consolas", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
 			this.TextEDX.Location = new System.Drawing.Point(39, 98);
 			this.TextEDX.Name = "TextEDX";
+			this.TextEDX.ReadOnly = true;
 			this.TextEDX.Size = new System.Drawing.Size(104, 20);
 			this.TextEDX.TabIndex = 7;
 			this.TextEDX.Text = "0000000000000000";
@@ -427,6 +441,7 @@
 			this.TextEAX.Font = new System.Drawing.Font("Consolas", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
 			this.TextEAX.Location = new System.Drawing.Point(39, 20);
 			this.TextEAX.Name = "TextEAX";
+			this.TextEAX.ReadOnly = true;
 			this.TextEAX.Size = new System.Drawing.Size(104, 20);
 			this.TextEAX.TabIndex = 1;
 			this.TextEAX.Text = "0000000000000000";
@@ -476,6 +491,7 @@
 			this.TextEBX.Font = new System.Drawing.Font("Consolas", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
 			this.TextEBX.Location = new System.Drawing.Point(39, 46);
 			this.TextEBX.Name = "TextEBX";
+			this.TextEBX.ReadOnly = true;
 			this.TextEBX.Size = new System.Drawing.Size(104, 20);
 			this.TextEBX.TabIndex = 3;
 			this.TextEBX.Text = "0000000000000000";
@@ -495,6 +511,7 @@
 			this.TextECX.Font = new System.Drawing.Font("Consolas", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
 			this.TextECX.Location = new System.Drawing.Point(39, 72);
 			this.TextECX.Name = "TextECX";
+			this.TextECX.ReadOnly = true;
 			this.TextECX.Size = new System.Drawing.Size(104, 20);
 			this.TextECX.TabIndex = 5;
 			this.TextECX.Text = "0000000000000000";
@@ -579,6 +596,10 @@
 			this.TmrQueueListener.Enabled = true;
 			this.TmrQueueListener.Tick += new System.EventHandler(this.TmrQueueListener_Tick);
 			// 
+			// TimerAnimateExecution
+			// 
+			this.TimerAnimateExecution.Tick += new System.EventHandler(this.TimerAnimateExecution_Tick);
+			// 
 			// DebuggerForm
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -657,5 +678,6 @@
 		private System.Windows.Forms.Button ButtonSetBreakpoint;
 		private System.Windows.Forms.ListView ListDisassembly;
 		private System.Windows.Forms.Timer TmrQueueListener;
+		private System.Windows.Forms.Timer TimerAnimateExecution;
 	}
 }

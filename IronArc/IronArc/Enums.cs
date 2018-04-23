@@ -16,6 +16,7 @@ namespace IronArc
 	public enum DebugRunUntilType
 	{
 		NotRunning,
+		RunContinously,
 		StepOver,
 		StepOut
 	}

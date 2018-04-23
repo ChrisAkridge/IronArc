@@ -22,6 +22,7 @@ namespace IronArcHost
 		private DebugVM vm;
 		private DisassemblyWindow disassemblyWindow;
 		private ConcurrentQueue<IronArc.Message> messageQueue;
+		private bool isAnimating;
 		
 		public DebuggerForm(VirtualMachine vm)
 		{
@@ -32,6 +33,7 @@ namespace IronArcHost
 
 			disassemblyWindow = new DisassemblyWindow(this.vm.CreateMemoryStream(), DisassemblyDisplayedItems);
 			disassemblyWindow.InstructionsChanged += DisassemblyWindow_InstructionsChanged;
+			disassemblyWindow.CachingEnabled = false;
 
 			RefreshDisassemblyList();
 
@@ -40,6 +42,7 @@ namespace IronArcHost
 			SubscribeRegisterLinkClickEvents();
 			this.vm.DebugDisplayInvalidated += Vm_DebugDisplayInvalidated;
 		}
+
 		private void SubscribeRegisterLinkClickEvents()
 		{
 			LinkEAX.Click += (sender, e) => EditRegister(vm.EAX, v => vm.EAX = v);
@@ -143,6 +146,9 @@ namespace IronArcHost
 		private void DebuggerForm_Load(object sender, EventArgs e)
 		{
 			UpdateRegisterDisplay();
+
+			var terminalForm = VMManager.Provider.Terminals.FirstOrDefault(f => f.MachineID == vm.MachineID);
+			if (terminalForm != null) { terminalForm.Show(); }
 		}
 
 		private void ButtonSetBreakpoint_Click(object sender, EventArgs e)
@@ -221,12 +227,46 @@ namespace IronArcHost
 				SetControlsEnabledOnVMStateChange(vmPaused: false);
 				TSBPause.Enabled = false;
 				TmrQueueListener.Enabled = false;
+				TimerAnimateExecution.Enabled = false;
 			}
 		}
 
 		private void TSBStepOut_Click(object sender, EventArgs e)
 		{
 			vm.StepOut();
+		}
+
+		private void TSBRun_Click(object sender, EventArgs e)
+		{
+			vm.Run();
+		}
+
+		private void TSBPause_Click(object sender, EventArgs e)
+		{
+			if (isAnimating)
+			{
+				isAnimating = false;
+				SetControlsEnabledOnVMStateChange(vmPaused: true);
+				TimerAnimateExecution.Enabled = false;
+			}
+			else { vm.Pause(); }
+		}
+
+		private void TSBAnimate_Click(object sender, EventArgs e)
+		{
+			isAnimating = true;
+			TimerAnimateExecution.Enabled = true;
+			SetControlsEnabledOnVMStateChange(vmPaused: false);
+		}
+
+		private void TimerAnimateExecution_Tick(object sender, EventArgs e)
+		{
+			foreach (Form form in Application.OpenForms)
+			{
+				if (form is DebugTerminalInputForm) { return; }
+			}
+
+			vm.StepInto();
 		}
 	}
 }

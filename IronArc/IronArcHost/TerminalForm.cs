@@ -24,6 +24,8 @@ namespace IronArcHost
 		}
 
 		public Guid MachineID { get; set; }
+		public bool CanPerformWaitingRead => (SynchronizationContext.Current == null);	// if it's null, code is running on the VM thread
+
 		private InputWaitingState waitingState = InputWaitingState.NotWaiting;
 		private ManualResetEvent waitHandle = new ManualResetEvent(false);
 		private string receivedInput;
@@ -81,6 +83,22 @@ namespace IronArcHost
 
 			waitHandle.Reset();
 			return receivedInput;
+		}
+
+		public char NonWaitingRead()
+		{
+			var inputForm = new DebugTerminalInputForm(DebugTerminalInputForm.DebugTerminalInputType.Character,
+				MachineID);
+			inputForm.ShowDialog();
+			return inputForm.Input[0];
+		}
+
+		public string NonWaitingReadLine()
+		{
+			var inputForm = new DebugTerminalInputForm(DebugTerminalInputForm.DebugTerminalInputType.Line,
+				MachineID);
+			inputForm.ShowDialog();
+			return inputForm.Input;
 		}
 
 		private void CMISaveOutput_Click(object sender, EventArgs e)

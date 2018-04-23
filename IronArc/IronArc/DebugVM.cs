@@ -24,6 +24,7 @@ namespace IronArc
 		public IReadOnlyList<Breakpoint> Breakpoints => breakpoints.AsReadOnly();
 		public ConcurrentQueue<Message> MessageQueue { get; }
 		public VMState VMState => vm.State;
+		public Guid MachineID => vm.MachineID;
 
 		public DebugVM(VirtualMachine vm, ConcurrentQueue<Message> uiMessageQueue)
 		{
@@ -147,6 +148,10 @@ namespace IronArc
 
 		private void StartInstructionLoopThread()
 		{
+			var uiMessage = new Message(VMMessage.None, UIMessage.VMStateChanged, vm.MachineID,
+				(int)VMState.Running, 0L, null);
+			uiMessageQueue.Enqueue(uiMessage);
+
 			var worker = new Thread(InstructionLoop);
 
 			if (runUntilType == DebugRunUntilType.StepOver)
@@ -217,6 +222,17 @@ namespace IronArc
 			return false;
 		}
 
+		public void Run()
+		{
+			runUntilType = DebugRunUntilType.RunContinously;
+			StartInstructionLoopThread();
+		}
+
+		public void Pause()
+		{
+			NotifyUIThreadOfPause();
+		}
+
 		public void StepInto()
 		{
 			vm.ExecuteOneInstruction();
@@ -257,7 +273,11 @@ namespace IronArc
 		public void StepOut()
 		{
 			runUntilType = DebugRunUntilType.StepOut;
-			
+
+			var uiMessage = new Message(VMMessage.None, UIMessage.VMStateChanged, vm.MachineID,
+				(int)VMState.Running, 0L, null);
+			uiMessageQueue.Enqueue(uiMessage);
+
 			var worker = new Thread(StepOutInstructionLoop);
 			worker.Name = $"Step Out {{{vm.MachineID}}}";
 			worker.Start();
@@ -272,11 +292,22 @@ namespace IronArc
 				// ret or end instruction that will actually be executed. So, instead, we're going
 				// to just execute instructions until we reach a ret or end. When we reach a ret,
 				// we DO want to execute it, but we DON'T want to execute an end instruction.
-
-				// WYLO: check if the next instruction is ret or end
-				// if it's ret, execute it, then NotifyUIOfPause
-				// if it's end, NotifyUIOfPause
-				// if it's neither, run the instruction and loop back
+				ushort opcode = vm.Memory.ReadUShortAt(EIP);
+				if (opcode == 0x0004 /* ret */)
+				{
+					vm.ExecuteOneInstruction();
+					NotifyUIThreadOfPause();
+					break;
+				}
+				else if (opcode == 0x0001 /* end */)
+				{
+					NotifyUIThreadOfPause();
+					break;
+				}
+				else
+				{
+					vm.ExecuteOneInstruction();
+				}
 			}
 		}
 
