@@ -208,7 +208,7 @@ IronArc Binary files are stored on the host machine as files with the IEXE exten
 
 These programs are loaded at a start address specified when starting the VM in the memory space. If the program is larger than the assigned memory space, the processor will immediately fail. EIP and ERP is set to the specified address and execution begins from EIP. The remainder of memory is initialized to zeroes. The stack immediately follows (unless set to another address when starting the VM), as reflected by ESP = EBP = (start address + program size).
 
-**The size of the program, with the header and string table, in bytes, will be initially stored in the EAX register when the program is loaded. All IFB-format programs must account for this and all implementations must place the size of the program within EAX.** The program is free to use or clear this value as necessary.
+**The size of the program, with the header, global variable space, and string table, in bytes, will be initially stored in the EAX register when the program is loaded. All IFB-format programs must account for this and all implementations must place the size of the program within EAX.** The program is free to use or clear this value as necessary.
 
 ## Hardware
 

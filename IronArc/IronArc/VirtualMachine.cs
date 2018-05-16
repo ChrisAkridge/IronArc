@@ -15,8 +15,9 @@ namespace IronArc
 		public const uint MagicNumber = 0x45584549; // "IEXE"
 		private const ulong HeaderSize = 28UL;
 
+		private ulong firstInstructionAddress;
 		private ulong stringsTableAddress;
-		
+
 		public Guid MachineID { get; }
 		public Processor Processor { get; }
 		public ByteBlock Memory { get; }
@@ -25,7 +26,7 @@ namespace IronArc
 		public VMState State { get; private set; }
 		public ulong InstructionExecutedCount { get; private set; }
 
-		public VirtualMachine(ulong memorySize, string programPath, ulong loadAddress, 
+		public VirtualMachine(ulong memorySize, string programPath, ulong loadAddress,
 			IEnumerable<string> hardwareDeviceNames)
 		{
 			byte[] program = File.ReadAllBytes(programPath);
@@ -39,10 +40,10 @@ namespace IronArc
 
 			Processor = new Processor(Memory, loadAddress, (ulong)program.Length + HeaderSize,
 				stringsTableAddress, this);
-			Processor.EIP += HeaderSize;
+			Processor.EIP += firstInstructionAddress;
 			Hardware = new List<HardwareDevice>();
 
-			foreach (var hardwareName in hardwareDeviceNames)
+			foreach (string hardwareName in hardwareDeviceNames)
 			{
 				var type = Type.GetType(hardwareName);
 				Hardware.Add((HardwareDevice)Activator.CreateInstance(type, MachineID));
@@ -68,6 +69,7 @@ namespace IronArc
 				Error((uint)IronArc.Error.HeaderInvalid);
 			}
 
+			firstInstructionAddress = BitConverter.ToUInt64(program, 12);
 			stringsTableAddress = BitConverter.ToUInt64(program, 20);
 		}
 
@@ -158,8 +160,7 @@ namespace IronArc
 				if (!MessageQueue.IsEmpty)
 				{
 					// For now, we'll just respond to SetVMState.
-					Message message = null;
-					if (!MessageQueue.TryDequeue(out message))
+					if (!MessageQueue.TryDequeue(out Message message))
 					{
 						throw new InvalidOperationException("Tried to dequeue a message from an empty queue.");
 						// yay race conditions
@@ -175,13 +176,17 @@ namespace IronArc
 							break;
 						}
 					}
-					else if (message.VMMessage == VMMessage.AddHardwareDevice)
+					else
 					{
-						AddHardwareDevice((HardwareDevice)message.Data);
-					}
-					else if (message.VMMessage == VMMessage.RemoveHardwareDevice)
-					{
-						RemoveHardwareDevice((Type)message.Data);
+						switch (message.VMMessage)
+						{
+							case VMMessage.AddHardwareDevice:
+								AddHardwareDevice((HardwareDevice)message.Data);
+								break;
+							case VMMessage.RemoveHardwareDevice:
+								RemoveHardwareDevice((Type)message.Data);
+								break;
+						}
 					}
 				}
 			}
@@ -196,12 +201,12 @@ namespace IronArc
 		internal void HardwareCall(string hwcall)
 		{
 			string[] hwcallParts = hwcall.Split(new[] { "::" }, StringSplitOptions.None);
-			
-			for (int i = 0; i < Hardware.Count; i++)
+
+			foreach (HardwareDevice hwDevice in Hardware)
 			{
-				if (Hardware[i].DeviceName == hwcallParts[0])
+				if (hwDevice.DeviceName == hwcallParts[0])
 				{
-					Hardware[i].HardwareCall(hwcallParts[1], this);
+					hwDevice.HardwareCall(hwcallParts[1], this);
 					return;
 				}
 			}

@@ -49,7 +49,7 @@ namespace IronArcHost
 			{
 				var newMachineID = VMManager.CreateVM(newVMForm.ProgramPath, newVMForm.MemorySize, newVMForm.ProgramLoadAddress,
 					newVMForm.HardwareDeviceNames);
-				
+
 				var vm = VMManager.Lookup(newMachineID);
 				var lvi = new ListViewItem(vm.MachineID.ToString());
 				lvi.SubItems.Add(vm.State.ToString());
