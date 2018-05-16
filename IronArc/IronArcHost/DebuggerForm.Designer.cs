@@ -34,8 +34,6 @@
 			this.ListDisassembly = new System.Windows.Forms.ListView();
 			this.ButtonClearBreakpoint = new System.Windows.Forms.Button();
 			this.ButtonSetBreakpoint = new System.Windows.Forms.Button();
-			this.ButtonDisassemblyDown = new System.Windows.Forms.Button();
-			this.ButtonDisassemblyUp = new System.Windows.Forms.Button();
 			this.ToolStripDebugger = new System.Windows.Forms.ToolStrip();
 			this.TSBRun = new System.Windows.Forms.ToolStripButton();
 			this.TSBPause = new System.Windows.Forms.ToolStripButton();
@@ -92,8 +90,6 @@
 			this.GroupBoxDisassembly.Controls.Add(this.ListDisassembly);
 			this.GroupBoxDisassembly.Controls.Add(this.ButtonClearBreakpoint);
 			this.GroupBoxDisassembly.Controls.Add(this.ButtonSetBreakpoint);
-			this.GroupBoxDisassembly.Controls.Add(this.ButtonDisassemblyDown);
-			this.GroupBoxDisassembly.Controls.Add(this.ButtonDisassemblyUp);
 			this.GroupBoxDisassembly.Location = new System.Drawing.Point(12, 32);
 			this.GroupBoxDisassembly.Name = "GroupBoxDisassembly";
 			this.GroupBoxDisassembly.Size = new System.Drawing.Size(351, 267);
@@ -107,7 +103,7 @@
 			this.ListDisassembly.AutoArrange = false;
 			this.ListDisassembly.Location = new System.Drawing.Point(7, 21);
 			this.ListDisassembly.Name = "ListDisassembly";
-			this.ListDisassembly.Size = new System.Drawing.Size(309, 213);
+			this.ListDisassembly.Size = new System.Drawing.Size(344, 213);
 			this.ListDisassembly.TabIndex = 5;
 			this.ListDisassembly.UseCompatibleStateImageBehavior = false;
 			this.ListDisassembly.View = System.Windows.Forms.View.List;
@@ -131,24 +127,6 @@
 			this.ButtonSetBreakpoint.Text = "Set Breakpoint Here";
 			this.ButtonSetBreakpoint.UseVisualStyleBackColor = true;
 			this.ButtonSetBreakpoint.Click += new System.EventHandler(this.ButtonSetBreakpoint_Click);
-			// 
-			// ButtonDisassemblyDown
-			// 
-			this.ButtonDisassemblyDown.Location = new System.Drawing.Point(322, 62);
-			this.ButtonDisassemblyDown.Name = "ButtonDisassemblyDown";
-			this.ButtonDisassemblyDown.Size = new System.Drawing.Size(23, 23);
-			this.ButtonDisassemblyDown.TabIndex = 2;
-			this.ButtonDisassemblyDown.Text = "v";
-			this.ButtonDisassemblyDown.UseVisualStyleBackColor = true;
-			// 
-			// ButtonDisassemblyUp
-			// 
-			this.ButtonDisassemblyUp.Location = new System.Drawing.Point(322, 33);
-			this.ButtonDisassemblyUp.Name = "ButtonDisassemblyUp";
-			this.ButtonDisassemblyUp.Size = new System.Drawing.Size(23, 23);
-			this.ButtonDisassemblyUp.TabIndex = 1;
-			this.ButtonDisassemblyUp.Text = "^";
-			this.ButtonDisassemblyUp.UseVisualStyleBackColor = true;
 			// 
 			// ToolStripDebugger
 			// 
@@ -671,8 +649,6 @@
 		private System.Windows.Forms.TextBox TextEBP;
 		private System.Windows.Forms.LinkLabel LinkEIP;
 		private System.Windows.Forms.LinkLabel LinkEBP;
-		private System.Windows.Forms.Button ButtonDisassemblyDown;
-		private System.Windows.Forms.Button ButtonDisassemblyUp;
 		private Be.Windows.Forms.HexBox HexMemory;
 		private System.Windows.Forms.Button ButtonClearBreakpoint;
 		private System.Windows.Forms.Button ButtonSetBreakpoint;

@@ -1,0 +1,9 @@
+From Alex (tl_aram on GitHub)
+
+1. The bits 0-11 of a virtual address name a byte in a page
+2. Bits 12-21 name a page
+3. Bits 22-31 name a page block (1024 pages)
+4. The page table has two layers: a 1024-entry upper layer that holds addresses to lower layer or NULL if lower layer is not allocated
+5. Lower layer page tables can be allocated or freed at will and have 1024 page entries
+
+This makes page lookups roughly O(1) instead of O(N)

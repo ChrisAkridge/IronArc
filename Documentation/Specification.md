@@ -152,7 +152,7 @@ Arguments can then be accessed using constructs like `DWORD *ebp`. for `a`, or `
 ## IronArc Programs
 
 ### IronArc Instruction Format
-An IronArc program is, at minimum, a file containing a series of bytes that encode instructions, along with a string table located at the end of the file. Each instruction is composed of an opcode, a flags byte for some instructions, and one or more operands appearing as memory addresses or literal values. IronArc instructions are widely varying in size, from at least two bytes (an opcode with no flags or operands, such as the No Operation instruction) to many bytes (an opcode with flags and four operands).
+An IronArc program is, at minimum, a file containing a space for global variables, a series of bytes that encode instructions, and a string table located at the end of the file. Each instruction is composed of an opcode, a flags byte for some instructions, and one or more operands appearing as memory addresses or literal values. IronArc instructions are widely varying in size, from at least two bytes (an opcode with no flags or operands, such as the No Operation instruction) to many bytes (an opcode with flags and four operands).
 
 The first portion of an instruction is a two-byte opcode. The opcode uniquely identifies the instruction and the processor can then tell how many operands will succeed the opcode. The high byte of an opcode defines a certain “class” of instructions, such as control flow (JMP, CALL, RET), data manipulation (PUSH, MOV, ADD), et cetera. The low byte of the opcode specifies the specific instruction. With 256 possible classes and 256 possible instructions per class, there are a total of 65,536 instructions that can be identified with these opcodes, although the actual number of instructions will be much lower in practice.
 
@@ -192,16 +192,17 @@ The header is `4 + 4 + 4 + 8 + 8 = 28` bytes long.
 
 The file opens with a magic number `IEXE`, followed by an IronArc specification version and an assembler version. These versions are split into the high and low words for the major and minor version.
 
-**This specification is major version 1 and minor version 1.**
+**This specification is major version 1 and minor version 2.**
 
 The assembler version is written by whichever assembler made the program. If the program is composed by hand, the version should be major version 0 and minor version 0.
 
-
 Up next is the address of the start of the first instruction, followed by the start of the string table.
 
-Immediately following the header is all the instructions of the program. The `EIP` register is initialiazed to this value and execution begins here. It will continue through the memory space unless control flow is changed by the control flow instructions.
+Immediately following the header is a group of bytes that are used to store global variables. The number of bytes in this group is defined by the assembler. These bytes are all `00` by default, but can be changed by the program.
 
-At the end of the instruction space is a string table. The string table start with a 32-bit unsigned integer stating the number of strings in the table. An array of addresses to the start of each string follows, then the strings themselves. Each string is prefixed with the number of bytes it is as a four-byte unsigned integer, followed by the text of the string in UTF-8 format.
+Following the global variables bytes is all the instructions of the program. The `EIP` register is initialiazed to this value and execution begins here. It will continue through the memory space unless control flow is changed by the control flow instructions.
+
+After the instruction space is a string table. The string table start with a 32-bit unsigned integer stating the number of strings in the table. An array of addresses to the start of each string follows, then the strings themselves. Each string is prefixed with the number of bytes it is as a four-byte unsigned integer, followed by the text of the string in UTF-8 format.
 
 IronArc Binary files are stored on the host machine as files with the IEXE extension, although any arbitrary file can be used as a program (most of them will crash the processor or invalidate state, though).
 

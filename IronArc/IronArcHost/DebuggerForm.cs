@@ -33,7 +33,6 @@ namespace IronArcHost
 
 			disassemblyWindow = new DisassemblyWindow(this.vm.CreateMemoryStream(), DisassemblyDisplayedItems);
 			disassemblyWindow.InstructionsChanged += DisassemblyWindow_InstructionsChanged;
-			disassemblyWindow.CachingEnabled = false;
 
 			RefreshDisassemblyList();
 
@@ -117,8 +116,6 @@ namespace IronArcHost
 			ListDisassembly.Enabled = vmPaused;
 			HexMemory.Enabled = vmPaused;
 			ListCallStackViewer.Enabled = vmPaused;
-			ButtonDisassemblyUp.Enabled = vmPaused;
-			ButtonDisassemblyDown.Enabled = vmPaused;
 			ButtonSetBreakpoint.Enabled = vmPaused;
 			ButtonClearBreakpoint.Enabled = vmPaused;
 			LinkEAX.Enabled = vmPaused;
