@@ -62,8 +62,9 @@
     <ApplicationIcon>ironarchost.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="IronAssembler">
-      <HintPath>..\..\..\IronAssembler\IronAssembler\IronAssembler\bin\Debug\IronAssembler.dll</HintPath>
+    <Reference Include="IronAssembler, Version=0.1.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>bin\x86\Debug\IronAssembler.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -170,13 +171,13 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\..\Files\Programming\Source Code\Be.HexEditor-1.6.0\sources\Be.Windows.Forms.HexBox\Be.Windows.Forms.HexBox.csproj">
-      <Project>{26c5f25f-b450-4caf-ad8b-b8d11ae73457}</Project>
-      <Name>Be.Windows.Forms.HexBox</Name>
-    </ProjectReference>
     <ProjectReference Include="..\IronArc\IronArc.csproj">
       <Project>{8ce75941-a5de-4155-ab10-de82afe001fb}</Project>
       <Name>IronArc</Name>
+    </ProjectReference>
+    <ProjectReference Include="G:\Documents\Files\Programming\WinForms Controls\Be.HexEditor-1.6.0\sources\Be.Windows.Forms.HexBox\Be.Windows.Forms.HexBox.csproj">
+      <Project>{26c5f25f-b450-4caf-ad8b-b8d11ae73457}</Project>
+      <Name>Be.Windows.Forms.HexBox</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

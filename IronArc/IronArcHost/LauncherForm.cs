@@ -10,11 +10,13 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using IronArc;
+using IronArc.HardwareDefinitionGenerator;
 
 namespace IronArcHost
 {
 	public partial class LauncherForm : Form
 	{
+		private const string HardwareDefinitionVersion = "2020-05-20";
 		private Guid? machineIDWaitingToDebug;
 
 		public LauncherForm()
@@ -185,6 +187,29 @@ namespace IronArcHost
 
 				item.SubItems[4].Text = $"{instructionCount:n0}";
 				item.SubItems[5].Text = $"{(instructionCount - lastInstructionCount):n0}";
+			}
+		}
+
+		private void TSMISaveHardwareDefinition_Click(object sender, EventArgs e)
+		{
+			if (SFDHardwareDefinition.ShowDialog() != DialogResult.OK) { return; }
+			string filePath = SFDHardwareDefinition.FileName;
+
+			var hardwareDefinition = Generator.GenerateHardwareDefinition(HardwareDefinitionVersion);
+			
+			try
+			{
+				System.IO.File.WriteAllText(filePath, hardwareDefinition);
+			}
+			catch (Exception ex)
+			{
+				string message = $"Could not save the hardware definition to \"{filePath}\".\r\n";
+				message += $"An exception of type {ex.GetType().Name} was thrown.\r\n";
+				message += $"Message: \"{ex.Message}\"\r\n";
+				message += $"Call Stack:\r\n";
+				message += ex.StackTrace;
+
+				MessageBox.Show(message, "IronArc Host", MessageBoxButtons.OK, MessageBoxIcon.Error);
 			}
 		}
 	}

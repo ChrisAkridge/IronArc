@@ -2,6 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using IronArc.HardwareDefinitionGenerator;
+using IronArc.HardwareDefinitionGenerator.Models;
+using DefinitionDevice = IronArc.HardwareDefinitionGenerator.Models.HardwareDevice;
 
 namespace IronArc.Hardware
 {
@@ -13,6 +16,37 @@ namespace IronArc.Hardware
 		public override string DeviceName => "Terminal";
 
 		public override HardwareDeviceStatus Status => HardwareDeviceStatus.Active;
+
+		internal override DefinitionDevice Definition => new DefinitionDevice(nameof(TerminalDevice),
+			new List<HardwareCall>
+			{
+				new HardwareCall(
+					null,
+					"Write",
+					new List<HardwareCallParameter>
+					{
+						new HardwareCallParameter("text", DefaultDataTypes.LpStringPointer)
+					}
+				),
+				new HardwareCall(
+					null,
+					"WriteLine",
+					new List<HardwareCallParameter>
+					{
+						new HardwareCallParameter("text", DefaultDataTypes.LpStringPointer)
+					}
+				),
+				new HardwareCall(
+					DefaultDataTypes.UInt16,
+					"Read",
+					new List<HardwareCallParameter> { }
+				),
+				new HardwareCall(
+					DefaultDataTypes.LpString,
+					"ReadLine",
+					new List<HardwareCallParameter> { }
+				)
+			});
 
 		public TerminalDevice(Guid machineID)
 		{

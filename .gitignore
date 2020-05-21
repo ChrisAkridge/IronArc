@@ -108,3 +108,8 @@ Backup*/
 UpgradeLog*.XML
 /Releases
 /Releases
+
+
+# User files
+Links.txt
+/IronArc/.vs/IronArc/v16
