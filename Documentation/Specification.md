@@ -21,7 +21,7 @@ IronArc is not expected to be a useful application for real-world problems, as t
 ## How will it be implemented?
 The specification (this document) will define the rules of the IronArc virtual machine. From this specification, implementations can be created for any platform in any language as per the terms of the MIT License. Additionally, tools for the IronArc virtual machine and other IronArc-related projects can be created per the specification or specifications for those tools.
 
-The official implementation will be written for x86-based Windows machines using C# and the .Net Framework 4.0. The implementation will be output as a DLL library that can be referenced by other .Net projects. The official implementation will employ some usage of “unsafe” code that directly manipulates unsafe memory for performance reasons.
+The official implementation will be written using C# on any supported platform. The implementation will be output as a DLL library that can be referenced by other .NET projects. The official implementation will employ some usage of “unsafe” code that directly manipulates unsafe memory for performance reasons.
 
 The official program that will run the implementation will be a Windows Form program that will provide a full environment to run and debug multiple instances of IronArc virtual machines.
 
@@ -32,38 +32,37 @@ Up next is the IronArc assembler, [IronAssembler](https://www.github.com/ChrisAk
 ### Definition
 The IronArc processor is a set of rules that apply to a set of data. The data, stored in memory, consists of an executable program containing instructions. Each instruction is composed of a two-byte opcode followed by zero to four operands. Each operand is an addressing block that can address multiple kinds of memory or a numeric literal. For instructions that take operands, a byte after the opcode specifies what each operand is, using two bits per operand.
 
-The processor contains the following specific blocks of processor memory:
+The processor contains the following specific blocks of processor memory, all 8 bytes in size and initialized to 0 at VM start:
 
-* Eight eight-byte registers labelled EAX through EHX
-* The instruction pointer EIP, which points to the currently executing instruction in memory,
-* A flags register labelled EFLAGS
-* Two stack registers ESP (pointer to the top of the stack), and EBP (pointer to the start of the current stack frame)
-* A relative base pointer register, ERB, which always has the address of the very first instruction of the program. This allows programs to be loaded anywhere in memory and still have jumps using absolute addresses within the program.
+- Eight registers labelled EAX through EHX
+- The instruction pointer register EIP, which points to the currently executing instruction in memory,
+- An flags register labelled EFLAGS
+- Two stack registers ESP (pointer to the top of the stack), and EBP (pointer to the start of the current stack frame)
+- A relative base pointer register, ERB, which always has the address of the very first instruction of the program. This allows programs to be loaded anywhere in memory and still have jumps using absolute addresses within the program.
+- A page table "high water mark", ENP, which points to the next 4096-byte section of real memory to allocate a page from.
 
-The processor reads and executes instruction sequentially through the memory space. Jump, call, and return instructions serve to change the flow of execution to different addresses. The execution begins by reading in the opcode at EIP and incrementing EIP by two bytes. Then, the opcode is compared to a table of opcodes, and the specific instruction code is called. The instruction code will then read the required operands from memory, incrementing the instruction pointer as it goes. The operands are then used to execute the instruction. Finally, the cycle begins again as the next opcode is read from memory.
+The processor reads and executes instruction sequentially through the memory space (real or virtual). Jump, call, and return instructions serve to change the flow of execution to different addresses. The execution begins by reading in the opcode at EIP and incrementing EIP by two bytes. Then, the opcode is compared to a table of opcodes, and the specific instruction code is called. The instruction code will then read the required operands from memory, incrementing the instruction pointer as it goes. The operands are then used to execute the instruction. Finally, the cycle begins again as the next opcode is read from memory.
 
-A program is loaded into memory by the host process. The host process also sets the start address. EIP and ERP is set to this address and begins execution from there.
+A program is loaded into memory by the host process. The host process also sets the start address, the address where the program will be loaded. EIP and ERP is set to this address and begins execution from there.
 
 Opcodes are two-byte values that indicate the instruction to be executed. The first byte defines the “class” of instruction - a loose classification of sets of instructions. The second byte identifies the specific instruction. This allows for a total of 65,536 instructions spread across 256 classes, although the actual number of total instructions will be significantly smaller.
 
 ## Memory
 
 ### Memory Spaces
-The processor has access to various spaces of memory mapped into a single address space. Memory is addressed using 64-bit pointers, and different sources of memory (main memory, hardware-mapped, filesystem, etc.) are mapped to different portions of the address space.
+The processor has access to various spaces of memory mapped into a single address space. Memory is addressed using 64-bit pointers, and different sources of memory (system memory, hardware-mapped, memory-mapped files, etc.) are mapped to different portions of the address space.
 
-The main memory space is the primary source of memory to the IronArc VM. This memory space has its size defined by the user. The default size is considered to be 1MB. The processor can address, read, and write memory in this space through its instructions. More advanced programs may also have code that can dynamically allocate memory.
+The system memory space is the primary source of memory to the IronArc VM. This memory space has its size defined by the user. The default size is considered to be 1MB. The processor can address, read, and write memory in this space through its instructions. More advanced programs may also have code that can dynamically allocate memory.
 
 ### The Stack
-Using the ESP and EBP registers, a stack can be defined somewhere in the main memory space. By default, it starts at (start address + program size), but can be set at another location when starting a VM. It is operated on by the push, pop, return, and stack arithmetic, logic, and comparison instructions.
+Using the ESP and EBP registers, a stack can be defined somewhere in the system memory space. By default, it starts at (start address + program size), but can be set at another location when starting a VM. It is operated on by the push, pop, return, and stack arithmetic, logic, and comparison instructions.
 
 The location of the top of the stack is defined by the ESP register. The EBP register stores the bottom of the “stack frame” - a block of stack memory used since the last call instruction.
 
 ### Memory Addresses, Pointers, and Memory Mapping
-A memory address in an IronArc program is an eight-byte value that can point to most addresses available to the IronArc VM, including main memory or memory-mapped virtual hardware devices such as virtual monitors which require quick access to memory. Registers are accessed with different notation, see the section on Address Blocks below.
+A memory address in an IronArc program is an eight-byte value that can point to most addresses available to the IronArc VM, including system memory or memory-mapped virtual hardware devices such as virtual monitors which require quick access to memory. Registers are accessed with different notation, see the section on Address Blocks below.
 
-The bottom 63 bits of any address addresses a specific byte in a memory space. This allows the addressing of up to 8 exabytes (2^63 bytes) of memory. The highest bit indicates that this memory address contains a pointer to another value in memory.
-
-Memory-mapped hardware devices are assigned memory spaces by the host process - a `HWMemoryMapped` interrupt is fired, and the argument contains the byte that the mapping uses.
+The bottom 55 bits of any address addresses a specific byte in a memory space. This allows the addressing of up to 8 exabytes (2^63 bytes) of memory, or 32 petabytes (2^55 bytes) per plane. The highest bit indicates that this memory address contains a pointer to another value in memory. Bits 62 to 54 contain the *plane number*, which divides the memory space into 256 planes. Plane 0 contains the system memory. Plane 1 contains any memory used by hardware devices. Planes 2 through 255 are reserved for future use.
 
 Pointers are defined within the program itself. Within listings of assembly code, pointers are denoted with asterisk characters preceding the memory being addressed.
 
@@ -74,6 +73,16 @@ Machine code supports only one level of indirection per instruction, but multipl
 mov *eax eax    // moves the value being pointed to by eax into eax
 mov *eax eax    // moves the value being pointed to by the pointer in memory into eax
 ```
+
+### Virtual Memory
+
+Plane 0 supports the concept of virtual memory. The host process contains a list of *page tables*, each of which has a 32-bit identifier and can be created or destroyed at will. Each page table contains a list of page table entries that map a 32 petabyte *virtual address space* into the "real" addresses of Plane 0 as pages of 4,096 bytes. A page table entry states the starting virtual address and the starting real address it maps to. The ending addresses can be found by adding 4,095 to the starting addresses.
+
+One of the bits in the `EFLAGS` register is the *virtual mode bit*. If set, any address in Plane 0 that an IronArc program uses is treated as a virtual address and *translated* using the page table into a real address. If clear, all addresses directly address real memory without using translation. Address translation supports reading and writing byte ranges that span arbitrarily many pages. However, the host process will raise a `MemoryAccessOutOfBounds` error if the program tries to read or write a byte range that spans over multiple pages.
+
+Virtual addresses are mapped to real addresses as needed. When a program tries to access a virtual address that has no real address mapped to it, a *page fault* is raised. In this case, `ENP` becomes the starting real address of a new page table entry for the page the address resides in. `ENP` is then increased by 4,096.
+
+If there isn't enough system memory available to allocate a new page, `page compaction` occurs. Any unused pages in the real memory space are closed by copying the adjacent page into the unused page. The page table entry's starting real address is also updated to ensure the mapping still points to the correct addresses. Finally, `ENP` is set to the last allocated page. If there's still no free memory, the page fault fails, raising an `OutOfVirtualMemory` error.
 
 ### Control Flow Instructions
 The `jmp`, `call`, `ret`, `je`, `jne`, `jlt`, `jgt`, `jlte`, `jgte`, `jmpa`, `hwcall`, and `stackargs` instructions all either modify or set up changes to the flow of the program.
@@ -88,13 +97,15 @@ Jumping to an address moves the instruction pointer to an address with no way of
 A "call stack", internal to the implementation and not visible to the VM, stores a snapshot of the processor's state on each call. When a call is performed, a new call stack entry is pushed, saving the processor state at the time, and most registers are cleared for the called code to use.
 
 Call stack entries save the following processor state:
-* The address of the call instruction.
-* The address that was called.
-* All general purpose registers `EAX`-`EHX` are saved to the call stack entry and set to zero for the called code to use.
-* The flags register `EFLAGS` is saved to the call stack entry and zeroed much like the general purpose registers.
-* The stack base pointer `EBP` is saved and then set to the address of the first argument on the stack (see Calling Convention below).
-* The stack pointer `ESP` is also saved and then set to the top of the stack, after all pushed arguments.
-* The instruction pointer `EIP` is set to the called address.
+- The address of the call instruction.
+- The address that was called.
+- All general purpose registers `EAX` through `EHX` are saved to the call stack entry and set to zero for the called code to use.
+- The flags register `EFLAGS` is saved to the call stack entry and zeroed much like the general purpose registers.
+- The stack base pointer `EBP` is saved and then set to the address of the first argument on the stack (see Calling Convention below).
+- The stack pointer `ESP` is also saved and then set to the top of the stack, after all pushed arguments.
+- The instruction pointer `EIP` is set to the called address.
+
+All other state remains unchanged.
 
 The return instruction will pop the top entry off the call stack and set all registers to the saved values in the entry. EIP is set to the address of the call instruction, which is then skipped over to continue execution after the call.
 
@@ -192,7 +203,7 @@ The header is `4 + 4 + 4 + 8 + 8 = 28` bytes long.
 
 The file opens with a magic number `IEXE`, followed by an IronArc specification version and an assembler version. These versions are split into the high and low words for the major and minor version.
 
-**This specification is major version 1 and minor version 2.**
+**This specification is major version 1 and minor version 3.**
 
 The assembler version is written by whichever assembler made the program. If the program is composed by hand, the version should be major version 0 and minor version 0.
 
@@ -208,18 +219,18 @@ IronArc Binary files are stored on the host machine as files with the IEXE exten
 
 These programs are loaded at a start address specified when starting the VM in the memory space. If the program is larger than the assigned memory space, the processor will immediately fail. EIP and ERP is set to the specified address and execution begins from EIP. The remainder of memory is initialized to zeroes. The stack immediately follows (unless set to another address when starting the VM), as reflected by ESP = EBP = (start address + program size).
 
-**The size of the program, with the header, global variable space, and string table, in bytes, will be initially stored in the EAX register when the program is loaded. All IFB-format programs must account for this and all implementations must place the size of the program within EAX.** The program is free to use or clear this value as necessary.
+The size of the program, with the header, global variable space, and string table, in bytes, will be initially stored in the EAX register when the program is loaded. The program is free to use or clear this value as necessary.
 
 ## Hardware
 
 ### The Hardware Layer
 Hardware in IronArc is implemented as a virtual layer separating physical hardware and the virtual machine. The host process contains code that interfaces with hardware devices and also has code to notify the virtual machine about events from the hardware device.
 
-The "root" hardware device is device named "System". The system device does not map to physical hardware, but instead as a set of functions of the host process. The system device can be used to add handlers to hardware events, check which devices are connected, among other functions.
+The "main" hardware device is device named "System". The system device does not map to physical hardware, but instead as a set of functions of the host process. The system device can be used to add handlers to hardware events, check which devices are connected, among other functions.
 
-Events from hardware devices take the form of interrupts. A hardware interrupt occurs when a hardware device needs to inform the virtual machine about something that happened. For example, a keyboard will fire a hardware interrupt when a key is pressed. An IronArc program may register an interrupt handler, or a piece of code at a certain address in the main memory or system program that can handle the interrupt.
+Events from hardware devices take the form of interrupts. A hardware interrupt occurs when a hardware device needs to inform the virtual machine about something that happened. For example, a keyboard will fire a hardware interrupt when a key is pressed. An IronArc program may register an interrupt handler, or a piece of code at a certain address in the system memory or system program that can handle the interrupt.
 
-Hardware devices are assigned hardware numbers, a two-byte number that uniquely identifies the hardware device. These numbers are assigned sequentially as device are connected, but are not reused until the virtual machine is restarted or the `ClearHardwareNumbers` hardware call. The system receives HWN #0 and will always hold that number. If a total of 65,535 devices are connected to the device, either concurrently or separately, no new hardware devices can be connected, and the system device will raise the `HardwareNumberSpaceExhausted` interrupt.
+Hardware devices are assigned a name and an instance ID. The name is a length-prefixed string and is the same for each instance of a hardware device. The instance ID is 32 bits and varies for each instance attached to the VM.
 
 The virtual machine may request a hardware device to perform some action or retrieve some information. The virtual machine does this through hardware calls, which are essentially advanced methods that accepts parameters and optionally return values.
 
@@ -235,13 +246,13 @@ An interrupt is a named event with optional information raised by a hardware dev
 
 Interrupts are generated by the hardware device and can include one or more arguments containing information about the interrupt. The interrupt is sent to the host process, which references its table of interrupt handler addresses. If there is one registered event handler for the interrupt, the arguments are pushed onto the stack in reverse order, and the handler is called as if a call instruction was used (thus preserving lower stack frames). If there are no registered handlers, the interrupt and its arguments are discarded. If there are multiple registered handlers, the host process calls them in the order they were registered, pushing the arguments onto the stack before each call.
 
-An interrupt event handler is a section of executable code in the program that can handle an interrupt and perform tasks related to it. Interrupt event handlers can be registered by placing a hardware call to the `int8 System::RegisterInterruptHandler(uint32 hardwareNumber, lpstring interruptName, uint64 handlerAddress)` hardware call. This hardware call accepts a hardware number, the name of the interrupt, the address of the handler, and a value indicating whether the handler is in the system program. The return code denotes the index of the handler (multiple handlers will receive sequential indices). If the call fails, the system will halt in an error state.
+An interrupt event handler is a section of executable code in the program that can handle an interrupt and perform tasks related to it. Interrupt event handlers can be registered by placing a hardware call to the `int8 hwcall System::RegisterInterruptHandler(uint32 instanceId, lpstring* interruptName, ptr handlerAddress)` hardware call. This hardware call accepts a hardware number, the name of the interrupt, the address of the handler, and a value indicating whether the handler is in the system program. The return code denotes the index of the handler (multiple handlers will receive sequential indices). If the call fails, the system will halt in an error state.
 
 Up to 256 handlers can be registered on the same interrupt by calling the function multiple times with different addresses. Each handler will be given an index, starting at 0 for the first handler, up to 255. When the interrupt is raised, each registered handler will be called in the order they were registered, with the arguments being placed on the stack on each call.
 
 The interrupt handler can handle the interrupt in any way it desires, but it must ensure that all arguments are removed from the stack before it returns. This is very important, as the program that was running before the interrupt expected the stack to be in a certain state.
 
-Interrupt handlers can be unregistered by calling the `void System::UnregisterInterruptHandler(uint32 hardwareNumber, lpstring interruptName, uint8 handlerIndex)` hardware call. This frees the interrupt handler index, which will then be retaken first if another handler is registered for the interrupt.
+Interrupt handlers can be unregistered by calling the `void hwcall System::UnregisterInterruptHandler(uint32 hardwareNumber, lpstring* interruptName, uint8 handlerIndex)` hardware call. This frees the interrupt handler index, which will then be retaken first if another handler is registered for the interrupt.
 
 ### Hardware Calls
 A hardware call is a function of a hardware device that can be called by the virtual machine. Hardware calls accept zero or more parameters and can optionally return a result. Hardware calls can be made from any part of the program.
@@ -254,22 +265,23 @@ Hardware call overloading is not available. “Overloads” can be performed onl
 
 Hardware calls should be stylized in literature and documentation in the form `<return-type> hwcall <device-name>::<function-name>(<arg-type> <arg-name>...)`. The types, typically only useful for documentation, are:
 
-* (u)int[8/16/32/64]: A signed or unsigned 8-, 16-, 32-, or 64-bit integer.
-* lpstring: A UTF-8 string with its length in bytes prefixed as a 32-bit unsigned integer.
-* void: Used in return types, this indicates a hardware call that returns no value.
-* ptr: A pointer to a memory address.
+- (u)int[8/16/32/64]: A signed or unsigned 8-, 16-, 32-, or 64-bit integer.
+- lpstring\*: A pointer to a UTF-8 string with its length in bytes prefixed as a 32-bit unsigned integer.
+- void: Used in return types, this indicates a hardware call that returns no value.
+- ptr: A pointer to a memory address.
 
 ## Error Handling
+
 ### Raising Errors
 An error is a notifier that the state of the virtual machine is no longer valid. Errors occur when the virtual machine performs an action that is illegal, such as dividing a number by zero or attempting to assign an eight-byte value into a four-byte memory location. Some errors are fatal, meaning that the virtual machine cannot continue execution without risking data loss. Others are more recoverable, and the virtual machine can resume execution.
 
 Errors are composed of a four-byte error code that is shown to the user on the event of an error. These codes are mapped to error names, a table of which appears in the Table of Error Codes.
 
-Errors can be raised from within the virtual machine, through the `System::RaiseError(uint32 errorCode)` hardware call. However, most of the errors will be raised by the host process when an instruction from the virtual machine performs an illegal action. The specific method of error raising varies by implementation, but the following requirements must be met:
+Errors can be raised from within the virtual machine, through the `void hwcall System::RaiseError(uint32 errorCode)` hardware call. However, most of the errors will be raised by the host process when an instruction from the virtual machine performs an illegal action. The specific method of error raising varies by implementation, but the following requirements must be met:
 
-* Errors, when raised, will temporarily halt the execution of the virtual machine. All registers, memory, and hardware devices will remain loaded, in the state they were in immediately before the error.
-* The host process should provide the ability to continue execution on any non-fatal error. Optionally, the host process may also allow execution to continue on fatal errors as well, but this could result in data loss.
-* The host process displays the error code, error name, registers, and loaded hardware devices to the user in result of an error.
+- Errors, when raised, will temporarily halt the execution of the virtual machine. All registers, memory, and hardware devices will remain loaded, in the state they were in immediately before the error.
+- The host process should provide the ability to continue execution on any non-fatal error. Optionally, the host process may also allow execution to continue on fatal errors as well, but this could result in data loss.
+- The host process displays the error code, error name, registers, and loaded hardware devices to the user in result of an error.
 
 If the user chooses to continue execution, execution resumes from the instruction AFTER the one that raised the error.
 
@@ -278,17 +290,17 @@ If the user chooses to halt execution, the virtual machine will not continue, bu
 ### Handling Errors
 Some non-fatal errors can be handled without the virtual machine halting execution. This involves a hardware call to a system device to register an error handler, a piece of code that handles an specific error.
 
-To register an error handle, perform a hardware call to the `System::RegisterErrorHandler(uint32 errorCode, ptr handlerAddress)`. When this specific error occurs, the host process will make the virtual machine call the handler WITHOUT pushing any arguments onto the stack.
+To register an error handle, perform a hardware call to the `void hwcall System::RegisterErrorHandler(uint32 errorCode, ptr handlerAddress)`. When this specific error occurs, the host process will make the virtual machine call the handler WITHOUT pushing any arguments onto the stack.
 
-**The error handler can clean up and return, or merely return, or raise the same error code to truly halt execution without calling the handler again.**
+The error handler can clean up and return, or merely return, or raise the same error code to truly halt execution without calling the handler again.
 
-**A flag in the host process will determine if the virtual machine is within an error handler; it is set when the call to an error handler is performed, and is cleared on the return.**
+A flag in the host process will determine if the virtual machine is within an error handler; it is set when the call to an error handler is performed, and is cleared on the return.
 
 Error handlers must be stack-neutral; any values pushed onto the stack while in an error handler must be popped before returning to the main code. Upon return, the virtual machine continues execution from the instruction after the one that raised the error.
 
 Unlike interrupt handlers, error handlers can only be registered once for each error. However, error handlers can jump or call other addresses as necessary. The host process's error handler flag is not cleared until the error handler itself returns, though.
 
-Error handlers can be unregistered by calling the `System::UnregisterErrorHandler(uint32 errorCode)` hardware call.
+Error handlers can be unregistered by calling the `void hwcall System::UnregisterErrorHandler(uint32 errorCode)` hardware call.
 
 ### Checked and Unchecked Math
 By default, overflows and underflows when using integral instructions will not raise any errors. However, if the `CHECKED` flag on `EFLAGS` is set, `ArithemticOverflow` and `ArithmeticUnderflow` errors will be raised when overflows or underflows occur.
