@@ -694,11 +694,13 @@ namespace IronArc
 
 		public static ByteBlock FromLength(ulong length)
 		{
-			ByteBlock result = new ByteBlock();
-			result.pointer = (byte*)Marshal.AllocHGlobal((int)length);
-			result.Length = length;
+            var result = new ByteBlock
+            {
+                pointer = (byte*)Marshal.AllocHGlobal((int)length),
+                Length = length
+            };
 
-			for (int i = 0; i < (uint)length; i++)
+            for (int i = 0; i < (uint)length; i++)
 			{
 				*(result.pointer + i) = 0;
 			}

@@ -35,8 +35,7 @@ namespace IronArcHost
 			switch (textBox)
 			{
 				case RegisterEditorTextBoxes.Value:
-					ulong value;
-					if (!ulong.TryParse(TextValue.Text, NumberStyles.HexNumber, null, out value)) { goto cleanup; }
+                    if (!ulong.TryParse(TextValue.Text, NumberStyles.HexNumber, null, out var value)) { goto cleanup; }
 					RegisterValue = value;
 
 					SetBigEndianValue(value);
@@ -45,8 +44,7 @@ namespace IronArcHost
 					SetFloatingPoint(value);
 					break;
 				case RegisterEditorTextBoxes.BigEndianValue:
-					ulong valueBigEndian = 0UL;
-					if (!ulong.TryParse(BigEndianToLittleEndian(TextAsBigEndian.Text.PadLeft(16, '0')), NumberStyles.HexNumber, null, out valueBigEndian)) { goto cleanup; }
+                    if (!ulong.TryParse(BigEndianToLittleEndian(TextAsBigEndian.Text.PadLeft(16, '0')), NumberStyles.HexNumber, null, out var valueBigEndian)) { goto cleanup; }
 					RegisterValue = valueBigEndian;
 
 					SetValue(valueBigEndian);
@@ -55,8 +53,7 @@ namespace IronArcHost
 					SetFloatingPoint(valueBigEndian);
 					break;
 				case RegisterEditorTextBoxes.Signed:
-					long valueSigned = 0L;
-					if (!long.TryParse(TextSigned.Text, out valueSigned)) { goto cleanup; }
+                    if (!long.TryParse(TextSigned.Text, out var valueSigned)) { goto cleanup; }
 					RegisterValue = unchecked((ulong)valueSigned);
 
 					unchecked
@@ -68,8 +65,7 @@ namespace IronArcHost
 					}
 					break;
 				case RegisterEditorTextBoxes.Unsigned:
-					ulong valueUnsigned = 0UL;
-					if (!ulong.TryParse(TextUnsigned.Text, out valueUnsigned)) { goto cleanup; }
+                    if (!ulong.TryParse(TextUnsigned.Text, out var valueUnsigned)) { goto cleanup; }
 					RegisterValue = valueUnsigned;
 
 					SetValue(valueUnsigned);
@@ -78,8 +74,7 @@ namespace IronArcHost
 					SetFloatingPoint(valueUnsigned);
 					break;
 				case RegisterEditorTextBoxes.Floating:
-					double valueFloating = 0d;
-					if (!double.TryParse(TextFloatingPoint.Text, out valueFloating)) { goto cleanup; }
+                    if (!double.TryParse(TextFloatingPoint.Text, out var valueFloating)) { goto cleanup; }
 					ulong valueFloatingAsULong = unchecked((ulong)BitConverter.DoubleToInt64Bits(valueFloating));
 					RegisterValue = valueFloatingAsULong;
 
@@ -98,12 +93,12 @@ namespace IronArcHost
 
 		private void SetValue(ulong value)
 		{
-			TextValue.Text = string.Format("{0:X16}", value);
+			TextValue.Text = $"{value:X16}";
 		}
 
 		private void SetBigEndianValue(ulong value)
 		{
-			StringBuilder result = new StringBuilder(16);
+			var result = new StringBuilder(16);
 			byte[] bytes = BitConverter.GetBytes(value);
 			foreach (byte b in bytes)
 			{
@@ -114,7 +109,7 @@ namespace IronArcHost
 
 		public void SetSigned(ulong value)
 		{
-			TextSigned.Text = string.Format("{0}", unchecked((long)value));
+			TextSigned.Text = $"{unchecked((long)value)}";
 		}
 		
 		public void SetUnsigned(ulong value)
@@ -129,21 +124,20 @@ namespace IronArcHost
 		}
 
 		private void TextValue_TextChanged(object sender, EventArgs e)
-		{
-			if (!withinSetValuesCall)
-			{
-				// Verify that the string contains only hexadecimal digits.
-				TextValue.Text = RemoveInvalidCharacters(TextValue.Text, RemoveCharactersFor.Hexadecimal);
+        {
+            if (withinSetValuesCall) { return; }
 
-				// Verify that the string has up to 16 characters.
-				if (TextValue.Text.Length > 16)
-				{
-					TextValue.Text = TextValue.Text.Substring(0, 16);
-				}
+            // Verify that the string contains only hexadecimal digits.
+            TextValue.Text = RemoveInvalidCharacters(TextValue.Text, RemoveCharactersFor.Hexadecimal);
 
-				SetValuesOfOtherTextboxes(RegisterEditorTextBoxes.Value);
-			}
-		}
+            // Verify that the string has up to 16 characters.
+            if (TextValue.Text.Length > 16)
+            {
+                TextValue.Text = TextValue.Text.Substring(0, 16);
+            }
+
+            SetValuesOfOtherTextboxes(RegisterEditorTextBoxes.Value);
+        }
 
 		private void TextAsBigEndian_TextChanged(object sender, EventArgs e)
 		{

@@ -28,49 +28,47 @@ namespace IronArcHost
 		}
 
 		private void LauncherForm_VMStateChangeEvent(object sender, IronArc.Message e)
-		{
-			foreach (ListViewItem listItem in ListVMs.Items)
-			{
-				if (listItem.Text == e.MachineID.ToString())
-				{
-					listItem.SubItems[1].Text = ((VMState)e.WParam).ToString();
-				}
-			}
+        {
+            foreach (var listItem in ListVMs.Items.Cast<ListViewItem>()
+                                            .Where(listItem => listItem.Text == e.MachineID.ToString()))
+            {
+                listItem.SubItems[1].Text = ((VMState)e.WParam).ToString();
+            }
 
-			if (machineIDWaitingToDebug == e.MachineID)
+            if (machineIDWaitingToDebug == e.MachineID)
 			{
 				machineIDWaitingToDebug = null;
 				new DebuggerForm(VMManager.Lookup(e.MachineID)).ShowDialog();
 			}
-		}
+        }
 
 		private void TSBAddVM_Click(object sender, EventArgs e)
 		{
 			var newVMForm = new NewVMForm();
-			if (newVMForm.ShowDialog() == DialogResult.OK)
-			{
-				var newMachineID = VMManager.CreateVM(newVMForm.ProgramPath, newVMForm.MemorySize, newVMForm.ProgramLoadAddress,
-					newVMForm.HardwareDeviceNames);
 
-				var vm = VMManager.Lookup(newMachineID);
-				var lvi = new ListViewItem(vm.MachineID.ToString());
-				lvi.SubItems.Add(vm.State.ToString());
-				lvi.SubItems.Add(newVMForm.MemorySize.ToString());
-				lvi.SubItems.Add(vm.Hardware.Count.ToString());
-				lvi.SubItems.Add("0");
-				lvi.SubItems.Add("0");
-				ListVMs.Items.Add(lvi);
+            if (newVMForm.ShowDialog() != DialogResult.OK) { return; }
 
-				if (!newVMForm.StartInDebugger)
-				{
-					VMManager.ResumeVM(newMachineID);
-				}
-				else
-				{
-					new DebuggerForm(vm).ShowDialog();
-				}
-			}
-		}
+            var newMachineID = VMManager.CreateVM(newVMForm.ProgramPath, newVMForm.MemorySize, newVMForm.ProgramLoadAddress,
+                                                  newVMForm.HardwareDeviceNames);
+
+            var vm = VMManager.Lookup(newMachineID);
+            var lvi = new ListViewItem(vm.MachineID.ToString());
+            lvi.SubItems.Add(vm.State.ToString());
+            lvi.SubItems.Add(newVMForm.MemorySize.ToString());
+            lvi.SubItems.Add(vm.Hardware.Count.ToString());
+            lvi.SubItems.Add("0");
+            lvi.SubItems.Add("0");
+            ListVMs.Items.Add(lvi);
+
+            if (!newVMForm.StartInDebugger)
+            {
+                VMManager.ResumeVM(newMachineID);
+            }
+            else
+            {
+                new DebuggerForm(vm).ShowDialog();
+            }
+        }
 
 		private void TSBToggleVMState_Click(object sender, EventArgs e)
 		{

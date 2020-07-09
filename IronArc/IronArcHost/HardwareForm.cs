@@ -13,7 +13,7 @@ namespace IronArcHost
 {
 	public partial class HardwareForm : Form
 	{
-		private Guid machineID;
+		private readonly Guid machineID;
 	
 		public HardwareForm(Guid machineID)
 		{

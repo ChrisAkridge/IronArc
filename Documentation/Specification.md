@@ -32,7 +32,7 @@ Up next is the IronArc assembler, [IronAssembler](https://www.github.com/ChrisAk
 ### Definition
 The IronArc processor is a set of rules that apply to a set of data. The data, stored in memory, consists of an executable program containing instructions. Each instruction is composed of a two-byte opcode followed by zero to four operands. Each operand is an addressing block that can address multiple kinds of memory or a numeric literal. For instructions that take operands, a byte after the opcode specifies what each operand is, using two bits per operand.
 
-The processor contains the following specific blocks of processor memory, all 8 bytes in size and initialized to 0 at VM start:
+The processor contains the following specific blocks of processor memory, all 8 bytes in size and initialized to 0 (except EAX) at VM start:
 
 - Eight registers labelled EAX through EHX
 - The instruction pointer register EIP, which points to the currently executing instruction in memory,

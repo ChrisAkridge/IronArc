@@ -19,9 +19,9 @@ namespace IronArcHost
 	{
 		private const int DisassemblyDisplayedItems = 12;
 
-		private DebugVM vm;
-		private DisassemblyWindow disassemblyWindow;
-		private ConcurrentQueue<IronArc.Message> messageQueue;
+		private readonly DebugVM vm;
+		private readonly DisassemblyWindow disassemblyWindow;
+		private readonly ConcurrentQueue<IronArc.Message> messageQueue;
 		private bool isAnimating;
 		
 		public DebuggerForm(VirtualMachine vm)
@@ -145,8 +145,8 @@ namespace IronArcHost
 			UpdateRegisterDisplay();
 
 			var terminalForm = VMManager.Provider.Terminals.FirstOrDefault(f => f.MachineID == vm.MachineID);
-			if (terminalForm != null) { terminalForm.Show(); }
-		}
+            terminalForm?.Show();
+        }
 
 		private void ButtonSetBreakpoint_Click(object sender, EventArgs e)
 		{
@@ -181,25 +181,24 @@ namespace IronArcHost
 		}
 
 		private void TmrQueueListener_Tick(object sender, EventArgs e)
-		{
-			if (!messageQueue.IsEmpty)
-			{
-				messageQueue.TryDequeue(out IronArc.Message message);
-				if (message.UIMessage == UIMessage.VMStateChanged)
-				{
-					if ((VMState)message.WParam == VMState.Paused)
-					{
-						SetControlsEnabledOnVMStateChange(vmPaused: true);
-						UpdateDebugDisplay();
-					}
-					else if ((VMState)message.WParam == VMState.Running)
-					{
-						SetControlsEnabledOnVMStateChange(vmPaused: false);
-						UpdateDebugDisplay();
-					}
-				}
-			}
-		}
+        {
+            if (messageQueue.IsEmpty) { return; }
+
+            messageQueue.TryDequeue(out IronArc.Message message);
+            if (message.UIMessage == UIMessage.VMStateChanged)
+            {
+                if ((VMState)message.WParam == VMState.Paused)
+                {
+                    SetControlsEnabledOnVMStateChange(vmPaused: true);
+                    UpdateDebugDisplay();
+                }
+                else if ((VMState)message.WParam == VMState.Running)
+                {
+                    SetControlsEnabledOnVMStateChange(vmPaused: false);
+                    UpdateDebugDisplay();
+                }
+            }
+        }
 
 		private void TSBStepOver_Click(object sender, EventArgs e)
 		{

@@ -24,6 +24,7 @@ namespace IronArc
 		public ulong EIP;
 		public ulong EFLAGS;
 		public ulong ERP;
+        public ulong ENP;
 
 		public ulong stackArgsMarker;
 		private ByteBlock memory;
@@ -161,6 +162,7 @@ namespace IronArc
 				case 10UL: return EIP;
 				case 11UL: return EFLAGS;
 				case 12UL: return ERP;
+				case 13UL: return ENP;
 				default:
 					throw new ArgumentException($"There is no register numbered {registerNumber}. Please ensure you've masked out the high two bits.");
 			}
@@ -183,6 +185,7 @@ namespace IronArc
 				case 10UL: EIP = value; break;
 				case 11UL: EFLAGS = value; break;
 				case 12UL: ERP = value; break;
+				case 13UL: ENP = value; break;
 				default:
 					throw new ArgumentException($"There is no register numbered {registerNumber}. Please ensure you've masked out the high two bits.");
 			}
@@ -254,16 +257,10 @@ namespace IronArc
 			switch (block.type)
 			{
 				case AddressType.MemoryAddress:
-					if (block.isPointer)
-					{ return memory.ReadULongAt(block.value); }
-					else
-					{ return block.value; }
+                    return block.isPointer ? memory.ReadULongAt(block.value) : block.value;
 				case AddressType.Register:
 					ulong valueWithOffset = ReadRegisterByIndex(block.value) + (ulong)block.offset;
-					if (block.isPointer)
-					{ return memory.ReadULongAt(valueWithOffset); }
-					else
-					{ return valueWithOffset; }
+                    return block.isPointer ? memory.ReadULongAt(valueWithOffset) : valueWithOffset;
 				case AddressType.NumericLiteral:
 					if (block.size != OperandSize.QWord)
 					{
@@ -306,10 +303,6 @@ namespace IronArc
 						return memory.ReadDataAt(memory.ReadULongAt(block.value), size);
 					}
 					return memory.ReadDataAt(block.value, size);
-					// WYLO: string table parsing is NOT working at all
-					// The address block doesn't have the right type and has a nonsensical value
-					// okay IronAssembler isn't emitting the flags byte for hwcall which probably
-					// should be necessary
 				case AddressType.Register:
 					if (block.offset != 0 && !block.isPointer)
 					{
@@ -339,20 +332,12 @@ namespace IronArc
 			switch (block.type)
 			{
 				case AddressType.MemoryAddress:
-					if (block.isPointer)
-					{
-						memory.WriteDataAt(data, memory.ReadULongAt(block.value), size);
-					}
-					else
-					{
-						memory.WriteDataAt(data, block.value, size);
-					}
-					break;
+                    memory.WriteDataAt(data, block.isPointer ? memory.ReadULongAt(block.value) : block.value, size);
+                    break;
 				case AddressType.Register:
 					if (block.offset != 0 && !block.isPointer)
 					{
 						RaiseError(Error.InvalidAddressType);
-						return;
 					}
 					else if (block.isPointer)
 					{
@@ -397,8 +382,9 @@ namespace IronArc
 			EFLAGS &= ~(EFlags.StackArgsSet);
 
 			// Create and push the call stack frame.
-			var frame = new CallStackFrame(callAddress, EIP, EAX, EBX, ECX, EDX, EEX, EFX, EGX,
-				EHX, EFLAGS, EBP);
+            var frame = new CallStackFrame(callAddress, EIP, EAX, EBX, ECX,
+                                           EDX, EEX, EFX, EGX, EHX,
+                                           EFLAGS, EBP);
 			callStack.Push(frame);
 
 			// Clear most registers.
@@ -478,11 +464,9 @@ namespace IronArc
 			return memory.ReadDataAt(dataStartAddress, size);
 		}
 
-		public string ReadStringFromMemory(ulong stringAddress)
-		{
-			return memory.ReadStringAt(stringAddress);
-		}
-		#endregion
+		public string ReadStringFromMemory(ulong stringAddress) => memory.ReadStringAt(stringAddress);
+
+        #endregion
 
 		#region Control Flow Instructions (0x00)
 		private void NoOperation()
@@ -938,7 +922,7 @@ namespace IronArc
 		#endregion
 
 		#region Integral/Bitwise Operations
-		private NumericOperation OpcodeToNumericOperation(ushort opcode)
+		private static NumericOperation OpcodeToNumericOperation(ushort opcode)
 		{
 			switch ((opcode & 0xFF) % 18)
 			{
@@ -964,7 +948,7 @@ namespace IronArc
 			}
 		}
 
-		private int StackArgumentsToPop(NumericOperation operation)
+		private static int StackArgumentsToPop(NumericOperation operation)
 		{
 			switch (operation)
 			{
@@ -1040,8 +1024,8 @@ namespace IronArc
 
 			var leftBlock = new AddressBlock(size, leftType, memory, EIP);
 			EIP += leftBlock.operandLength;
-			AddressBlock rightBlock = new AddressBlock();
-			AddressBlock destBlock = new AddressBlock();
+			var rightBlock = new AddressBlock();
+			var destBlock = new AddressBlock();
 			if (isBinaryOperation)
 			{
 				rightBlock = new AddressBlock(size, rightType, memory, EIP);
@@ -1065,8 +1049,6 @@ namespace IronArc
 			}
 
 			ulong result = PerformNumericOperation(operation, left, right);
-
-			
 
 			if (operation != NumericOperation.Compare)
 			{
@@ -1102,7 +1084,7 @@ namespace IronArc
 			}
 		}
 
-		private NumericOperation OpcodeToFloatingOperation(ushort opcode)
+		private static NumericOperation OpcodeToFloatingOperation(ushort opcode)
 		{
 			switch (opcode & 0x7F)
 			{
@@ -1133,10 +1115,13 @@ namespace IronArc
 			ulong rightBytes = PopExternal(size);
 			ulong leftBytes = (stackArgsToPop == 2) ? PopExternal(size) : 0UL;
 
-			double right = (size == OperandSize.QWord) ? BitConverter.Int64BitsToDouble((long)rightBytes) :
-				((uint)rightBytes).ToFloatBitwise();
-			double left = (size == OperandSize.QWord) ? BitConverter.Int64BitsToDouble((long)leftBytes) :
-				((uint)leftBytes).ToFloatBitwise();
+            double right = (size == OperandSize.QWord)
+                ? BitConverter.Int64BitsToDouble((long)rightBytes)
+                : ((uint)rightBytes).ToFloatBitwise();
+
+            double left = (size == OperandSize.QWord)
+                ? BitConverter.Int64BitsToDouble((long)leftBytes)
+                : ((uint)leftBytes).ToFloatBitwise();
 			double result = PerformFloatingOperations(left, right, operation);
 
 			if (operation != NumericOperation.Compare)

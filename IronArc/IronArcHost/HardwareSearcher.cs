@@ -10,25 +10,19 @@ namespace IronArcHost
 {
 	internal static class HardwareSearcher
 	{
-		private static List<string> hardwareDeviceNames = new List<string>();
+		private static readonly List<string> hardwareDeviceNames = new List<string>();
 
 		public static List<Type> HardwareDeviceTypes = new List<Type>();
 		public static IReadOnlyList<string> HardwareDeviceNames => hardwareDeviceNames.AsReadOnly();
 
-
 		public static void FindHardwareInAssembly(Assembly assembly)
-		{
-			foreach (var type in assembly.GetTypes())
-			{
-				// Only types that derive from IronArc.HardwareDevice are hardware devices
-				// https://stackoverflow.com/a/8699063/2709212
-				if (type.IsSubclassOf(typeof(HardwareDevice)))
-				{
-					HardwareDeviceTypes.Add(type);
-					hardwareDeviceNames.Add(type.FullName);
-				}
-			}
-		}
+        {
+            foreach (var type in assembly.GetTypes().Where(type => type.IsSubclassOf(typeof(HardwareDevice))))
+            {
+                HardwareDeviceTypes.Add(type);
+                hardwareDeviceNames.Add(type.FullName);
+            }
+        }
 
 		public static void FindHardwareInIronArc()
 		{
