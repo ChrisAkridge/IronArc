@@ -24,7 +24,6 @@ namespace IronArc
 		public ulong EIP;
 		public ulong EFLAGS;
 		public ulong ERP;
-        public ulong ENP;
 
 		public ulong stackArgsMarker;
 		private ByteBlock memory;
@@ -436,10 +435,6 @@ namespace IronArc
 		{
 			memory.WriteAt(bytes, ESP);
 			ESP += (ulong)bytes.Length;
-			if (ESP <= EBP)
-			{
-				RaiseError(Error.StackOverflow);
-			}
 		}
 
 		public void PushExternal(ulong data, OperandSize size)
@@ -813,11 +808,6 @@ namespace IronArc
 
 			memory.WriteDataAt(data, ESP, size);
 			ESP += size.SizeInBytes();
-			if (ESP >= memory.Length || ESP < EBP)
-			{
-				RaiseError(Error.StackOverflow);
-				return;
-			}
 		}
 
 		private void PopFromStack()

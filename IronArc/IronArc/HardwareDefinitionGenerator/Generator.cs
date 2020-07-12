@@ -32,7 +32,7 @@ namespace IronArc.HardwareDefinitionGenerator
             // https://stackoverflow.com/a/949285/2709212
             var ironArc = Assembly.GetExecutingAssembly();
             var ironArcTypes = ironArc.GetTypes();
-            string namespaceName = "IronArc.Hardware";
+            const string namespaceName = "IronArc.Hardware";
 
             return ironArcTypes.Where(t => t.Namespace == namespaceName)
                 .Where(t => !t.IsInterface);

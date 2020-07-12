@@ -270,6 +270,16 @@ Hardware calls should be stylized in literature and documentation in the form `<
 - void: Used in return types, this indicates a hardware call that returns no value.
 - ptr: A pointer to a memory address.
 
+### Hardware Memory Mapping
+
+Hardware devices can map memory into the VM's memory space. All hardware memory is mapped into Plane 1. Each instance of a hardware device can map memory only once.
+
+Hardware devices can directly call a function in the implementation to map memory into Plane 1. When called, the function creates a buffer of the requested size, places it into Plane 1, and returns the starting real address of the newly mapped memory, along with a pointer/reference to the buffer, so the hardware device can directly read and write to its memory. Another implementation function can be used to free mapped memory and remove it from Plane 1.
+
+Hardware device memory is mapped contiguously into Plane 1, such that new memory is allocated immediately after the last. Freeing mapped memory does cause gaps in Plane 1, but I don't think we'll need compaction here.
+
+The hardware calls `void hwcall System::GetHardwareDeviceDescription(ptr destination)` and `void hwcall System::GetAllHardwareDeviceDescriptions(ptr destination)` can be used by an IronArc program to find out what hardware devices are on the system 
+
 ## Error Handling
 
 ### Raising Errors
