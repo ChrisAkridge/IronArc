@@ -21,7 +21,7 @@ namespace IronArc.Memory
             mappings.Add(mapping);
             nextHardwareAllocationAddress += length;
         }
-        
+
         public void Remove(ulong mappingStartAddress) => mappings.RemoveAll(m => m.StartAddress == mappingStartAddress);
 
         public byte[] Read(ulong address, int length)

@@ -5,18 +5,18 @@ using System.Text;
 
 namespace IronArc
 {
-	public enum Error : uint
-	{
-		GeneralError,
-		InvalidAddressType,
-		AddressOutOfRange,
-		CallStackUnderflow,
-		NotImplemented,
-		HardwareDeviceNotPresent,
-		InvalidDestinationType,
-		HeaderInvalid,
-		StringIndexOutOfRange,
-		StackUnderflow,
+    public enum Error : uint
+    {
+        GeneralError,
+        InvalidAddressType,
+        AddressOutOfRange,
+        CallStackUnderflow,
+        NotImplemented,
+        HardwareDeviceNotPresent,
+        InvalidDestinationType,
+        HeaderInvalid,
+        StringIndexOutOfRange,
+        StackUnderflow,
         NoSuchPageTable,
         CannotDestroyCurrentPageTable,
         CrossPlaneAccess,
@@ -24,7 +24,7 @@ namespace IronArc
         CrossHardwareMemoryAccess,
         NoHardwareMemoryHere,
         OutOfVirtualMemory
-	}
+    }
 
     public static class ErrorMessages
     {

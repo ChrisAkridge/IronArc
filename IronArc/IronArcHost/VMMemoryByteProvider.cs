@@ -8,55 +8,37 @@ using IronArc;
 
 namespace IronArcHost
 {
-	internal sealed class VMMemoryByteProvider : IByteProvider
-	{
-		private DebugVM vm;
+    internal sealed class VMMemoryByteProvider : IByteProvider
+    {
+        private readonly DebugVM vm;
 
-		public VMMemoryByteProvider(DebugVM vm)
-		{
-			this.vm = vm;
-		}
+        public VMMemoryByteProvider(DebugVM vm) => this.vm = vm;
 
-		public long Length => vm.MemorySize;
+        public long Length => vm.MemorySize;
 
-		public event EventHandler LengthChanged;
-		public event EventHandler Changed;
+        public event EventHandler LengthChanged;
+        public event EventHandler Changed;
 
-		public void OnChanged()
-		{
-			Changed?.Invoke(this, new EventArgs());
-		}
+        public void OnChanged() => Changed?.Invoke(this, new EventArgs());
 
-		public void ApplyChanges()
-		{
-			throw new NotImplementedException();
-		}
+        public void ApplyChanges() => throw new NotImplementedException();
 
-		public bool HasChanges()
-		{
-			throw new NotImplementedException();
-		}
+        public bool HasChanges() => throw new NotImplementedException();
 
-		public byte ReadByte(long index) => vm.ReadByte(index);
+        public byte ReadByte(long index) => vm.ReadByte(index);
 
-		public void WriteByte(long index, byte value)
-		{
-			vm.WriteByte(index, value);
-			OnChanged();
-		}
+        public void WriteByte(long index, byte value)
+        {
+            vm.WriteByte(index, value);
+            OnChanged();
+        }
 
-		public bool SupportsDeleteBytes() => false;
-		public bool SupportsInsertBytes() => false;
-		public bool SupportsWriteByte() => true;
+        public bool SupportsDeleteBytes() => false;
+        public bool SupportsInsertBytes() => false;
+        public bool SupportsWriteByte() => true;
 
-		public void InsertBytes(long index, byte[] bs)
-		{
-			throw new InvalidOperationException("IronArc VM memory cannot have its length changed.");
-		}
+        public void InsertBytes(long index, byte[] bs) => throw new InvalidOperationException("IronArc VM memory cannot have its length changed.");
 
-		public void DeleteBytes(long index, long length)
-		{
-			throw new InvalidOperationException("IronArc VM memory cannot have its length changed.");
-		}
-	}
+        public void DeleteBytes(long index, long length) => throw new InvalidOperationException("IronArc VM memory cannot have its length changed.");
+    }
 }

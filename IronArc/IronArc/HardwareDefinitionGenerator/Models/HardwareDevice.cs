@@ -14,7 +14,7 @@ namespace IronArc.HardwareDefinitionGenerator.Models
         public HardwareDevice(string deviceName, IList<HardwareCall> hardwareCalls)
         {
             DeviceName = deviceName;
-            this.hardwareCalls = (List<HardwareCall>) hardwareCalls;
+            this.hardwareCalls = (List<HardwareCall>)hardwareCalls;
         }
     }
 }

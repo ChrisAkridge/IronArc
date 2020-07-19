@@ -14,11 +14,11 @@ namespace IronArc.HardwareDefinitionGenerator
         {
             var hardwareTypes = GetHardwareTypes();
             IEnumerable<HardwareDevice> devices =
-                hardwareTypes.Select(t => (HardwareDevice)Activator.CreateInstance(t, new Guid()));
+                hardwareTypes.Select(t => (HardwareDevice)Activator.CreateInstance(t, new Guid())).ToList();
             IEnumerable<Models.HardwareDevice> deviceDefinitions =
                 devices.Select(d => d.Definition);
             var definition = new Models.HardwareDefinition(version, deviceDefinitions.ToList());
-            
+
             foreach (HardwareDevice device in devices)
             {
                 device.Dispose();

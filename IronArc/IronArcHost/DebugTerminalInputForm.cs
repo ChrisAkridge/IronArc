@@ -10,45 +10,38 @@ using System.Windows.Forms;
 
 namespace IronArcHost
 {
-	public partial class DebugTerminalInputForm : Form
-	{
-		public enum DebugTerminalInputType
-		{
-			Character,
-			Line
-		}
+    public partial class DebugTerminalInputForm : Form
+    {
+        public enum DebugTerminalInputType
+        {
+            Character,
+            Line
+        }
 
-		private DebugTerminalInputType inputType;
-		public string Input => TextInput.Text;
+        private DebugTerminalInputType inputType;
+        public string Input => TextInput.Text;
 
-		public DebugTerminalInputForm(DebugTerminalInputType inputType, Guid machineID)
-		{
-			InitializeComponent();
+        public DebugTerminalInputForm(DebugTerminalInputType inputType, Guid machineId)
+        {
+            InitializeComponent();
 
-			this.inputType = inputType;
-			if (inputType == DebugTerminalInputType.Character)
-			{
-				StaticLabelDescription.Text = $"VM {machineID.ToString()} requires a character of input.";
-			}
-			else
-			{
-				StaticLabelDescription.Text = $"VM {machineID.ToString()} requires a line of input.";
-			}
-		}
+            this.inputType = inputType;
 
-		private void TextInput_TextChanged(object sender, EventArgs e)
-		{
-			ButtonSubmit.Enabled = TextInput.Text.Any();
+            StaticLabelDescription.Text = inputType == DebugTerminalInputType.Character
+                ? $"VM {machineId.ToString()} requires a character of input."
+                : $"VM {machineId.ToString()} requires a line of input.";
+        }
 
-			if (inputType == DebugTerminalInputType.Character && TextInput.Text.Length > 1)
-			{
-				TextInput.Text = TextInput.Text[0].ToString();
-			}
-		}
+        private void TextInput_TextChanged(object sender, EventArgs e)
+        {
+            ButtonSubmit.Enabled = TextInput.Text.Any();
 
-		private void ButtonSubmit_Click(object sender, EventArgs e)
-		{
-			Close();
-		}
-	}
+            if (inputType == DebugTerminalInputType.Character && TextInput.Text.Length > 1)
+            {
+                TextInput.Text = TextInput.Text[0].ToString();
+            }
+        }
+
+        private void ButtonSubmit_Click(object sender, EventArgs e) => Close();
+    }
 }

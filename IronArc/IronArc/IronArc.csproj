@@ -93,7 +93,7 @@
     <Compile Include="HardwareProvider.cs" />
     <Compile Include="Hardware\ITerminal.cs" />
     <Compile Include="Hardware\TerminalDevice.cs" />
-    <Compile Include="Hardware\VSDebugger.cs" />
+    <Compile Include="Hardware\Debugger.cs" />
     <Compile Include="ICoreHardwareProvider.cs" />
     <Compile Include="InterruptHandler.cs" />
     <Compile Include="Memory\HardwareMemoryMapping.cs" />

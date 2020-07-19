@@ -19,7 +19,7 @@ namespace IronArc.Memory
         private uint nextPageTableId;
         private readonly Dictionary<uint, PageTable> pageTables = new Dictionary<uint, PageTable>();
         private readonly HardwareMemory hardwareMemory;
-        
+
         public bool PerformAddressTranslation { get; set; }
         public uint CurrentPageTableId { get; set; }
 
@@ -52,7 +52,7 @@ namespace IronArc.Memory
 
             pageTables.Remove(pageTableId);
         }
-        
+
         public byte[] Read(ulong address, ulong length)
         {
             ulong endAddress = address + length;
@@ -65,8 +65,8 @@ namespace IronArc.Memory
 
             if (plane == 0)
             {
-                return !PerformAddressTranslation 
-                    ? systemMemory.ReadAt(address, length) 
+                return !PerformAddressTranslation
+                    ? systemMemory.ReadAt(address, length)
                     : ReadVirtual(address, length);
             }
 
@@ -91,7 +91,7 @@ namespace IronArc.Memory
                 {
                     PageFault(page);
                 }
-                
+
                 ulong addressInPage = address & AddressInPageMask;
                 int bytesToRead = (length >= 4096) ? PageSize - (int)addressInPage : (int)length;
                 systemMemory.ReadIntoBuffer(buffer, bufferIndex, currentPageTable[page] + addressInPage, bytesToRead);
@@ -134,7 +134,7 @@ namespace IronArc.Memory
         }
 
         public sbyte ReadSByte(ulong address) => (sbyte)ReadByte(address);
-        
+
         public ushort ReadUShort(ulong address)
         {
             ulong plane = GetPlaneOfAddress(address);
@@ -143,7 +143,7 @@ namespace IronArc.Memory
             {
                 throw new VMErrorException(Error.CrossPlaneAccess, $"Read 2 bytes at 0x{address:X16} crossed planes");
             }
-            
+
             if (plane == 0)
             {
                 if (!PerformAddressTranslation) { return systemMemory.ReadUShortAt(address); }
@@ -158,7 +158,7 @@ namespace IronArc.Memory
                     ulong addressInPage = address & AddressInPageMask;
                     return systemMemory.ReadUShortAt(currentPageTable[page] + addressInPage);
                 }
-                
+
                 // Scenario 2: the ushort is split between two pages
                 ulong secondPage = page + PageSize;
                 if (!currentPageTable.ContainsKey(secondPage)) { PageFault(page); }
@@ -171,7 +171,7 @@ namespace IronArc.Memory
 
             if (plane == 1)
             {
-                
+
             }
 
             throw new VMErrorException(Error.ReservedPlaneAccess, $"Read 2 bytes at 0x{address:X16} in reserved plane");
@@ -216,7 +216,7 @@ namespace IronArc.Memory
 
             if (plane == 1)
             {
-                
+
             }
 
             throw new VMErrorException(Error.ReservedPlaneAccess, $"Read 4 bytes at 0x{address:X16} in reserved plane");
@@ -262,14 +262,14 @@ namespace IronArc.Memory
                 byte g = systemMemory.ReadByteAt(TranslateAddress(currentPageTable, address + 6));
                 byte h = systemMemory.ReadByteAt(TranslateAddress(currentPageTable, address + 7));
 
-                return ((ulong)a << 56) |
-                    ((ulong)b << 48) |
-                    ((ulong)c << 40) |
-                    ((ulong)d << 32) |
-                    ((ulong)e << 24) |
-                    ((ulong)f << 16) |
-                    ((ulong)g << 8) |
-                    h;
+                return ((ulong)a << 56)
+                    | ((ulong)b << 48)
+                    | ((ulong)c << 40)
+                    | ((ulong)d << 32)
+                    | ((ulong)e << 24)
+                    | ((ulong)f << 16)
+                    | ((ulong)g << 8)
+                    | h;
             }
 
             if (plane == 1) { }
@@ -278,15 +278,14 @@ namespace IronArc.Memory
         }
 
         public long ReadLong(ulong address) => (long)ReadULong(address);
-        
-        // TODO: Write the write methods
 
+        // TODO: Write the write methods
         private static ulong TranslateAddress(PageTable pageTable, ulong address)
         {
             ulong offsetIntoPage = address % PageSize;
             return pageTable[GetPage(address)] + offsetIntoPage;
         }
-        
+
         private void PageFault(ulong page)
         {
             if (nextPageAllocationAddress + PageSize > systemMemory.Length)
@@ -296,7 +295,7 @@ namespace IronArc.Memory
 
             ulong startRealAddress = nextPageAllocationAddress;
             pageTables[CurrentPageTableId].Add(page, startRealAddress);
-            
+
             nextPageAllocationAddress += PageSize;
         }
 
@@ -313,7 +312,7 @@ namespace IronArc.Memory
                     virtualAddressForPageIndexes[pageIndex] = pageTableEntry.Key;
                 }
             }
-            
+
             var newVirtualAddressMappings = new List<KeyValuePair<int, ulong>>();
 
             for (int i = 0; i < pagesOfSystemMemory; i++)
@@ -329,16 +328,17 @@ namespace IronArc.Memory
             }
 
             byte[] copyBuffer = new byte[4096];
+
             for (var i = 0; i < newVirtualAddressMappings.Count; i++)
             {
                 var kvp = newVirtualAddressMappings[i];
 
                 ulong sourcePage = (ulong)kvp.Key * PageSize;
                 ulong destinationPage = (ulong)i * PageSize;
-                
+
                 systemMemory.ReadIntoBuffer(copyBuffer, 0, sourcePage, PageSize);
                 systemMemory.WriteAt(copyBuffer, destinationPage);
-                
+
                 // TODO: page compaction algorithm is wrong - we need a separate class for this, probably
                 //  and update the RealStartAddresses in the page table entry
                 // TODO: catch a VMErrorException in the execute instruction method and raise an error there
@@ -351,9 +351,8 @@ namespace IronArc.Memory
 
             nextPageAllocationAddress = (ulong)newVirtualAddressMappings.Count * PageSize;
         }
-        
+
         private static ulong GetPlaneOfAddress(ulong address) => (address & PlaneMask) >> 47;
         private static ulong GetPage(ulong address) => address & PageMask;
-
     }
 }

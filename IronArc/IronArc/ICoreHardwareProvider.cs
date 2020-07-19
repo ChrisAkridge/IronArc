@@ -7,11 +7,12 @@ using IronArc.Hardware;
 
 namespace IronArc
 {
-	public interface ICoreHardwareProvider
-	{
-		ConcurrentQueue<Message> UIMessageQueue { get; }
+    public interface ICoreHardwareProvider
+    {
+        // ReSharper disable once InconsistentNaming
+        ConcurrentQueue<Message> UIMessageQueue { get; }
 
-		ITerminal CreateTerminal();
-		void DestroyTerminal(ITerminal terminal);
-	}
+        ITerminal CreateTerminal();
+        void DestroyTerminal(ITerminal terminal);
+    }
 }

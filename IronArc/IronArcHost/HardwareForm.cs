@@ -11,75 +11,68 @@ using IronArc;
 
 namespace IronArcHost
 {
-	public partial class HardwareForm : Form
-	{
-		private readonly Guid machineID;
-	
-		public HardwareForm(Guid machineID)
-		{
-			InitializeComponent();
-			this.machineID = machineID;
+    public partial class HardwareForm : Form
+    {
+        private readonly Guid machineId;
 
-			var vm = VMManager.Lookup(machineID);
+        public HardwareForm(Guid machineId)
+        {
+            InitializeComponent();
+            this.machineId = machineId;
 
-			// Step 1: List all the hardware devices we can use in ListAvailableDevices
-			foreach (var hardwareDeviceName in HardwareSearcher.HardwareDeviceNames)
-			{
-				ListAvailableDevices.Items.Add(hardwareDeviceName);
-			}
+            var vm = VMManager.Lookup(machineId);
 
-			// Step 2: Find which hardware devices are actually running on the VM
-			foreach (var hardwareDevice in vm.Hardware)
-			{
-				int hwDeviceIndex = ListAvailableDevices.Items.IndexOf(hardwareDevice.GetType().FullName);
-				ListAvailableDevices.Items.RemoveAt(hwDeviceIndex);
+            // Step 1: List all the hardware devices we can use in ListAvailableDevices
+            foreach (var hardwareDeviceName in HardwareSearcher.HardwareDeviceNames)
+            {
+                ListAvailableDevices.Items.Add(hardwareDeviceName);
+            }
 
-				var selectedDevice = new ListViewItem(hardwareDevice.GetType().FullName);
-				selectedDevice.SubItems.Add(hardwareDevice.Status.ToString());
-				ListSelectedDevices.Items.Add(selectedDevice);
-			}
-		}
+            // Step 2: Find which hardware devices are actually running on the VM
+            foreach (var hardwareDevice in vm.Hardware)
+            {
+                int hwDeviceIndex = ListAvailableDevices.Items.IndexOf(hardwareDevice.GetType().FullName ?? throw new InvalidOperationException());
+                ListAvailableDevices.Items.RemoveAt(hwDeviceIndex);
 
-		private void ListSelectedDevices_SelectedIndexChanged(object sender, EventArgs e)
-		{
-			ButtonRemoveDevice.Enabled = (ListSelectedDevices.SelectedIndices.Count > 0);
-		}
+                var selectedDevice = new ListViewItem(hardwareDevice.GetType().FullName);
+                selectedDevice.SubItems.Add(hardwareDevice.Status.ToString());
+                ListSelectedDevices.Items.Add(selectedDevice);
+            }
+        }
 
-		private void ListAvailableDevices_SelectedIndexChanged(object sender, EventArgs e)
-		{
-			ButtonAddDevice.Enabled = (ListAvailableDevices.SelectedIndices.Count > 0);
-		}
+        private void ListSelectedDevices_SelectedIndexChanged(object sender, EventArgs e) =>
+            ButtonRemoveDevice.Enabled = (ListSelectedDevices.SelectedIndices.Count > 0);
 
-		private void ButtonAddDevice_Click(object sender, EventArgs e)
-		{
-			int deviceIndex = ListAvailableDevices.SelectedIndex;
-			string hwDeviceTypeName = (string)ListAvailableDevices.Items[deviceIndex];
+        private void ListAvailableDevices_SelectedIndexChanged(object sender, EventArgs e) =>
+            ButtonAddDevice.Enabled = (ListAvailableDevices.SelectedIndices.Count > 0);
 
-			VMManager.AddHardwareToVM(machineID, hwDeviceTypeName);
+        private void ButtonAddDevice_Click(object sender, EventArgs e)
+        {
+            int deviceIndex = ListAvailableDevices.SelectedIndex;
+            string hwDeviceTypeName = (string)ListAvailableDevices.Items[deviceIndex];
 
-			// TODO: we need to add a message to indicate that a hardware device addition was
-			// sucessful. Then we need to run the below code when we get the message.
-			ListAvailableDevices.Items.RemoveAt(deviceIndex);
-			var lvi = new ListViewItem(hwDeviceTypeName);
-			lvi.SubItems.Add("Active");
+            VMManager.AddHardwareToVM(machineId, hwDeviceTypeName);
 
-			ListSelectedDevices.Items.Add(lvi);
-		}
+            // TODO: we need to add a message to indicate that a hardware device addition was
+            // sucessful. Then we need to run the below code when we get the message.
+            ListAvailableDevices.Items.RemoveAt(deviceIndex);
+            var lvi = new ListViewItem(hwDeviceTypeName);
+            lvi.SubItems.Add("Active");
 
-		private void ButtonRemoveDevice_Click(object sender, EventArgs e)
-		{
-			int deviceIndex = ListSelectedDevices.SelectedIndices[0];
-			string hwDeviceTypeName = ListSelectedDevices.Items[deviceIndex].Text;
+            ListSelectedDevices.Items.Add(lvi);
+        }
 
-			VMManager.RemoveHardwareFromVM(machineID, hwDeviceTypeName);
+        private void ButtonRemoveDevice_Click(object sender, EventArgs e)
+        {
+            int deviceIndex = ListSelectedDevices.SelectedIndices[0];
+            string hwDeviceTypeName = ListSelectedDevices.Items[deviceIndex].Text;
 
-			ListSelectedDevices.Items.RemoveAt(deviceIndex);
-			ListAvailableDevices.Items.Add(hwDeviceTypeName);
-		}
+            VMManager.RemoveHardwareFromVM(machineId, hwDeviceTypeName);
 
-		private void ButtonOK_Click(object sender, EventArgs e)
-		{
-			Close();
-		}
-	}
+            ListSelectedDevices.Items.RemoveAt(deviceIndex);
+            ListAvailableDevices.Items.Add(hwDeviceTypeName);
+        }
+
+        private void ButtonOK_Click(object sender, EventArgs e) => Close();
+    }
 }

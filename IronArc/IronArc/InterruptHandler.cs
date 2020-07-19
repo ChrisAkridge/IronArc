@@ -5,9 +5,9 @@ using System.Text;
 
 namespace IronArc
 {
-	public struct InterruptHandler
-	{
-		public int Index;
-		public ulong CallAddress;
-	}
+    public struct InterruptHandler
+    {
+        public int Index { get; set; }
+        public ulong CallAddress { get; set; }
+    }
 }

@@ -5,18 +5,18 @@ using System.Text;
 
 namespace IronArc.Hardware
 {
-	public interface ITerminal
-	{
-		Guid MachineID { get; set; }
-		bool CanPerformWaitingRead { get; }
+    public interface ITerminal
+    {
+        Guid MachineId { get; set; }
+        bool CanPerformWaitingRead { get; }
 
-		void Write(string text);
-		void WriteLine(string text);
+        void Write(string text);
+        void WriteLine(string text);
 
-		char Read();
-		string ReadLine();
+        char Read();
+        string ReadLine();
 
-		char NonWaitingRead();
-		string NonWaitingReadLine();
-	}
+        char NonWaitingRead();
+        string NonWaitingReadLine();
+    }
 }
