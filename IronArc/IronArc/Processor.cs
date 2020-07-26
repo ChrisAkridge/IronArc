@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using IronArc.Memory;
+
 // ReSharper disable InconsistentNaming
 
 namespace IronArc
@@ -9,6 +11,7 @@ namespace IronArc
     public sealed class Processor
     {
         private readonly VirtualMachine vm;
+        private readonly MemoryManager memory;
 
         public ulong EAX;
         public ulong EBX;
@@ -27,14 +30,13 @@ namespace IronArc
         public ulong ERP;
 
         public ulong stackArgsMarker;
-        private ByteBlock memory;
         public ulong stringsTableAddress;
 
         public Dictionary<string, List<InterruptHandler>> interruptTable;
         public Dictionary<uint, ulong> errorTable;
         public Stack<CallStackFrame> callStack;
 
-        public Processor(ByteBlock memory, ulong firstInstructionAddress, ulong programSize,
+        public Processor(MemoryManager memory, ulong firstInstructionAddress, ulong programSize,
             ulong stringsTableAddress, VirtualMachine vm)
         {
             this.memory = memory;
@@ -50,12 +52,12 @@ namespace IronArc
         }
 
         #region Memory Read/Write
-        private byte ReadProgramByte() => memory.ReadByteAt(EIP++);
+        private byte ReadProgramByte() => memory.ReadByte(EIP++);
         private sbyte ReadProgramSByte() => (sbyte)ReadProgramByte();
 
         private ushort ReadProgramWord()
         {
-            var result = memory.ReadUShortAt(EIP);
+            var result = memory.ReadUShort(EIP);
             EIP += 2;
             return result;
         }
@@ -63,7 +65,7 @@ namespace IronArc
 
         private uint ReadProgramDWord()
         {
-            var result = memory.ReadUIntAt(EIP);
+            var result = memory.ReadUInt(EIP);
             EIP += 4;
             return result;
         }
@@ -71,7 +73,7 @@ namespace IronArc
 
         private ulong ReadProgramQWord()
         {
-            var result = memory.ReadULongAt(EIP);
+            var result = memory.ReadULong(EIP);
             EIP += 8;
             return result;
         }
@@ -79,7 +81,7 @@ namespace IronArc
 
         private string ReadProgramLPString()
         {
-            var result = memory.ReadStringAt(EIP, out var stringLength);
+            var result = memory.ReadString(EIP, out uint stringLength);
             EIP += stringLength;
             return result;
         }
@@ -88,59 +90,99 @@ namespace IronArc
         [SuppressMessage("ReSharper", "MultipleStatementsOnOneLine")]
         public void ExecuteNextInstruction()
         {
-            // Step 1: decode the opcode
             ushort opcode = ReadProgramWord();
-            switch ((opcode >> 8))
+
+            try
             {
-                case 0x00: /* Control Flow Instructions */
-                    switch ((opcode & 0xFF))
-                    {
-                        case 0x00: NoOperation(); break;
-                        case 0x01: End(); break;
-                        case 0x02: Jump(); break;
-                        case 0x03: Call(); break;
-                        case 0x04: Return(); break;
-                        case 0x05: JumpIfEqual(); break;
-                        case 0x06: JumpIfNotEqual(); break;
-                        case 0x07: JumpIfLessThan(); break;
-                        case 0x08: JumpIfGreaterThan(); break;
-                        case 0x09: JumpIfLessThanOrEqualTo(); break;
-                        case 0x0A: JumpIfGreaterThanOrEqualTo(); break;
-                        case 0x0B: AbsoluteJump(); break;
-                        case 0x0C: HardwareCall(); break;
-                        case 0x0D: StackArgumentPrologue(); break;
-                        default: break;
-                    }
-                    break;
-                case 0x01:
-                    switch ((opcode & 0xFF))
-                    {
-                        case 0x00: MoveData(); break;
-                        case 0x01: MoveDataWithLength(); break;
-                        case 0x02: PushToStack(); break;
-                        case 0x03: PopFromStack(); break;
-                        case 0x04: ArrayRead(); break;
-                        case 0x05: ArrayWrite(); break;
-                        default: break;
-                    }
-                    break;
-                case 0x02:
-                    int operation = opcode & 0xFF;
-                    if (operation <= 0x11 /* 0x0211 is Stack Comparison */)
-                    {
-                        PerformStackOperation(opcode);
-                    }
-                    else if (operation <= 0x23 /* 0x0223 is Long Comparison */)
-                    {
-                        PerformLongOperation(opcode);
-                    }
-                    else if (operation >= 0x80 && operation <= 0x86)
-                    {
-                        PerformFloatingStackOperation(opcode);
-                    }
-                    break;
-                default:
-                    break;
+                switch ((opcode >> 8))
+                {
+                    case 0x00: /* Control Flow Instructions */
+                        switch (opcode & 0xFF)
+                        {
+                            case 0x00:
+                                NoOperation();
+                                break;
+                            case 0x01:
+                                End();
+                                break;
+                            case 0x02:
+                                Jump();
+                                break;
+                            case 0x03:
+                                Call();
+                                break;
+                            case 0x04:
+                                Return();
+                                break;
+                            case 0x05:
+                                JumpIfEqual();
+                                break;
+                            case 0x06:
+                                JumpIfNotEqual();
+                                break;
+                            case 0x07:
+                                JumpIfLessThan();
+                                break;
+                            case 0x08:
+                                JumpIfGreaterThan();
+                                break;
+                            case 0x09:
+                                JumpIfLessThanOrEqualTo();
+                                break;
+                            case 0x0A:
+                                JumpIfGreaterThanOrEqualTo();
+                                break;
+                            case 0x0B:
+                                break;
+                            case 0x0C:
+                                HardwareCall();
+                                break;
+                            case 0x0D:
+                                StackArgumentPrologue();
+                                break;
+                            default: break;
+                        }
+                        break;
+                    case 0x01:
+                        switch (opcode & 0xFF)
+                        {
+                            case 0x00:
+                                MoveData();
+                                break;
+                            case 0x01:
+                                MoveDataWithLength();
+                                break;
+                            case 0x02:
+                                PushToStack();
+                                break;
+                            case 0x03:
+                                PopFromStack();
+                                break;
+                            case 0x04:
+                                ArrayRead();
+                                break;
+                            case 0x05:
+                                ArrayWrite();
+                                break;
+                            default: break;
+                        }
+
+                        break;
+                    case 0x02:
+                        int operation = opcode & 0xFF;
+
+                        if (operation <= 0x11 /* 0x0211 is Stack Comparison */) { PerformStackOperation(opcode); }
+                        else if (operation <= 0x23 /* 0x0223 is Long Comparison */) { PerformLongOperation(opcode); }
+                        else if (operation >= 0x80 && operation <= 0x86) { PerformFloatingStackOperation(opcode); }
+
+                        break;
+                    default:
+                        break;
+                }
+            }
+            catch (VMErrorException errorEx)
+            {
+                RaiseError(errorEx.Error, errorEx.Message ?? errorEx.DefaultMessage);
             }
         }
 
@@ -183,7 +225,10 @@ namespace IronArc
                 case 8UL: EBP = value; break;
                 case 9UL: ESP = value; break;
                 case 10UL: EIP = value; break;
-                case 11UL: EFLAGS = value; break;
+                case 11UL:
+                    EFLAGS = value;
+                    memory.PerformAddressTranslation = (EFLAGS & EFlags.PerformAddressTranslation) != 0;
+                    break;
                 case 12UL: ERP = value; break;
                 default:
                     throw new ArgumentException($"There is no register numbered {registerNumber}. Please ensure you've masked out the high two bits.");
@@ -234,10 +279,10 @@ namespace IronArc
         {
             switch (size)
             {
-                case OperandSize.Byte: memory.WriteByteAt((byte)data, address); break;
-                case OperandSize.Word: memory.WriteUShortAt((ushort)data, address); break;
-                case OperandSize.DWord: memory.WriteUIntAt((uint)data, address); break;
-                case OperandSize.QWord: memory.WriteULongAt(data, address); break;
+                case OperandSize.Byte: memory.WriteByte((byte)data, address); break;
+                case OperandSize.Word: memory.WriteUShort((ushort)data, address); break;
+                case OperandSize.DWord: memory.WriteUInt((uint)data, address); break;
+                case OperandSize.QWord: memory.WriteULong(data, address); break;
                 default:
                     throw new ArgumentException($"Implementation error: Invalid operand size {size}");
             }
@@ -257,10 +302,10 @@ namespace IronArc
             switch (block.type)
             {
                 case AddressType.MemoryAddress:
-                    return block.isPointer ? memory.ReadULongAt(block.value) : block.value;
+                    return block.isPointer ? memory.ReadULong(block.value) : block.value;
                 case AddressType.Register:
                     ulong valueWithOffset = ReadRegisterByIndex(block.value) + (ulong)block.offset;
-                    return block.isPointer ? memory.ReadULongAt(valueWithOffset) : valueWithOffset;
+                    return block.isPointer ? memory.ReadULong(valueWithOffset) : valueWithOffset;
                 case AddressType.NumericLiteral:
                     if (block.size != OperandSize.QWord)
                     {
@@ -282,7 +327,7 @@ namespace IronArc
 
         private ulong LookupStringAddress(uint stringIndex)
         {
-            uint numberOfStrings = memory.ReadUIntAt(stringsTableAddress);
+            uint numberOfStrings = memory.ReadUInt(stringsTableAddress);
             if (numberOfStrings <= stringIndex)
             {
                 RaiseError(Error.StringIndexOutOfRange);
@@ -290,7 +335,7 @@ namespace IronArc
             }
 
             ulong stringAddressAddress = stringsTableAddress + 4 + (8 * stringIndex);
-            return memory.ReadULongAt(stringAddressAddress);
+            return memory.ReadULong(stringAddressAddress);
         }
 
         private ulong ReadDataFromAddressBlock(AddressBlock block, OperandSize size)
@@ -298,17 +343,17 @@ namespace IronArc
             switch (block.type)
             {
                 case AddressType.MemoryAddress:
-                    return memory.ReadDataAt(block.isPointer ? memory.ReadULongAt(block.value) : block.value, size);
+                    return memory.ReadData(block.isPointer ? memory.ReadULong(block.value) : block.value, size);
                 case AddressType.Register:
                     if (block.offset != 0 && !block.isPointer)
                     {
-                        RaiseError(Error.InvalidAddressType);
+                        RaiseError(Error.InvalidAddressType, $"Read from {ErrorMessages.GetRegisterName(block.value)} that has offset but is not a pointer");
                         return 0UL;
                     }
                     else if (block.isPointer)
                     {
                         ulong address = ReadRegisterByIndex(block.value) + (ulong)block.offset;
-                        return memory.ReadDataAt(address, size);
+                        return memory.ReadData(address, size);
                     }
                     else
                     {
@@ -328,17 +373,17 @@ namespace IronArc
             switch (block.type)
             {
                 case AddressType.MemoryAddress:
-                    memory.WriteDataAt(data, block.isPointer ? memory.ReadULongAt(block.value) : block.value, size);
+                    memory.WriteData(data, block.isPointer ? memory.ReadULong(block.value) : block.value, size);
                     break;
                 case AddressType.Register:
                     if (block.offset != 0 && !block.isPointer)
                     {
-                        RaiseError(Error.InvalidAddressType);
+                        RaiseError(Error.InvalidAddressType, $"Write to {ErrorMessages.GetRegisterName(block.value)} that has offset but is not a pointer");
                     }
                     else if (block.isPointer)
                     {
                         ulong address = ReadRegisterByIndex(block.value) + (ulong)block.offset;
-                        memory.WriteDataAt(data, address, size);
+                        memory.WriteData(data, address, size);
                     }
                     else
                     {
@@ -355,8 +400,11 @@ namespace IronArc
             }
         }
 
-        internal void RaiseError(uint errorCode)
+        internal void RaiseError(uint errorCode, string message)
         {
+            vm.LastError = new ErrorDescription((Error)errorCode,
+                message ?? ErrorMessages.GetDefaultMessage((Error)errorCode));
+            
             // Look up an error handler for the code and call it if there is one.
             if (!errorTable.ContainsKey(errorCode))
             {
@@ -368,7 +416,9 @@ namespace IronArc
             CallImpl(handlerAddress);
         }
 
-        internal void RaiseError(Error error) => RaiseError((uint)error);
+        internal void RaiseError(Error error) => RaiseError((uint)error, null);
+
+        internal void RaiseError(Error error, string message) => RaiseError((uint)error, message);
 
         private void CallImpl(ulong callAddress)
         {
@@ -429,14 +479,14 @@ namespace IronArc
         #region External Helpers
         public void PushExternal(byte[] bytes)
         {
-            memory.WriteAt(bytes, ESP);
+            memory.Write(bytes, ESP);
             ESP += (ulong)bytes.Length;
         }
 
         public void PushExternal(ulong data, OperandSize size)
         {
             ulong sizeInBytes = size.GetSizeInBytes();
-            memory.WriteDataAt(data, ESP, size);
+            memory.WriteData(data, ESP, size);
             ESP += sizeInBytes;
         }
 
@@ -446,17 +496,64 @@ namespace IronArc
             ulong dataStartAddress = ESP - sizeInBytes;
             ESP -= sizeInBytes;
 
-            if (ESP >= EBP) { return memory.ReadDataAt(dataStartAddress, size); }
+            if (ESP >= EBP) { return memory.ReadData(dataStartAddress, size); }
 
             RaiseError(Error.StackUnderflow);
             return 0;
         }
 
-        public string ReadStringFromMemory(ulong stringAddress) => memory.ReadStringAt(stringAddress);
+        public string ReadStringFromMemory(ulong stringAddress) => memory.ReadString(stringAddress, out _);
 
         public void WriteStringToMemory(ulong stringAddress, string text) =>
-            memory.WriteStringAt(text, stringAddress);
+            memory.WriteString(text, stringAddress);
 
+        internal void RegisterInterruptHandler(uint deviceId, string interruptName, ulong callAddress)
+        {
+            if (!interruptTable.ContainsKey(interruptName))
+            {
+                interruptTable.Add(interruptName, new List<InterruptHandler>());
+            }
+            
+            // TODO: verify that the interrupt name actually exists
+            // also take a device ID in a handler, too, and verify that
+            // exists in the SystemDevice class (or maybe in VirtualMachine)
+            int nextHandlerIndex = Enumerable.Range(0, 256)
+                .First(i => interruptTable[interruptName].All(interrupt => interrupt.Index != i));
+
+            if (nextHandlerIndex >= 256)
+            {
+                RaiseError(Error.HardwareError, $"All handlers for {interruptName} are registered");
+                return;
+            }
+            
+            interruptTable[interruptName].Add(new InterruptHandler
+            {
+                DeviceId = deviceId,
+                CallAddress = callAddress,
+                Index = (byte)nextHandlerIndex
+            });
+        }
+
+        internal void UnregisterInterruptHandler(uint deviceId, string interruptName, byte index)
+        {
+            if (!interruptTable.ContainsKey(interruptName))
+            {
+                RaiseError(Error.HardwareError, $"Cannot remove handlers for {interruptName} as none are registered");
+                return;
+            }
+
+            if (interruptTable[interruptName].All(interrupt => interrupt.Index != index))
+            {
+                RaiseError(Error.HardwareError, $"Cannot remove handler #{index} for {interruptName} because there isn't a handler with that index");
+                return;
+            }
+
+            interruptTable[interruptName].RemoveAll(i => i.Index == index);
+        }
+
+        internal void RegisterErrorHandler(uint errorCode, ulong handlerAddress) => errorTable[errorCode] = handlerAddress;
+
+        internal void UnregisterErrorHandler(uint errorCode) => errorTable.Remove(errorCode);
         #endregion
 
         #region Control Flow Instructions (0x00)
@@ -481,15 +578,7 @@ namespace IronArc
             // Flags byte: 00XX0000 where the X names the address block type.
 
             byte flagsByte = (byte)((ReadProgramByte() & 0x30) >> 4);
-            ulong jumpAddress = GetMemoryAddressFromAddressBlock(flagsByte) + ERP;
-
-            if (jumpAddress >= memory.Length)
-            {
-                RaiseError(Error.AddressOutOfRange);
-                return;
-            }
-
-            EIP = jumpAddress;
+            EIP = GetMemoryAddressFromAddressBlock(flagsByte) + ERP;
         }
 
         private void Call()
@@ -503,12 +592,6 @@ namespace IronArc
 
             byte flagsByte = (byte)((ReadProgramByte() & 0x30) >> 4);
             ulong callAddress = GetMemoryAddressFromAddressBlock(flagsByte) + ERP;
-
-            if (callAddress >= memory.Length)
-            {
-                RaiseError(Error.AddressOutOfRange);
-                return;
-            }
 
             CallImpl(callAddress);
         }
@@ -532,17 +615,10 @@ namespace IronArc
             // Flags byte: 00XX0000 where the X names the address block type.
 
             byte flagsByte = (byte)((ReadProgramByte() & 0x30) >> 4);
-            ulong jumpAddress = GetMemoryAddressFromAddressBlock(flagsByte) + ERP;
-
-            if (jumpAddress >= memory.Length)
-            {
-                RaiseError(Error.AddressOutOfRange);
-                return;
-            }
 
             if ((EFLAGS & EFlags.EqualFlag) != 0)
             {
-                EIP = jumpAddress;
+                EIP = GetMemoryAddressFromAddressBlock(flagsByte) + ERP;
             }
         }
 
@@ -556,17 +632,10 @@ namespace IronArc
             // Flags byte: 00XX0000 where the X names the address block type.
 
             byte flagsByte = (byte)((ReadProgramByte() & 0x30) >> 4);
-            ulong jumpAddress = GetMemoryAddressFromAddressBlock(flagsByte) + ERP;
-
-            if (jumpAddress >= memory.Length)
-            {
-                RaiseError(Error.AddressOutOfRange);
-                return;
-            }
 
             if ((EFLAGS & EFlags.EqualFlag) == 0)
             {
-                EIP = jumpAddress;
+                EIP = GetMemoryAddressFromAddressBlock(flagsByte) + ERP;
             }
         }
 
@@ -580,17 +649,10 @@ namespace IronArc
             // Flags byte: 00XX0000 where the X names the address block type.
 
             byte flagsByte = (byte)((ReadProgramByte() & 0x30) >> 4);
-            ulong jumpAddress = GetMemoryAddressFromAddressBlock(flagsByte) + ERP;
-
-            if (jumpAddress >= memory.Length)
-            {
-                RaiseError(Error.AddressOutOfRange);
-                return;
-            }
 
             if ((EFLAGS & EFlags.LessThanFlag) != 0)
             {
-                EIP = jumpAddress;
+                EIP = GetMemoryAddressFromAddressBlock(flagsByte) + ERP;
             }
         }
 
@@ -604,17 +666,10 @@ namespace IronArc
             // Flags byte: 00XX0000 where the X names the address block type.
 
             byte flagsByte = (byte)((ReadProgramByte() & 0x30) >> 4);
-            ulong jumpAddress = GetMemoryAddressFromAddressBlock(flagsByte) + ERP;
-
-            if (jumpAddress >= memory.Length)
-            {
-                RaiseError(Error.AddressOutOfRange);
-                return;
-            }
 
             if ((EFLAGS & EFlags.GreaterThanFlag) != 0)
             {
-                EIP = jumpAddress;
+                EIP = GetMemoryAddressFromAddressBlock(flagsByte) + ERP;
             }
         }
 
@@ -628,17 +683,10 @@ namespace IronArc
             // Flags byte: 00XX0000 where the X names the address block type.
 
             byte flagsByte = (byte)((ReadProgramByte() & 0x30) >> 4);
-            ulong jumpAddress = GetMemoryAddressFromAddressBlock(flagsByte) + ERP;
 
-            if (jumpAddress >= memory.Length)
+            if (((EFLAGS & EFlags.LessThanFlag) != 0) || ((EFLAGS & EFlags.EqualFlag) != 0))
             {
-                RaiseError(Error.AddressOutOfRange);
-                return;
-            }
-
-            if (((EFLAGS & EFlags.LessThanFlag) != 0) && ((EFLAGS & EFlags.EqualFlag) != 0))
-            {
-                EIP = jumpAddress;
+                EIP = GetMemoryAddressFromAddressBlock(flagsByte) + ERP;
             }
         }
 
@@ -652,17 +700,10 @@ namespace IronArc
             // Flags byte: 00XX0000 where the X names the address block type.
 
             byte flagsByte = (byte)((ReadProgramByte() & 0x30) >> 4);
-            ulong jumpAddress = GetMemoryAddressFromAddressBlock(flagsByte) + ERP;
-
-            if (jumpAddress >= memory.Length)
-            {
-                RaiseError(Error.AddressOutOfRange);
-                return;
-            }
 
             if (((EFLAGS & EFlags.GreaterThanFlag) != 0) || ((EFLAGS & EFlags.EqualFlag) != 0))
             {
-                EIP = jumpAddress;
+                EIP = GetMemoryAddressFromAddressBlock(flagsByte) + ERP;
             }
         }
 
@@ -676,15 +717,7 @@ namespace IronArc
             // Flags byte: 00XX0000 where the X names the address block type.
 
             byte flagsByte = (byte)((ReadProgramByte() & 0x30) >> 4);
-            ulong jumpAddress = GetMemoryAddressFromAddressBlock(flagsByte);
-
-            if (jumpAddress >= memory.Length)
-            {
-                RaiseError(Error.AddressOutOfRange);
-                return;
-            }
-
-            EIP = jumpAddress;
+            EIP = GetMemoryAddressFromAddressBlock(flagsByte);
         }
 
         private void HardwareCall()
@@ -702,7 +735,7 @@ namespace IronArc
             EIP += block.operandLength;
             ulong stringAddress = ReadDataFromAddressBlock(block, OperandSize.QWord);
 
-            string hwcall = memory.ReadStringAt(stringAddress);
+            string hwcall = memory.ReadString(stringAddress, out _);
             vm.HardwareCall(hwcall);
         }
 
@@ -780,7 +813,7 @@ namespace IronArc
             ulong sourceAddress = GetMemoryAddressFromAddressBlock(sourceBlock);
             ulong destAddress = GetMemoryAddressFromAddressBlock(destinationBlock);
 
-            memory.WriteAt(sourceAddress, destAddress, length);
+            memory.Write(sourceAddress, destAddress, length);
         }
 
         private void PushToStack()
@@ -802,7 +835,7 @@ namespace IronArc
 
             ulong data = ReadDataFromAddressBlock(dataBlock, size);
 
-            memory.WriteDataAt(data, ESP, size);
+            memory.WriteData(data, ESP, size);
             ESP += size.SizeInBytes();
         }
 
@@ -835,7 +868,7 @@ namespace IronArc
                 RaiseError(Error.StackUnderflow);
             }
 
-            ulong data = memory.ReadDataAt(ESP - sizeInBytes, size);
+            ulong data = memory.ReadData(ESP - sizeInBytes, size);
             ESP -= sizeInBytes;
             WriteDataToAddressBlock(data, destBlock, size);
         }
@@ -866,7 +899,7 @@ namespace IronArc
             EIP += indexBlock.operandLength;
 
             uint arrayIndex = (uint)ReadDataFromAddressBlock(indexBlock, size);
-            PushExternal(memory.ReadDataAt(arrayStartAddress + (arrayIndex * elementSizeInBytes),
+            PushExternal(memory.ReadData(arrayStartAddress + (arrayIndex * elementSizeInBytes),
                 size), size);
         }
 
@@ -902,7 +935,7 @@ namespace IronArc
 
             uint arrayIndex = (uint)ReadDataFromAddressBlock(indexBlock, size);
             ulong arrayIndexAddress = arrayStartAddress + (arrayIndex * elementSizeInBytes);
-            memory.WriteDataAt(ReadDataFromAddressBlock(dataBlock, size), arrayIndexAddress,
+            memory.WriteData(ReadDataFromAddressBlock(dataBlock, size), arrayIndexAddress,
                 size);
         }
         #endregion
@@ -1006,7 +1039,7 @@ namespace IronArc
             var rightType = ReadAddressType((byte)((flagsByte & 0x0C) >> 2));
             var destType = ReadAddressType((byte)(flagsByte & 0x03));
 
-            bool isBinaryOperation = (StackArgumentsToPop(operation) == 2);
+            bool isBinaryOperation = StackArgumentsToPop(operation) == 2;
 
             var leftBlock = new AddressBlock(size, leftType, memory, EIP);
             EIP += leftBlock.operandLength;
@@ -1093,7 +1126,7 @@ namespace IronArc
             var flagsByte = ReadProgramByte();
             var size = ReadOperandSize((byte)(flagsByte >> 6));
 
-            if ((int)size < 2 /* size != OperandSize.DWord || size != OperandSize.QWord */)
+            if (size != OperandSize.DWord || size != OperandSize.QWord)
             {
                 throw new InvalidOperationException($"The operand size {size} is not valid. Floating operations must use DWORD (single) or QWORD (double).");
             }

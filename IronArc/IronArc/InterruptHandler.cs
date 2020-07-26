@@ -7,7 +7,8 @@ namespace IronArc
 {
     public struct InterruptHandler
     {
-        public int Index { get; set; }
+        public uint DeviceId { get; set; }
+        public byte Index { get; set; }
         public ulong CallAddress { get; set; }
     }
 }

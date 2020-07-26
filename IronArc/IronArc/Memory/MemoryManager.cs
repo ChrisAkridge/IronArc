@@ -17,15 +17,17 @@ namespace IronArc.Memory
         private ByteBlock systemMemory;
         private ulong nextPageAllocationAddress;
         private uint nextPageTableId;
-        private readonly Dictionary<uint, PageTable> pageTables = new Dictionary<uint, PageTable>();
+        private IDictionary<uint, PageTable> pageTables = new Dictionary<uint, PageTable>();
         private readonly HardwareMemory hardwareMemory;
 
         public bool PerformAddressTranslation { get; set; }
         public uint CurrentPageTableId { get; set; }
 
-        public MemoryManager(ulong systemMemorySize, HardwareMemory hardwareMemory)
+        public ulong SystemMemoryLength => systemMemory.Length;
+
+        public MemoryManager(ByteBlock systemMemory, HardwareMemory hardwareMemory)
         {
-            systemMemory = ByteBlock.FromLength(systemMemorySize);
+            this.systemMemory = systemMemory;
             this.hardwareMemory = hardwareMemory;
         }
 
@@ -171,7 +173,7 @@ namespace IronArc.Memory
 
             if (plane == 1)
             {
-
+                return hardwareMemory.ReadUShort(address);
             }
 
             throw new VMErrorException(Error.ReservedPlaneAccess, $"Read 2 bytes at 0x{address:X16} in reserved plane");
@@ -216,7 +218,7 @@ namespace IronArc.Memory
 
             if (plane == 1)
             {
-
+                return hardwareMemory.ReadUInt(address);
             }
 
             throw new VMErrorException(Error.ReservedPlaneAccess, $"Read 4 bytes at 0x{address:X16} in reserved plane");
@@ -272,14 +274,320 @@ namespace IronArc.Memory
                     | h;
             }
 
-            if (plane == 1) { }
+            if (plane == 1) { return hardwareMemory.ReadULong(address); }
 
             throw new VMErrorException(Error.ReservedPlaneAccess, $"Read 8 bytes 0x{address:X16} in reserved plane");
         }
 
         public long ReadLong(ulong address) => (long)ReadULong(address);
 
-        // TODO: Write the write methods
+        public string ReadString(ulong address, out uint length)
+        {
+            uint stringLength = ReadUInt(address);
+
+            length = stringLength + 4;
+            return Encoding.UTF8.GetString(Read(address + 4, stringLength));
+        }
+
+        public ulong ReadData(ulong address, OperandSize size)
+        {
+            switch (size)
+            {
+                case OperandSize.Byte:
+                    return ReadByte(address);
+                case OperandSize.Word:
+                    return ReadUShort(address);
+                case OperandSize.DWord:
+                    return ReadUInt(address);
+                case OperandSize.QWord:
+                    return ReadULong(address);
+                default:
+                    throw new ArgumentException($"Implementation error: Invalid operand size {size}");
+            }
+        }
+
+        public void Write(byte[] bytes, ulong address)
+        {
+            ulong endAddress = address + (ulong)bytes.Length;
+            ulong plane = GetPlaneOfAddress(address);
+
+            if (plane != GetPlaneOfAddress(endAddress))
+            {
+                throw new VMErrorException(Error.CrossPlaneAccess, $"Write 0x{address:X16}-0x{endAddress:x16} crossed planes");
+            }
+
+            if (plane == 0)
+            {
+                if (PerformAddressTranslation)
+                {
+                    WriteVirtual(bytes, address);
+                }
+                else { systemMemory.WriteAt(bytes, address); }
+            }
+            else if (plane == 1)
+            {
+                hardwareMemory.Write(bytes, address);
+            }
+
+            throw new VMErrorException(Error.ReservedPlaneAccess,
+                $"Write 0x{address:X16}-0x{endAddress:X16} is in reserved plane");
+        }
+
+        private void WriteVirtual(byte[] bytes, ulong address)
+        {
+            var length = (ulong)bytes.Length;
+            int bufferIndex = 0;
+            ulong endAddress = address + length;
+            PageTable currentPageTable = pageTables[CurrentPageTableId];
+
+            for (ulong page = GetPage(address); page < GetPage(endAddress); page += PageSize)
+            {
+                if (!currentPageTable.ContainsKey(page))
+                {
+                    PageFault(page);
+                }
+
+                ulong addressInPage = address & AddressInPageMask;
+                int bytesToWrite = (length >= PageSize) ? PageSize - (int)addressInPage : (int)length;
+                systemMemory.WriteAt(bytes, bufferIndex, bytesToWrite, currentPageTable[page] + addressInPage);
+
+                address += (ulong)bytesToWrite;
+                length -= (ulong)bytesToWrite;
+                bufferIndex += bytesToWrite;
+            }
+        }
+
+        public void Write(ulong source, ulong destination, ulong length)
+        {
+            ulong sourceEndAddress = source + length;
+            ulong destinationEndAddress = destination + length;
+            ulong sourcePlane = GetPlaneOfAddress(source);
+            ulong destinationPlane = GetPlaneOfAddress(destination);
+
+            if (sourcePlane != GetPlaneOfAddress(sourceEndAddress))
+            {
+                throw new VMErrorException(Error.CrossPlaneAccess,
+                    $"Write from 0x{source:X16}-0x{sourceEndAddress:x16} crossed planes");
+            }
+
+            if (destinationPlane != GetPlaneOfAddress(destinationEndAddress))
+            {
+                throw new VMErrorException(Error.CrossPlaneAccess,
+                    $"Write to 0x{destination:X16}-0x{destinationEndAddress:x16} crossed planes");
+            }
+
+            byte[] bytes = Read(source, length);
+            Write(bytes, destination);
+        }
+        
+        public void WriteByte(byte value, ulong address)
+        {
+            ulong plane = GetPlaneOfAddress(address);
+
+            if (plane == 0)
+            {
+                if (!PerformAddressTranslation)
+                {
+                    systemMemory.WriteByteAt(value, address);
+                }
+
+                PageTable currentPageTable = pageTables[CurrentPageTableId];
+                ulong page = GetPage(address);
+                
+                if (!currentPageTable.ContainsKey(page)) { PageFault(page); }
+
+                ulong addressInPage = address & AddressInPageMask;
+                
+                systemMemory.WriteByteAt(value, currentPageTable[page] + addressInPage);
+            }
+            else if (plane == 1)
+            {
+                hardwareMemory.WriteByte(value, address);
+            }
+
+            throw new VMErrorException(Error.ReservedPlaneAccess, $"Write byte at 0x{address:X16} in reserved plane");
+        }
+
+        public void WriteSByte(sbyte value, ulong address) => WriteByte((byte)value, address);
+
+        public void WriteUShort(ushort value, ulong address)
+        {
+            ulong plane = GetPlaneOfAddress(address);
+
+            if (GetPlaneOfAddress(plane + 1) != plane)
+            {
+                throw new VMErrorException(Error.CrossPlaneAccess, $"Write 2 bytes at 0x{address:X16} crossed planes");
+            }
+
+            if (plane == 0)
+            {
+                if (!PerformAddressTranslation) { systemMemory.WriteUShortAt(value, address); }
+
+                PageTable currentPageTable = pageTables[CurrentPageTableId];
+                ulong page = GetPage(address);
+
+                if (!currentPageTable.ContainsKey(page)) { PageFault(page); }
+                
+                if (address % PageSize != 4095)
+                {
+                    ulong addressInPage = address & AddressInPageMask;
+
+                    systemMemory.WriteUShortAt(value, currentPageTable[page] + addressInPage);
+                }
+                else
+                {
+                    ulong secondPage = page + PageSize;
+
+                    if (!currentPageTable.ContainsKey(secondPage)) { PageFault(page); }
+
+                    byte lo = (byte)(value >> 8);
+                    byte hi = (byte)(value & 0xFF);
+
+                    systemMemory.WriteByteAt(lo, currentPageTable[page] + (PageSize - 1));
+                    systemMemory.WriteByteAt(hi, currentPageTable[secondPage]);
+                }
+            }
+            else if (plane == 1) { hardwareMemory.WriteUShort(value, address); }
+
+            throw new VMErrorException(Error.ReservedPlaneAccess, $"Write 2 bytes at 0x{address:X16} in reserved plane");
+        }
+
+        public void WriteShort(short value, ulong address) => WriteUShort((ushort)value, address);
+
+        public void WriteUInt(uint value, ulong address)
+        {
+            ulong plane = GetPlaneOfAddress(address);
+
+            if (GetPlaneOfAddress(plane + 3) != plane)
+            {
+                throw new VMErrorException(Error.CrossPlaneAccess, $"Write 4 bytes at 0x{address:X16} crossed planes");
+            }
+
+            if (plane == 0)
+            {
+                if (!PerformAddressTranslation) { systemMemory.WriteUIntAt(value, address); }
+
+                PageTable currentPageTable = pageTables[CurrentPageTableId];
+                ulong page = GetPage(address);
+
+                if (!currentPageTable.ContainsKey(page)) { PageFault(page); }
+
+                if (address % PageSize <= 4092)
+                {
+                    ulong addressInPage = address & AddressInPageMask;
+
+                    systemMemory.WriteUIntAt(value, currentPageTable[page] + addressInPage);
+                }
+                else
+                {
+                    ulong secondPage = page + PageSize;
+
+                    if (!currentPageTable.ContainsKey(secondPage)) { PageFault(page); }
+
+                    byte a = (byte)(value >> 24);
+                    byte b = (byte)((value >> 16) & 0xFF);
+                    byte c = (byte)((value >> 8) & 0xFF);
+                    byte d = (byte)(value & 0xFF);
+
+                    systemMemory.WriteByteAt(a, TranslateAddress(currentPageTable, address));
+                    systemMemory.WriteByteAt(b, TranslateAddress(currentPageTable, address + 1));
+                    systemMemory.WriteByteAt(c, TranslateAddress(currentPageTable, address + 2));
+                    systemMemory.WriteByteAt(d, TranslateAddress(currentPageTable, address + 3));
+                }
+            }
+            else if (plane == 1) { hardwareMemory.WriteUInt(value, address); }
+
+            throw new VMErrorException(Error.ReservedPlaneAccess, $"Write 4 bytes at 0x{address:X16} in reserved plane");
+        }
+
+        public void WriteInt(int value, ulong address) => WriteUInt((uint)value, address);
+
+        public void WriteULong(ulong value, ulong address)
+        {
+            ulong plane = GetPlaneOfAddress(address);
+
+            if (GetPlaneOfAddress(plane + 7) != plane)
+            {
+                throw new VMErrorException(Error.CrossPlaneAccess, $"Write 8 bytes at 0x{address:X16} crossed planes");
+            }
+
+            if (plane == 0)
+            {
+                if (!PerformAddressTranslation) { systemMemory.WriteULongAt(value, address); }
+
+                PageTable currentPageTable = pageTables[CurrentPageTableId];
+                ulong page = GetPage(address);
+
+                if (!currentPageTable.ContainsKey(page)) { PageFault(page); }
+
+                if (address % PageSize <= 4088)
+                {
+                    ulong addressInPage = address & AddressInPageMask;
+
+                    systemMemory.WriteULongAt(value, currentPageTable[page] + addressInPage);
+                }
+                else
+                {
+                    ulong secondPage = page + PageSize;
+
+                    if (!currentPageTable.ContainsKey(secondPage)) { PageFault(page); }
+
+                    byte a = (byte)(value >> 56);
+                    byte b = (byte)((value >> 48) & 0xFF);
+                    byte c = (byte)((value >> 40) & 0xFF);
+                    byte d = (byte)((value >> 32) & 0xFF);
+                    byte e = (byte)((value >> 24) & 0xFF);
+                    byte f = (byte)((value >> 16) & 0xFF);
+                    byte g = (byte)((value >> 8) & 0xFF);
+                    byte h = (byte)(value & 0xFF);
+
+                    systemMemory.WriteByteAt(a, TranslateAddress(currentPageTable, address));
+                    systemMemory.WriteByteAt(b, TranslateAddress(currentPageTable, address + 1));
+                    systemMemory.WriteByteAt(c, TranslateAddress(currentPageTable, address + 2));
+                    systemMemory.WriteByteAt(d, TranslateAddress(currentPageTable, address + 3));
+                    systemMemory.WriteByteAt(e, TranslateAddress(currentPageTable, address + 4));
+                    systemMemory.WriteByteAt(f, TranslateAddress(currentPageTable, address + 5));
+                    systemMemory.WriteByteAt(g, TranslateAddress(currentPageTable, address + 6));
+                    systemMemory.WriteByteAt(h, TranslateAddress(currentPageTable, address + 7));
+                }
+            }
+            else if (plane == 1) { hardwareMemory.WriteULong(value, address); }
+
+            throw new VMErrorException(Error.ReservedPlaneAccess,
+                $"Write 8 bytes at 0x{address:X16} in reserved plane");
+        }
+
+        public void WriteLong(long value, ulong address) => WriteULong((ulong)value, address);
+
+        public void WriteString(string value, ulong address)
+        {
+            byte[] utf8 = Encoding.UTF8.GetBytes(value);
+            uint stringLength = (uint)utf8.Length;
+            WriteUInt(stringLength, address);
+            Write(utf8, address + 4);
+        }
+
+        public void WriteData(ulong data, ulong address, OperandSize size)
+        {
+            switch (size)
+            {
+                case OperandSize.Byte:
+                    WriteByte((byte)data, address);
+                    break;
+                case OperandSize.Word:
+                    WriteUShort((ushort)data, address);
+                    break;
+                case OperandSize.DWord:
+                    WriteUInt((uint)data, address);
+                    break;
+                case OperandSize.QWord:
+                    WriteULong(data, address);
+                    break;
+                default:
+                    throw new ArgumentException($"Implementation error: Invalid operand size {size}");
+            }
+        }
+
         private static ulong TranslateAddress(PageTable pageTable, ulong address)
         {
             ulong offsetIntoPage = address % PageSize;
@@ -293,6 +601,11 @@ namespace IronArc.Memory
                 CompactPages();
             }
 
+            if (nextPageAllocationAddress + PageSize > systemMemory.Length)
+            {
+                throw new VMErrorException(Error.OutOfVirtualMemory);
+            }
+            
             ulong startRealAddress = nextPageAllocationAddress;
             pageTables[CurrentPageTableId].Add(page, startRealAddress);
 
@@ -301,55 +614,9 @@ namespace IronArc.Memory
 
         private void CompactPages()
         {
-            int pagesOfSystemMemory = (int)(systemMemory.Length / PageSize);
-            ulong?[] virtualAddressForPageIndexes = new ulong?[pagesOfSystemMemory];
-
-            foreach (KeyValuePair<uint, PageTable> pageTable in pageTables)
-            {
-                foreach (KeyValuePair<ulong, ulong> pageTableEntry in pageTable.Value)
-                {
-                    int pageIndex = (int)(pageTableEntry.Value / PageSize);
-                    virtualAddressForPageIndexes[pageIndex] = pageTableEntry.Key;
-                }
-            }
-
-            var newVirtualAddressMappings = new List<KeyValuePair<int, ulong>>();
-
-            for (int i = 0; i < pagesOfSystemMemory; i++)
-            {
-                if (virtualAddressForPageIndexes[i] == null) { continue; }
-
-                newVirtualAddressMappings.Add(new KeyValuePair<int, ulong>(i, virtualAddressForPageIndexes[i].Value));
-            }
-
-            if (newVirtualAddressMappings.Count == pagesOfSystemMemory)
-            {
-                throw new VMErrorException(Error.OutOfVirtualMemory);
-            }
-
-            byte[] copyBuffer = new byte[4096];
-
-            for (var i = 0; i < newVirtualAddressMappings.Count; i++)
-            {
-                var kvp = newVirtualAddressMappings[i];
-
-                ulong sourcePage = (ulong)kvp.Key * PageSize;
-                ulong destinationPage = (ulong)i * PageSize;
-
-                systemMemory.ReadIntoBuffer(copyBuffer, 0, sourcePage, PageSize);
-                systemMemory.WriteAt(copyBuffer, destinationPage);
-
-                // TODO: page compaction algorithm is wrong - we need a separate class for this, probably
-                //  and update the RealStartAddresses in the page table entry
-                // TODO: catch a VMErrorException in the execute instruction method and raise an error there
-                //  and figure out a way to pass the message to the debugger (last error message?)
-                // TODO: fix the docs to list the details of the hardware calls and errors
-                //  and remove ENP, we don't need it
-                // TODO: add WriteXXX methods
-                // TODO: add System device and the hardware calls it needs
-            }
-
-            nextPageAllocationAddress = (ulong)newVirtualAddressMappings.Count * PageSize;
+            var compactor = new PageCompactor(pageTables, systemMemory);
+            pageTables = compactor.CompactPages(out ulong newNextRealPageStartAddress);
+            nextPageAllocationAddress = newNextRealPageStartAddress;
         }
 
         private static ulong GetPlaneOfAddress(ulong address) => (address & PlaneMask) >> 47;

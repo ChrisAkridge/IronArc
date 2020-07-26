@@ -23,7 +23,40 @@ namespace IronArc
         ReservedPlaneAccess,
         CrossHardwareMemoryAccess,
         NoHardwareMemoryHere,
-        OutOfVirtualMemory
+        OutOfVirtualMemory,
+        HardwareError
+    }
+
+    public sealed class ErrorDescription
+    {
+        public Error Error { get; }
+        public string Message { get; }
+        public byte[] MessageUtf8 { get; }
+
+        public ErrorDescription(Error error, string message)
+        {
+            Error = error;
+            Message = message;
+            MessageUtf8 = Encoding.UTF8.GetBytes(Message);
+        }
+
+        public ulong GetErrorDescriptionSize()
+        {
+            const ulong PointerSize = 8UL;
+            const ulong ErrorCodeSize = 4UL;
+            const ulong StringLengthSize = 4UL;
+
+            return PointerSize + ErrorCodeSize + StringLengthSize + (ulong)MessageUtf8.Length;
+        }
+
+        public byte[] GetErrorDescription(ulong address)
+        {
+            byte[] errorCodeBytes = BitConverter.GetBytes((uint)Error);
+            byte[] messageLengthBytes = BitConverter.GetBytes(MessageUtf8.Length);
+            byte[] messagePointerBytes = BitConverter.GetBytes(address + 8UL + (ulong)errorCodeBytes.Length);
+
+            return messagePointerBytes.Concat(errorCodeBytes.Concat(messageLengthBytes.Concat(MessageUtf8))).ToArray();
+        }
     }
 
     public static class ErrorMessages
@@ -51,8 +84,29 @@ namespace IronArc
                 case Error.CrossHardwareMemoryAccess:
                     return "A memory access occurred across two or more hardware device memory spaces.";
                 case Error.NoHardwareMemoryHere: return "Attempted to access hardware memory where none was mapped.";
-                case Error.OutOfVirtualMemory: return "A page fault could not allocate another page".
+                case Error.OutOfVirtualMemory: return "A page fault could not allocate another page.";
                 default: return $"Attempted to raise non-existant error {(uint)error}. Congratulations.";
+            }
+        }
+
+        public static string GetRegisterName(ulong registerIndex)
+        {
+            switch (registerIndex)
+            {
+                case 0UL: return "EAX";
+                case 1UL: return "EBX";
+                case 2UL: return "ECX";
+                case 3UL: return "EDX";
+                case 4UL: return "EEX";
+                case 5UL: return "EFX";
+                case 6UL: return "EGX";
+                case 7UL: return "EHX";
+                case 8UL: return "EBP";
+                case 9UL: return "ESP";
+                case 10UL: return "EIP";
+                case 11UL: return "EFLAGS";
+                case 12UL: return "ERP";
+                default: return $"unknown register #{registerIndex}";
             }
         }
     }

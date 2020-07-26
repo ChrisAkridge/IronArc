@@ -60,7 +60,7 @@ Raises an error, given its error code.
 void hwcall System::RegisterErrorHandler(uint32 errorCode, ptr handlerAddress)
 ```
 
-Registers a pointer that will be jumped to when a given error code is raised.
+Registers a pointer that will be jumped to when a given error code is raised. Overwrites any existing handler for this error code.
 
 - Parameters:
 	- `uint32 errorCode`: The error code that, when raised, will cause the VM to jump to `handlerAddress`.

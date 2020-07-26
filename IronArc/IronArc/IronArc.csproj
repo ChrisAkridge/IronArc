@@ -92,13 +92,16 @@
     <Compile Include="HardwareDevice.cs" />
     <Compile Include="HardwareProvider.cs" />
     <Compile Include="Hardware\ITerminal.cs" />
+    <Compile Include="Hardware\SystemDevice.cs" />
     <Compile Include="Hardware\TerminalDevice.cs" />
     <Compile Include="Hardware\Debugger.cs" />
     <Compile Include="ICoreHardwareProvider.cs" />
+    <Compile Include="InternalHardwareDescriptionGenerator.cs" />
     <Compile Include="InterruptHandler.cs" />
     <Compile Include="Memory\HardwareMemoryMapping.cs" />
     <Compile Include="Memory\HardwareMemory.cs" />
     <Compile Include="Memory\MemoryManager.cs" />
+    <Compile Include="Memory\PageCompactor.cs" />
     <Compile Include="Message.cs" />
     <Compile Include="Processor.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

@@ -216,6 +216,16 @@ namespace IronArc
             Marshal.Copy(bytes, 0, (IntPtr)(pointer + address), bytes.Length);
         }
 
+        public void WriteAt(byte[] bytes, int startIndex, int length, ulong address)
+        {
+            if (address + (ulong)length > Length)
+            {
+                throw new ArgumentOutOfRangeException($"Cannot write at 0x{address:X2}. Argument out of range.");
+            }
+            
+            Marshal.Copy(bytes, startIndex, (IntPtr)(pointer + address), length);
+        }
+
         public void WriteAt(ByteBlock bytes, ulong address)
         {
             if (address + bytes.Length >= Length)

@@ -17,25 +17,26 @@ namespace IronArc.Hardware
 
         public override HardwareDeviceStatus Status => HardwareDeviceStatus.Active;
 
-        internal override DefinitionDevice Definition => new DefinitionDevice(nameof(TerminalDevice),
-            new List<HardwareCall>
-            {
-                new HardwareCall(null, "Write",
-                    new List<HardwareCallParameter>
-                    {
-                        new HardwareCallParameter("text", DefaultDataTypes.LpStringPointer)
-                    }),
-                new HardwareCall(null, "WriteLine",
-                    new List<HardwareCallParameter>
-                    {
-                        new HardwareCallParameter("text", DefaultDataTypes.LpStringPointer)
-                    }),
-                new HardwareCall(DefaultDataTypes.UInt16, "Read", new List<HardwareCallParameter> { }),
-                new HardwareCall(null, "ReadLine", new List<HardwareCallParameter>
+        internal override DefinitionDevice Definition =>
+            new DefinitionDevice(nameof(TerminalDevice),
+                new List<HardwareCall>
                 {
-                    new HardwareCallParameter("destination", DefaultDataTypes.Pointer)
-                })
-            });
+                    new HardwareCall(null, "Write",
+                        new List<HardwareCallParameter>
+                        {
+                            new HardwareCallParameter("text", DefaultDataTypes.LpStringPointer)
+                        }),
+                    new HardwareCall(null, "WriteLine",
+                        new List<HardwareCallParameter>
+                        {
+                            new HardwareCallParameter("text", DefaultDataTypes.LpStringPointer)
+                        }),
+                    new HardwareCall(DefaultDataTypes.UInt16, "Read", new List<HardwareCallParameter> { }),
+                    new HardwareCall(null, "ReadLine", new List<HardwareCallParameter>
+                    {
+                        new HardwareCallParameter("destination", DefaultDataTypes.Pointer)
+                    })
+                });
 
         public TerminalDevice(Guid machineId)
         {

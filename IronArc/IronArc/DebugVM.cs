@@ -21,7 +21,7 @@ namespace IronArc
         public event EventHandler ReturnOccurred;
         public event EventHandler DebugDisplayInvalidated;
 
-        public long MemorySize => (long)vm.Memory.Length;
+        public long MemorySize => (long)vm.SystemMemory.Length;
         public IReadOnlyList<Breakpoint> Breakpoints => breakpoints.AsReadOnly();
         public ConcurrentQueue<Message> MessageQueue { get; }
         public VMState VMState => vm.State;
@@ -115,13 +115,13 @@ namespace IronArc
         }
         #endregion
 
-        public UnmanagedMemoryStream CreateMemoryStream() => vm.Memory.CreateStream();
+        public UnmanagedMemoryStream CreateMemoryStream() => vm.SystemMemory.CreateStream();
         public CallStackFrame GetCallStackTop() => vm.Processor.callStack.Peek();
 
         public IEnumerable<CallStackFrame> GetCallStack() => vm.Processor.callStack;
 
-        public byte ReadByte(long address) => vm.Memory.ReadByteAt((ulong)address);
-        public void WriteByte(long address, byte value) => vm.Memory.WriteByteAt(value, (ulong)address);
+        public byte ReadByte(long address) => vm.SystemMemory.ReadByteAt((ulong)address);
+        public void WriteByte(long address, byte value) => vm.SystemMemory.WriteByteAt(value, (ulong)address);
 
         public void AddBreakpoint(ulong address, bool isUserVisible) =>
             breakpoints.Add(new Breakpoint(address, isUserVisible));
@@ -216,7 +216,7 @@ namespace IronArc
 
         public void StepOver()
         {
-            bool isCallInstruction = vm.Memory.ReadUShortAt(EIP) == 0x0003;
+            bool isCallInstruction = vm.SystemMemory.ReadUShortAt(EIP) == 0x0003;
             if (!isCallInstruction)
             {
                 StepInto();
@@ -228,13 +228,13 @@ namespace IronArc
                 // Find the length of the call instruction so we can set a breakpoint right after
                 // it.
                 int callInstructionLength = 3;  // opcode + flags byte
-                byte flagsByte = vm.Memory.ReadByteAt(EIP + 2);
+                byte flagsByte = vm.SystemMemory.ReadByteAt(EIP + 2);
                 flagsByte = (byte)((flagsByte & 0x30) >> 4);
                 if (flagsByte == 0 || flagsByte == 2) { callInstructionLength += 8; }
                 else if (flagsByte == 1)
                 {
                     // Register: can be either 1 byte or 5 bytes if it has an offset
-                    byte registerByte = vm.Memory.ReadByteAt(EIP + 3);
+                    byte registerByte = vm.SystemMemory.ReadByteAt(EIP + 3);
                     if ((registerByte & 0x40) != 0) { callInstructionLength += 5; }
                     else { callInstructionLength += 1; }
                 }
@@ -266,7 +266,7 @@ namespace IronArc
                 // ret or end instruction that will actually be executed. So, instead, we're going
                 // to just execute instructions until we reach a ret or end. When we reach a ret,
                 // we DO want to execute it, but we DON'T want to execute an end instruction.
-                ushort opcode = vm.Memory.ReadUShortAt(EIP);
+                ushort opcode = vm.SystemMemory.ReadUShortAt(EIP);
                 if (opcode == 0x0004 /* ret */)
                 {
                     vm.ExecuteOneInstruction();

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using IronArc.Memory;
 
 namespace IronArc
 {
@@ -81,6 +82,72 @@ namespace IronArc
                     break;
                 case AddressType.StringEntry:
                     value = memory.ReadUIntAt(operandAddress);
+                    operandLength = 4UL;
+                    break;
+                default:
+                    throw new ArgumentException($"Invalid address type {type}.", nameof(type));
+            }
+        }
+
+        public AddressBlock(OperandSize size, AddressType type, MemoryManager memory, ulong operandAddress)
+        {
+            this.size = size;
+            this.type = type;
+
+            // These assignments are just so the compiler doesn't complain
+            value = 0UL;
+            offset = 0;
+            isPointer = false;
+            operandLength = 0UL;
+
+            switch (type)
+            {
+                case AddressType.MemoryAddress:
+                    value = memory.ReadULong(operandAddress);
+                    isPointer = (value & MemoryPointerMask) != 0;
+                    if (isPointer)
+                    { value &= 0x7FFF_FFFF_FFFF_FFFF; }
+                    operandLength = 8UL;
+                    break;
+                case AddressType.Register:
+                    value = memory.ReadByte(operandAddress);
+                    isPointer = (value & RegisterPointerMask) != 0;
+                    operandLength = 1UL;
+                    if ((value & RegisterHasOffsetMask) != 0)
+                    {
+                        offset = memory.ReadInt(operandAddress + 1);
+                        operandLength = 5UL;
+                    }
+
+                    // Clear the pointer and offset bits from the byte since we already know
+                    // if this is a pointer/has an offset.
+                    value &= 0x3F;
+                    break;
+                case AddressType.NumericLiteral:
+                    switch (size)
+                    {
+                        case OperandSize.Byte:
+                            value = memory.ReadByte(operandAddress);
+                            operandLength = 1UL;
+                            break;
+                        case OperandSize.Word:
+                            value = memory.ReadUShort(operandAddress);
+                            operandLength = 2UL;
+                            break;
+                        case OperandSize.DWord:
+                            value = memory.ReadUInt(operandAddress);
+                            operandLength = 4UL;
+                            break;
+                        case OperandSize.QWord:
+                            value = memory.ReadULong(operandAddress);
+                            operandLength = 8UL;
+                            break;
+                        default:
+                            throw new ArgumentException($"Invalid operand size {size}.", nameof(size));
+                    }
+                    break;
+                case AddressType.StringEntry:
+                    value = memory.ReadUInt(operandAddress);
                     operandLength = 4UL;
                     break;
                 default:

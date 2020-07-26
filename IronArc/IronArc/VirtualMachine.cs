@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using IronArc.Hardware;
+using IronArc.Memory;
 
 namespace IronArc
 {
@@ -20,10 +21,13 @@ namespace IronArc
 
         public Guid MachineId { get; }
         public Processor Processor { get; }
-        public ByteBlock Memory { get; }
+        public ByteBlock SystemMemory { get; }
+        public HardwareMemory HardwareMemory { get; }
+        public MemoryManager MemoryManager { get; }
         public ConcurrentQueue<Message> MessageQueue { get; }
         public List<HardwareDevice> Hardware { get; }
         public VMState State { get; private set; }
+        public ErrorDescription LastError { get; set; }
         public ulong InstructionExecutedCount { get; private set; }
 
         public VirtualMachine(ulong memorySize, string programPath, ulong loadAddress,
@@ -35,10 +39,13 @@ namespace IronArc
             MachineId = Guid.NewGuid();
             MessageQueue = new ConcurrentQueue<Message>();
 
-            Memory = ByteBlock.FromLength(memorySize);
-            Memory.WriteAt(program, loadAddress);
+            SystemMemory = ByteBlock.FromLength(memorySize);
+            SystemMemory.WriteAt(program, loadAddress);
+            
+            HardwareMemory = new HardwareMemory();
+            MemoryManager = new MemoryManager(SystemMemory, HardwareMemory);
 
-            Processor = new Processor(Memory, loadAddress, (ulong)program.Length + HeaderSize,
+            Processor = new Processor(MemoryManager, loadAddress, (ulong)program.Length + HeaderSize,
                 stringsTableAddress, this);
             Processor.EIP += firstInstructionAddress;
             Hardware = new List<HardwareDevice>();
