@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using IronArc.Memory;
 
 namespace IronArc.Hardware
 {
@@ -116,9 +117,77 @@ namespace IronArc.Hardware
             var errorDescription = vm.LastError.GetErrorDescription(destination);
             vm.MemoryManager.Write(errorDescription, destination);
         }
-        
-        // TODO: methods for hardware description generation
-        // and yes, you'll have to generate descriptions twice, once for size and again for the description
+
+        private void GetHardwareDeviceDescriptionSize(VirtualMachine vm, uint deviceId)
+        {
+            if (vm.Hardware.All(d => d.DeviceId != deviceId))
+            {
+                vm.Processor.RaiseError(IronArc.Error.HardwareError, $"No device with ID {deviceId} exists.");
+
+                return;
+            }
+
+            var description = vm.GetHardwareDescription(deviceId, 0UL);
+            vm.Processor.PushExternal((ulong)description.Count(), OperandSize.QWord);
+        }
+
+        private void GetHardwareDeviceDescription(VirtualMachine vm, uint deviceId, ulong destination)
+        {
+            if (vm.Hardware.All(d => d.DeviceId != deviceId))
+            {
+                vm.Processor.RaiseError(IronArc.Error.HardwareError, $"No device with ID {deviceId} exists.");
+
+                return;
+            }
+
+            var description = vm.GetHardwareDescription(deviceId, destination).ToArray();
+            vm.MemoryManager.Write(description, destination);
+        }
+
+        private void GetAllHardwareDeviceDescriptionsSize(VirtualMachine vm)
+        {
+            var descriptions = vm.GetAllHardwareDescriptions(0UL);
+            vm.Processor.PushExternal((ulong)descriptions.Length, OperandSize.QWord);
+        }
+
+        private void GetAllHardwareDeviceDescriptions(VirtualMachine vm, ulong destination)
+        {
+            var descriptions = vm.GetAllHardwareDescriptions(destination);
+            vm.MemoryManager.Write(descriptions, destination);
+        }
+
+        private void CreatePageTable(VirtualMachine vm)
+        {
+            vm.MemoryManager.CreatePageTable();
+            vm.Processor.PushExternal(vm.MemoryManager.CurrentPageTableId, OperandSize.DWord);
+        }
+
+        private void DestroyPageTable(VirtualMachine vm, uint pageTableId)
+        {
+            if (vm.MemoryManager.CurrentPageTableId == pageTableId)
+            {
+                vm.Processor.RaiseError(Error.HardwareError, $"Cannot delete the current page table (ID {pageTableId}).");
+
+                return;
+            }
+
+            if (pageTableId == 0)
+            {
+                vm.Processor.RaiseError(Error.HardwareError, $"Cannot delete page table with ID 0.");
+
+                return;
+            }
+            
+            vm.MemoryManager.DestroyPageTable(pageTableId);
+        }
+
+        private void ChangeCurrentPageTable(VirtualMachine vm, uint pageTableId)
+        {
+            if (!vm.MemoryManager.TryChangePageTable(pageTableId))
+            {
+                vm.Processor.RaiseError(Error.HardwareError, $"Cannot change to page table with ID {pageTableId} because no page table has that ID.");
+            }
+        }
 
         /// <summary>Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.</summary>
         public override void Dispose() { }

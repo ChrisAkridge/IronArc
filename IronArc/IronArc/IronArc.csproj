@@ -96,7 +96,6 @@
     <Compile Include="Hardware\TerminalDevice.cs" />
     <Compile Include="Hardware\Debugger.cs" />
     <Compile Include="ICoreHardwareProvider.cs" />
-    <Compile Include="InternalHardwareDescriptionGenerator.cs" />
     <Compile Include="InterruptHandler.cs" />
     <Compile Include="Memory\HardwareMemoryMapping.cs" />
     <Compile Include="Memory\HardwareMemory.cs" />

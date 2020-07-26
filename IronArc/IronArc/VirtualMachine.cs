@@ -215,5 +215,50 @@ namespace IronArc
             // If we reach here, this hardware device doesn't exist, or the device name is wrong.
             Processor.RaiseError(IronArc.Error.HardwareDeviceNotPresent);
         }
+
+        internal IEnumerable<byte> GetHardwareDescription(uint deviceId, ulong destination)
+        {
+            var device = Hardware.FirstOrDefault(d => d.DeviceId == deviceId);
+
+            var deviceIdBytes = BitConverter.GetBytes(deviceId);
+            var memoryStart = BitConverter.GetBytes(device.MemoryMapping.StartAddress);
+            var memoryEnd = BitConverter.GetBytes(device.MemoryMapping.EndAddress);
+            var nameBytes = device.DeviceName.ToLPString();
+            var namePointer = BitConverter.GetBytes(destination + 8UL + 4UL + 8UL + 8UL);
+
+            return namePointer
+                .Concat(deviceIdBytes)
+                .Concat(memoryStart)
+                .Concat(memoryEnd)
+                .Concat(nameBytes);
+        }
+
+        internal byte[] GetAllHardwareDescriptions(ulong destination)
+        {
+            var hardwareDescriptions = new List<byte>();
+            var hardwareDescriptionPointers = new List<ulong>();
+            ulong currentDescriptionAddress = destination + (ulong)(Hardware.Count * 8);
+            int sizeBeforeLastAdd = 0;
+
+            foreach (var device in Hardware.OrderBy(d => d.DeviceId))
+            {
+                var description = GetHardwareDescription(device.DeviceId, currentDescriptionAddress);
+                hardwareDescriptions.AddRange(description);
+                
+                ulong descriptionSize = (ulong)(hardwareDescriptions.Count - sizeBeforeLastAdd);
+                sizeBeforeLastAdd = hardwareDescriptions.Count;
+
+                hardwareDescriptionPointers.Add(currentDescriptionAddress);
+                currentDescriptionAddress += descriptionSize;
+            }
+
+            var descriptionPointerBytes = hardwareDescriptionPointers
+                .Select(ptr => BitConverter.GetBytes(ptr))
+                .SelectMany(b => b);
+
+            return descriptionPointerBytes
+                .Concat(hardwareDescriptions)
+                .ToArray();
+        }
     }
 }

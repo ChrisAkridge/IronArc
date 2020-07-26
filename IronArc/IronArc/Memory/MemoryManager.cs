@@ -21,7 +21,7 @@ namespace IronArc.Memory
         private readonly HardwareMemory hardwareMemory;
 
         public bool PerformAddressTranslation { get; set; }
-        public uint CurrentPageTableId { get; set; }
+        public uint CurrentPageTableId { get; private set; }
 
         public ulong SystemMemoryLength => systemMemory.Length;
 
@@ -29,13 +29,15 @@ namespace IronArc.Memory
         {
             this.systemMemory = systemMemory;
             this.hardwareMemory = hardwareMemory;
+            
+            pageTables.Add(0, new PageTable());
         }
 
         public uint CreatePageTable()
         {
+            nextPageTableId += 1;
             uint createdPageTableId = nextPageTableId;
             pageTables.Add(createdPageTableId, new PageTable());
-            nextPageTableId += 1;
 
             return createdPageTableId;
         }
@@ -44,7 +46,7 @@ namespace IronArc.Memory
         {
             if (!pageTables.ContainsKey(pageTableId))
             {
-                throw new VMErrorException(Error.NoSuchPageTable, $"Cannot destroy non-existant page table {pageTableId}");
+                return;
             }
 
             if (CurrentPageTableId == pageTableId)
@@ -53,6 +55,15 @@ namespace IronArc.Memory
             }
 
             pageTables.Remove(pageTableId);
+        }
+
+        public bool TryChangePageTable(uint newPageTableId)
+        {
+            if (!pageTables.ContainsKey(newPageTableId)) { return false; }
+
+            CurrentPageTableId = newPageTableId;
+
+            return true;
         }
 
         public byte[] Read(ulong address, ulong length)

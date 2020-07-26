@@ -11,13 +11,13 @@ The `System` device has the following hardware calls:
 #### RegisterInterruptHandler
 
 ```c
-uint8 hwcall System::RegisterInterruptHandler(uint32 deviceIndex, lpstring* interruptName, ptr handlerAddress)
+uint8 hwcall System::RegisterInterruptHandler(uint32 deviceId, lpstring* interruptName, ptr handlerAddress)
 ```
 
 Registers a pointer that will be jumped to when a hardware device with a given index raises an interrupt. Up to 256 handlers can be registered on the same interrupt by calling the function multiple times with different addresses. Each handler will be given an index, starting at 0 for the first handler, up to 255. If the index of the last assigned handler was 255, another handler can only be added if other handlers have been unregistered, thereby freeing their indices - these handlers will get the first freed index, in order. If there are no freed indices, a hardware error indicating that no handler index was available will be raised.
 
 - Parameters:
-	- `uint32 deviceIndex`: The index of the hardware device to handle interrupts for.
+	- `uint32 deviceId`: The index of the hardware device to handle interrupts for.
 	- `lpstring* interruptName`: A pointer to a string containing the name of the interrupt to handle.
 	- `ptr handlerAddress`: The pointer to jump to when the interrupt occurs.
 - Return value: A byte equal to the count of handlers registered for this interrupt on this device after the registration.
@@ -29,13 +29,13 @@ Registers a pointer that will be jumped to when a hardware device with a given i
 #### UnregisterInterruptHandler
 
 ```c
-void hwcall System::UnregisterInterruptHandler(uint32 deviceIndex, lpstring* interruptName, uint8 handlerIndex)
+void hwcall System::UnregisterInterruptHandler(uint32 deviceId, lpstring* interruptName, uint8 handlerIndex)
 ```
 
 Unregisters a handler for a given interrupt on a given hardware device with a given index, freeing the index for registering again later.
 
 - Parameters:
-	- `uint32 deviceIndex`: The index of the hardware device to remove the handler on.
+	- `uint32 deviceId`: The index of the hardware device to remove the handler on.
 	- `lpstring* interruptName`: A pointer to a string containing the name of the interrupt to remove the handler on.
 	- `uint8 handlerIndex`: The index of the handler to unregister.
 - Errors:
@@ -119,15 +119,19 @@ int32 hwcall System::GetHardwareDeviceCount()
 #### GetHardwareDeviceDescriptionSize
 
 ```c
-uint64 hwcall System::GetHardwareDeviceDescriptionSize(int32 deviceIndex)
+uint64 hwcall System::GetHardwareDeviceDescriptionSize(uint32 deviceId)
 ```
 
+- Parameters:
+	- `uint32 deviceId`: The index of the device to get the size of the description of.
 - Return value: The size, in bytes, that will be written by a call to `System::GetHardwareDeviceDescription`.
+- Errors:
+	- If the device index isn't used by any device
 
 #### GetHardwareDeviceDescription
 
 ```c
-void hwcall System::GetHardwareDeviceDescription(ptr destination)
+void hwcall System::GetHardwareDeviceDescription(uint32 deviceId, ptr destination)
 ```
 
 Writes the description of a single hardware device, in the form of the following structure:
@@ -135,7 +139,7 @@ Writes the description of a single hardware device, in the form of the following
 struct HardwareDescription
 {
 	lpstring* NamePointer;
-	uint32 DeviceIndex;
+	uint32 deviceId;
 	uint64 MemoryStart;
 	uint64 MemoryEnd;
 	lpstring Name;
@@ -145,7 +149,10 @@ struct HardwareDescription
 All fields are contiguous in memory. `MemoryStart` and `MemoryEnd` are both `0` if the device maps no memory. `NamePointer` always points to `Name`.
 
 - Parameters:
+	- `uint32 deviceId`: The index of the device to get the description of.
 	- `ptr destination`: The address to write the description to.
+- Errors:
+	- If the device index isn't used by any device
 
 #### GetAllHardwareDeviceDescriptionSize
 
@@ -202,6 +209,7 @@ Destroys a page table, given its ID.
 	- `uint32 pageTableId`: The ID of the page table to destroy.
 - Errors:
 	- If the page table to destroy is also the current page table.
+	- If the page table has an ID of 0.
 
 #### ChangeCurrentPageTable
 

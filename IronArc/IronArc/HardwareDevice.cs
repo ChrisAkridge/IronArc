@@ -13,9 +13,9 @@ namespace IronArc
         public abstract string DeviceName { get; }
         public abstract HardwareDeviceStatus Status { get; } // add a SetStatus(HardwareDeviceStatus) method to derived classes to set the status. Also use a field, not an autoproperty.
         internal abstract DefinitionDevice Definition { get; }
-        internal HardwareMemoryMapping MemoryMapping { get; }
+        internal HardwareMemoryMapping MemoryMapping { get; set; }
         public abstract void HardwareCall(string functionName, VirtualMachine vm);
-        internal abstract void AddHardwareMemoryIfNeeded(HardwareMemory hardwareMemory);
+        internal virtual void AddHardwareMemoryIfNeeded(HardwareMemory hardwareMemory) { }
         public abstract void Dispose();
     }
 }

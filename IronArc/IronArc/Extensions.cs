@@ -8,7 +8,7 @@ namespace IronArc
 {
     public static class Extensions
     {
-        public static byte[] ToLPString(string text)
+        public static byte[] ToLPString(this string text)
         {
             int textLength = Encoding.UTF8.GetByteCount(text);
             return BitConverter.GetBytes(textLength).Concat(Encoding.UTF8.GetBytes(text)).ToArray();
