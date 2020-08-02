@@ -18,14 +18,15 @@ namespace IronArc
 
         private ulong firstInstructionAddress;
         private ulong stringsTableAddress;
+        private uint nextHardwareDeviceId;
 
         public Guid MachineId { get; }
         public Processor Processor { get; }
         public ByteBlock SystemMemory { get; }
+        public List<HardwareDevice> Hardware { get; }
         public HardwareMemory HardwareMemory { get; }
         public MemoryManager MemoryManager { get; }
         public ConcurrentQueue<Message> MessageQueue { get; }
-        public List<HardwareDevice> Hardware { get; }
         public VMState State { get; private set; }
         public ErrorDescription LastError { get; set; }
         public ulong InstructionExecutedCount { get; private set; }
@@ -48,11 +49,11 @@ namespace IronArc
             Processor = new Processor(MemoryManager, loadAddress, (ulong)program.Length + HeaderSize,
                 stringsTableAddress, this);
             Processor.EIP += firstInstructionAddress;
-            Hardware = new List<HardwareDevice>();
+            Hardware = new List<HardwareDevice> { new SystemDevice(MachineId, nextHardwareDeviceId++) };
 
             foreach (var type in hardwareDeviceNames.Select(name => Type.GetType(name)))
             {
-                Hardware.Add((HardwareDevice)Activator.CreateInstance(type ?? throw new InvalidOperationException(), MachineId));
+                AddHardwareDevice(type);
             }
 
             State = VMState.Paused;
@@ -82,22 +83,13 @@ namespace IronArc
 
         public void AddHardwareDevice(Type hardwareDeviceType)
         {
-            if (Hardware.Select(h => h.GetType()).Contains(hardwareDeviceType))
-            {
-                throw new ArgumentException($"A hardware device named {hardwareDeviceType.FullName} is already running on this VM.");
-            }
-
-            Hardware.Add((HardwareDevice)Activator.CreateInstance(hardwareDeviceType, MachineId));
+            AddHardwareDevice((HardwareDevice)Activator.CreateInstance(hardwareDeviceType, MachineId, ++nextHardwareDeviceId));
         }
 
         public void AddHardwareDevice(HardwareDevice device)
         {
-            if (Hardware.Any(h => h.GetType() == device.GetType()))
-            {
-                throw new ArgumentException($"A hardware device named {device.GetType().FullName} is already running on this VM.");
-            }
-
             Hardware.Add(device);
+            MessageQueue.Enqueue(new Message(VMMessage.HardwareInterrupt, UIMessage.None, MachineId, 0, 0L, new Interrupt(0, "HardwareDeviceAttached")));
         }
 
         public bool RemoveHardwareDevice(Type hardwareDeviceType)
@@ -107,6 +99,7 @@ namespace IronArc
 
             device.Dispose();
             Hardware.Remove(device);
+            MessageQueue.Enqueue(new Message(VMMessage.HardwareInterrupt, UIMessage.None, MachineId, 0, 0L, new Interrupt(0, "HardwareDeviceRemoved")));
             return true;
         }
 
@@ -190,6 +183,9 @@ namespace IronArc
                             case VMMessage.RemoveHardwareDevice:
                                 RemoveHardwareDevice((Type)message.Data);
                                 break;
+                            case VMMessage.HardwareInterrupt:
+                                Processor.HandleInterrupt((Interrupt)message.Data);
+                                break;
                         }
                     }
                 }
@@ -215,7 +211,7 @@ namespace IronArc
             // If we reach here, this hardware device doesn't exist, or the device name is wrong.
             Processor.RaiseError(IronArc.Error.HardwareDeviceNotPresent);
         }
-
+        
         internal IEnumerable<byte> GetHardwareDescription(uint deviceId, ulong destination)
         {
             var device = Hardware.FirstOrDefault(d => d.DeviceId == deviceId);

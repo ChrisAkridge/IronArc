@@ -32,7 +32,7 @@ namespace IronArc
         public ulong stackArgsMarker;
         public ulong stringsTableAddress;
 
-        public Dictionary<string, List<InterruptHandler>> interruptTable;
+        public Dictionary<InterruptHandlerKey, ulong?[]> interruptTable;
         public Dictionary<uint, ulong> errorTable;
         public Stack<CallStackFrame> callStack;
 
@@ -43,7 +43,7 @@ namespace IronArc
             this.vm = vm;
             this.stringsTableAddress = stringsTableAddress;
 
-            interruptTable = new Dictionary<string, List<InterruptHandler>>();
+            interruptTable = new Dictionary<InterruptHandlerKey, ulong?[]>();
             errorTable = new Dictionary<uint, ulong>();
             callStack = new Stack<CallStackFrame>();
 
@@ -509,48 +509,59 @@ namespace IronArc
 
         internal void RegisterInterruptHandler(uint deviceId, string interruptName, ulong callAddress)
         {
-            if (!interruptTable.ContainsKey(interruptName))
+            var key = new InterruptHandlerKey(deviceId, interruptName);
+
+            if (!interruptTable.ContainsKey(key))
             {
-                interruptTable.Add(interruptName, new List<InterruptHandler>());
+                interruptTable.Add(key, new ulong?[256]);
             }
             
             // TODO: verify that the interrupt name actually exists
             // also take a device ID in a handler, too, and verify that
             // exists in the SystemDevice class (or maybe in VirtualMachine)
-            int nextHandlerIndex = Enumerable.Range(0, 256)
-                .First(i => interruptTable[interruptName].All(interrupt => interrupt.Index != i));
+            int nextHandlerIndex = Array.IndexOf(interruptTable[key], null, 0) + 1;
 
             if (nextHandlerIndex >= 256)
             {
                 RaiseError(Error.HardwareError, $"All handlers for {interruptName} are registered");
                 return;
             }
-            
-            interruptTable[interruptName].Add(new InterruptHandler
-            {
-                DeviceId = deviceId,
-                CallAddress = callAddress,
-                Index = (byte)nextHandlerIndex
-            });
+
+            interruptTable[key][nextHandlerIndex] = callAddress;
         }
 
         internal void UnregisterInterruptHandler(uint deviceId, string interruptName, byte index)
         {
-            if (!interruptTable.ContainsKey(interruptName))
+            var key = new InterruptHandlerKey(deviceId, interruptName);
+
+            if (!interruptTable.ContainsKey(key))
             {
                 RaiseError(Error.HardwareError, $"Cannot remove handlers for {interruptName} as none are registered");
                 return;
             }
 
-            if (interruptTable[interruptName].All(interrupt => interrupt.Index != index))
+            if (interruptTable[key][index] == null)
             {
                 RaiseError(Error.HardwareError, $"Cannot remove handler #{index} for {interruptName} because there isn't a handler with that index");
                 return;
             }
 
-            interruptTable[interruptName].RemoveAll(i => i.Index == index);
+            interruptTable[key][index] = null;
         }
 
+        internal void HandleInterrupt(Interrupt interrupt)
+        {
+            var handlerKey = new InterruptHandlerKey(interrupt.DeviceId, interrupt.InterruptName);
+
+            if (!interruptTable.ContainsKey(handlerKey)) { return; }
+
+            for (int i = 0; i < 256; i++)
+            {
+                ulong? callAddress = interruptTable[handlerKey][i];
+                if (callAddress.HasValue) { CallImpl(callAddress.Value); }
+            }
+        }
+        
         internal void RegisterErrorHandler(uint errorCode, ulong handlerAddress) => errorTable[errorCode] = handlerAddress;
 
         internal void UnregisterErrorHandler(uint errorCode) => errorTable.Remove(errorCode);

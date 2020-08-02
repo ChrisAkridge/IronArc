@@ -91,12 +91,13 @@
     <Compile Include="HardwareDefinitionGenerator\Models\HardwareDevice.cs" />
     <Compile Include="HardwareDevice.cs" />
     <Compile Include="HardwareProvider.cs" />
+    <Compile Include="Interrupt.cs" />
     <Compile Include="Hardware\ITerminal.cs" />
     <Compile Include="Hardware\SystemDevice.cs" />
     <Compile Include="Hardware\TerminalDevice.cs" />
     <Compile Include="Hardware\Debugger.cs" />
     <Compile Include="ICoreHardwareProvider.cs" />
-    <Compile Include="InterruptHandler.cs" />
+    <Compile Include="InterruptHandlerKey.cs" />
     <Compile Include="Memory\HardwareMemoryMapping.cs" />
     <Compile Include="Memory\HardwareMemory.cs" />
     <Compile Include="Memory\MemoryManager.cs" />

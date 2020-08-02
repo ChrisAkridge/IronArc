@@ -15,7 +15,8 @@ namespace IronArc
         public long LParam { get; }
         public object Data { get; }
 
-        public Message(VMMessage vmMessage, UIMessage uiMessage, Guid machineID, int wParam, long lParam, object data)
+        public Message(VMMessage vmMessage, UIMessage uiMessage, Guid machineID, int wParam, long lParam,
+            object data)
         {
             VMMessage = vmMessage;
             UIMessage = uiMessage;

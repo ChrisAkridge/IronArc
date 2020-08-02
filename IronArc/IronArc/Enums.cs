@@ -54,7 +54,8 @@ namespace IronArc
         AddHardwareDevice,
         RemoveHardwareDevice,
         DebugYieldVM,
-        DebugResumeVM
+        DebugResumeVM,
+        HardwareInterrupt
     }
 
     public enum UIMessage

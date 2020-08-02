@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using IronArc.HardwareDefinitionGenerator;
+using IronArc.HardwareDefinitionGenerator.Models;
 using IronArc.Memory;
 
 namespace IronArc.Hardware
@@ -11,10 +13,31 @@ namespace IronArc.Hardware
     {
         public override string DeviceName => "System";
         public override HardwareDeviceStatus Status => HardwareDeviceStatus.Active;
-        internal override HardwareDefinitionGenerator.Models.HardwareDevice Definition { get; }
 
-        public SystemDevice(uint deviceId, VirtualMachine vm)
+        internal override HardwareDefinitionGenerator.Models.HardwareDevice Definition =>
+            new HardwareDefinitionGenerator.Models.HardwareDevice("System",
+                new List<HardwareCall>
+                {
+                    Generator.ParseHardwareCall("uint8 hwcall System::RegisterInterruptHandler(uint32 deviceId, lpstring* interruptName, ptr handlerAddress)"),
+                    Generator.ParseHardwareCall("void hwcall System::UnregisterInterruptHandler(uint32 deviceId, lpstring* interruptName, uint8 handlerIndex)"),
+                    Generator.ParseHardwareCall("void hwcall System::RaiseError(uint32 errorCode)"),
+                    Generator.ParseHardwareCall("void hwcall System::RegisterErrorHandler(uint32 errorCode, ptr handlerAddress)"),
+                    Generator.ParseHardwareCall("void hwcall System::UnregisterErrorHandler(uint32 errorCode)"),
+                    Generator.ParseHardwareCall("uint64 hwcall System::GetLastErrorDescriptionSize()"),
+                    Generator.ParseHardwareCall("void hwcall System::GetLastErrorDescription(ptr destination)"),
+                    Generator.ParseHardwareCall("int32 hwcall System::GetHardwareDeviceCount()"),
+                    Generator.ParseHardwareCall("uint64 hwcall System::GetHardwareDeviceDescriptionSize(uint32 deviceId)"),
+                    Generator.ParseHardwareCall("void hwcall System::GetHardwareDeviceDescription(uint32 deviceId, ptr destination)"),
+                    Generator.ParseHardwareCall("uint64 hwcall System::GetAllHardwareDeviceDescriptionsSize()"),
+                    Generator.ParseHardwareCall("void hwcall System::GetAllHardwareDeviceDescriptions(ptr destination)"),
+                    Generator.ParseHardwareCall("uint32 hwcall System::CreatePageTable()"),
+                    Generator.ParseHardwareCall("void hwcall System::DestroyPageTable(uint32 pageTableId)"),
+                    Generator.ParseHardwareCall("void hwcall System::ChangeCurrentPageTable(uint32 pageTableId)")
+                });
+
+        public SystemDevice(Guid machineId, uint deviceId)
         {
+            MachineId = machineId;
             DeviceId = deviceId;
         }
 
@@ -68,6 +91,40 @@ namespace IronArc.Hardware
             {
                 ulong destination = vm.Processor.PopExternal(OperandSize.QWord);
                 GetLastErrorDescription(vm, destination);
+            }
+            else if (lowerCased == "gethardwaredevicedescriptionsize")
+            {
+                uint deviceId = (uint)vm.Processor.PopExternal(OperandSize.DWord);
+                GetHardwareDeviceDescriptionSize(vm, deviceId);
+            }
+            else if (lowerCased == "gethardwaredevicedescription")
+            {
+                ulong destination = vm.Processor.PopExternal(OperandSize.QWord);
+                uint deviceId = (uint)vm.Processor.PopExternal(OperandSize.DWord);
+                GetHardwareDeviceDescription(vm, deviceId, destination);
+            }
+            else if (lowerCased == "getallhardwaredevicedescriptionssize")
+            {
+                GetAllHardwareDeviceDescriptionsSize(vm);
+            }
+            else if (lowerCased == "getallhardwaredevicedescriptions")
+            {
+                ulong destination = vm.Processor.PopExternal(OperandSize.QWord);
+                GetAllHardwareDeviceDescriptions(vm, destination);
+            }
+            else if (lowerCased == "createpagetable")
+            {
+                CreatePageTable(vm);
+            }
+            else if (lowerCased == "destroypagetable")
+            {
+                uint pageTableId = (uint)vm.Processor.PopExternal(OperandSize.DWord);
+                DestroyPageTable(vm, pageTableId);
+            }
+            else if (lowerCased == "changecurrentpagetable")
+            {
+                uint pageTableId = (uint)vm.Processor.PopExternal(OperandSize.DWord);
+                ChangeCurrentPageTable(vm, pageTableId);
             }
         }
 

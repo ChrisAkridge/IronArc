@@ -21,7 +21,11 @@ namespace IronArc.Hardware
             new DefinitionDevice(nameof(Debugger),
                 new List<HardwareCall> { new HardwareCall(null, "Break", new List<HardwareCallParameter>()) });
 
-        public Debugger(Guid machineID) { }
+        public Debugger(Guid machineId, uint deviceId)
+        {
+            MachineId = machineId;
+            DeviceId = deviceId;
+        }
 
         public override void Dispose() { }
 

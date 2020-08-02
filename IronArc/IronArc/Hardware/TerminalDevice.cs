@@ -38,10 +38,13 @@ namespace IronArc.Hardware
                     })
                 });
 
-        public TerminalDevice(Guid machineId)
+        public TerminalDevice(Guid machineId, uint deviceId)
         {
             terminal = HardwareProvider.Provider.CreateTerminal();
             terminal.MachineId = machineId;
+
+            MachineId = machineId;
+            DeviceId = deviceId;
         }
 
         public override void HardwareCall(string functionName, VirtualMachine vm)
