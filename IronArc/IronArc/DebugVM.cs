@@ -15,17 +15,21 @@ namespace IronArc
         private readonly VirtualMachine vm;
         private readonly List<Breakpoint> breakpoints;
         private readonly ConcurrentQueue<Message> uiMessageQueue;
+        private readonly List<string> memorySpaceNames;
         private DebugRunUntilType runUntilType = DebugRunUntilType.NotRunning;
 
         public event EventHandler CallOccurred;
         public event EventHandler ReturnOccurred;
         public event EventHandler DebugDisplayInvalidated;
+        public event EventHandler MemorySpacesChanged;
 
-        public long MemorySize => (long)vm.SystemMemory.Length;
+        public long SystemMemorySize => (long)vm.SystemMemory.Length;
         public IReadOnlyList<Breakpoint> Breakpoints => breakpoints.AsReadOnly();
         public ConcurrentQueue<Message> MessageQueue { get; }
         public VMState VMState => vm.State;
         public Guid MachineID => vm.MachineId;
+
+        public IEnumerable<string> MemorySpaceNames => memorySpaceNames;
 
         public DebugVM(VirtualMachine vm, ConcurrentQueue<Message> uiMessageQueue)
         {
@@ -33,6 +37,12 @@ namespace IronArc
             this.uiMessageQueue = uiMessageQueue;
             breakpoints = new List<Breakpoint>();
             MessageQueue = new ConcurrentQueue<Message>();
+
+            memorySpaceNames = new List<string> { "System Memory" };
+            memorySpaceNames.AddRange(vm.Hardware.Where(h => h.MemoryMapping != null).Select(h => $"{h.DeviceName} {h.DeviceId}"));
+
+            vm.VirtualPageTableCreated += VirtualPageTableCreated;
+            vm.VirtualPageTableDestroyed += VirtualPageTableDestroyed;
         }
 
         #region Register Properties
@@ -116,6 +126,10 @@ namespace IronArc
         #endregion
 
         public UnmanagedMemoryStream CreateMemoryStream() => vm.SystemMemory.CreateStream();
+
+        public ByteBlock GetHardwareMemoryByteBlock(uint deviceId) =>
+            vm.Hardware.First(h => h.DeviceId == deviceId).MemoryMapping.MemoryReference;
+
         public CallStackFrame GetCallStackTop() => vm.Processor.callStack.Peek();
 
         public IEnumerable<CallStackFrame> GetCallStack() => vm.Processor.callStack;
@@ -286,5 +300,18 @@ namespace IronArc
         }
 
         private void OnDebugDisplayInvalidated() => DebugDisplayInvalidated?.Invoke(this, new EventArgs());
+        private void OnMemorySpacesChanged() => MemorySpacesChanged?.Invoke(this, new EventArgs());
+
+        private void VirtualPageTableCreated(object sender, string e)
+        {
+            memorySpaceNames.Add(e);
+            OnMemorySpacesChanged();
+        }
+
+        private void VirtualPageTableDestroyed(object sender, string e)
+        {
+            memorySpaceNames.Remove(e);
+            OnMemorySpacesChanged();
+        }
     }
 }

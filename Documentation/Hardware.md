@@ -224,6 +224,28 @@ Changes the current page table to the one with the given ID.
 - Errors:
 	- If no page table has that ID.
 	
+#### CopyMemory
+
+```c
+void hwcall System::CopyMemory(uint8 direction, uint32 pageTableId, ptr srcAddress, ptr destAddress, uint64 length)
+```
+
+Copies memory between real and virtual memory of the current page table.
+
+- Parameters:
+	- `uint8 direction`:
+		- `0`: From real to virtual
+		- `1`: From virtual to real
+	- `uint32 pageTableId`: The ID of the page table to copy to or from.
+	- `ptr srcAddress`: The address to start copying from.
+	- `ptr destAddress`: The address to start copying to.
+	- `uint64 length`: How many bytes to copy.
+- Errors:
+	- If `direction` is anything other than `0` or `1`.
+	- If `pageTableId` is not the ID of any page table.
+	- If any byte between `srcAddress` and `srcAddress + length` is out of bounds.
+	- If any byte between `destAddress` and `destAddress + length` is out of bounds.
+	
 ### Interrupts
 
 ### HardwareDeviceAttached

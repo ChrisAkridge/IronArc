@@ -1,14 +1,9 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
 using System.Globalization;
-using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using IronArc;
 using IronAssembler.DisassemblyWindows;
@@ -38,8 +33,14 @@ namespace IronArcHost
 
             HexMemory.ByteProvider = new VMMemoryByteProvider(this.vm);
 
+            foreach (var memorySpaceName in this.vm.MemorySpaceNames)
+            {
+                ComboMemorySpace.Items.Add(memorySpaceName);
+            }
+
             SubscribeRegisterLinkClickEvents();
             this.vm.DebugDisplayInvalidated += Vm_DebugDisplayInvalidated;
+            this.vm.MemorySpacesChanged += DebugVM_MemorySpacesChanged;
         }
 
         private void SubscribeRegisterLinkClickEvents()
@@ -257,12 +258,41 @@ namespace IronArcHost
 
         private void TimerAnimateExecution_Tick(object sender, EventArgs e)
         {
-            foreach (Form form in Application.OpenForms)
-            {
-                if (form is DebugTerminalInputForm) { return; }
-            }
+            if (Application.OpenForms.OfType<DebugTerminalInputForm>().Any()) { return; }
 
             vm.StepInto();
+        }
+
+        private void ComboMemorySpace_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            // WYLO:
+            // also does changing memory in the hex editor actually do anything to the
+            // memory? There's a Changed event that doesn't seem to be subscribed
+            // to anywhere
+            string memorySpaceName = (string)ComboMemorySpace.SelectedItem;
+
+            if (memorySpaceName == "System Memory")
+            {
+                HexMemory.ByteProvider = new VMMemoryByteProvider(vm);
+            }
+            else
+            {
+                uint deviceId = uint.Parse(memorySpaceName.Split(' ')[1]);
+                HexMemory.ByteProvider = new ByteBlockByteProvider(vm.GetHardwareMemoryByteBlock(deviceId));
+            }
+        }
+
+        private void DebugVM_MemorySpacesChanged(object sender, EventArgs e)
+        {
+            string previouslySelectedMemorySpaceName = (string)ComboMemorySpace.SelectedItem;
+            ComboMemorySpace.Items.Clear();
+            ComboMemorySpace.Items.Add("System Memory");
+            ComboMemorySpace.Items.AddRange(vm.MemorySpaceNames.OfType<object>().ToArray());
+
+            ComboMemorySpace.SelectedIndex =
+                vm.MemorySpaceNames.Any(n => n == previouslySelectedMemorySpaceName) 
+                    ? ComboMemorySpace.Items.IndexOf(previouslySelectedMemorySpaceName)
+                    : 0;
         }
     }
 }

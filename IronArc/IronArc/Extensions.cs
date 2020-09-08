@@ -32,5 +32,10 @@ namespace IronArc
 
         // https://stackoverflow.com/a/27238358/2709212
         public static unsafe uint ToUIntBitwise(this float bits) => *(uint*)&bits;
+
+        public static IEnumerable<T> AsEnumerable<T>(this T item)
+        {
+            yield return item;
+        }
     }
 }

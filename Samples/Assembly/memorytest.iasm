@@ -1,0 +1,113 @@
+# memorytest.iasm
+# Test virtual memory and the new hardware device
+globals: 0
+
+start:
+	# Set up the stack
+	mov QWORD eax ebp
+	mov QWORD eax esp
+
+	# Register interrupt handlers
+	push QWORD _print_attached_hardware
+	push "HardwareDeviceAttached"
+	push DWORD 0 # Always the System device
+	hwcall "System::RegisterInterruptHandler"
+	push QWORD _print_removed_hardware
+	push "HardwareDeviceRemoved"
+	push QWORD _print_attached_hardware
+	hwcall "System::RegisterInterruptHandler"
+
+	# Create a page table
+	hwcall "System::CreatePageTable"
+	pop DWORD ecx
+
+	# Copy the program into virtual page table #0
+	push QWORD eax
+	push QWORD 0
+	push QWORD 0
+	push DWORD ecx
+	push BYTE 0
+	hwcall "System::CopyMemory"
+
+	# Enable virtual mode
+	mov QWORD 0xCAFEBABE eflags
+
+# Allocate 64 pages (256 KB) through page faults
+loop_test:
+	push QWORD ebx
+	push QWORD 262144
+	cmp QWORD
+	jlt loop_main
+	jmp loop_after
+	
+loop_main:
+	mov BYTE *ebx ecx
+	jmp loop_test
+
+loop_after:
+	jmp system_call_tests
+
+# HardwareDeviceAttached handler
+_print_attached_hardware:
+	push "Hardware attached!"
+	hwcall "Terminal::WriteLine"
+
+# HardwareDeviceRemoved handler
+_print_removed_hardware:
+	push "Hardware removed!"
+	hwcall "Terminal::WriteLine"
+	
+_print_error:
+	push "Error!"
+	hwcall "Terminal::WriteLine"
+	hwcall "System::GetLastErrorDescriptionSize"
+	pop QWORD ecx
+	mov QWORD 0 edx
+	addl QWORD eax edx edx
+	addl QWORD 1024 edx edx
+	push QWORD edx
+	hwcall "System::GetLastErrorDescription"
+	push QWORD *edx
+	hwcall "Terminal::WriteLine"
+	
+system_call_tests:
+	push QWORD _print_error
+	push DWORD 0
+	hwcall "System::RegisterErrorHandler"
+	push DWORD 0
+	hwcall "System::RaiseError"
+	push DWORD 0
+	hwcall "System::UnregisterErrorHandler"
+	push DWORD 1
+	hwcall "System::GetHardwareDeviceCount"
+	hwcall "Terminal::WriteLine"
+	push DWORD 0
+	hwcall "System::GetHardwareDeviceDescriptionSize"
+	mov QWORD 0 edx
+	addl QWORD eax edx edx
+	addl QWORD 1024 edx edx
+	push QWORD edx
+	push DWORD 0
+	hwcall "System::GetHardwareDeviceDescription"
+	push QWORD *edx
+	hwcall "Terminal::WriteLine"
+	hwcall "System::GetAllHardwareDeviceDescriptionSize"
+	mov QWORD 0 edx
+	addl QWORD eax edx edx
+	addl QWORD 1024 edx edx
+	push QWORD edx
+	hwcall "System::GetAllHardwareDeviceDescriptions"
+	hwcall "System::CreatePageTable"
+	pop DWORD edx
+	push QWORD eax
+	push QWORD 0
+	push QWORD 0
+	push DWORD edx
+	push BYTE 0
+	hwcall "System::CopyMemory"
+	push DWORD edx
+	hwcall "System::ChangeCurrentPageTable"
+	push DWORD edx
+	subl DWORD edx 1 edx
+	hwcall "System::DestroyPageTable"
+	

@@ -504,6 +504,9 @@ namespace IronArc
 
         public string ReadStringFromMemory(ulong stringAddress) => memory.ReadString(stringAddress, out _);
 
+        public string ReadStringFromMemoryByIndex(uint stringIndex) =>
+            ReadStringFromMemory(LookupStringAddress(stringIndex));
+        
         public void WriteStringToMemory(ulong stringAddress, string text) =>
             memory.WriteString(text, stringAddress);
 

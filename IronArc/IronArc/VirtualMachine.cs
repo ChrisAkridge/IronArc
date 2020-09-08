@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics.Eventing.Reader;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -19,6 +20,9 @@ namespace IronArc
         private ulong firstInstructionAddress;
         private ulong stringsTableAddress;
         private uint nextHardwareDeviceId;
+
+        public event EventHandler<string> VirtualPageTableCreated;
+        public event EventHandler<string> VirtualPageTableDestroyed;
 
         public Guid MachineId { get; }
         public Processor Processor { get; }
@@ -256,5 +260,9 @@ namespace IronArc
                 .Concat(hardwareDescriptions)
                 .ToArray();
         }
+
+        internal void OnVirtualPageTableCreated(string pageTableName) => VirtualPageTableCreated?.Invoke(this, pageTableName);
+
+        internal void OnVirtualPageTableDestroyed(string pageTableName) => VirtualPageTableDestroyed?.Invoke(this, pageTableName);
     }
 }

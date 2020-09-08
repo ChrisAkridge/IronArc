@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace IronArc.Memory
 {
-    public readonly struct HardwareMemoryMapping
+    public class HardwareMemoryMapping
     {
         public ulong StartAddress { get; }
         public ulong EndAddress { get; }

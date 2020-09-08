@@ -195,6 +195,15 @@ namespace IronArc.Memory
         public uint ReadUInt(ulong address)
         {
             ulong plane = GetPlaneOfAddress(address);
+            // WYLO: I think we need to remove the string table addressing mode and
+            // instead have IronAssembler rewrite str:0 into a simple pointer directly
+            // to the start of each string in the strings table. This also lets us remove
+            // the number of strings in the table, plus all their pointers. This is to allow
+            // things like hardware calls to get string pointers and not just string table
+            // indices.
+            //
+            // The IronAssembler file format is unchanged, but we will need a number of
+            // spec changes.
 
             if (GetPlaneOfAddress(plane + 3) != plane)
             {
@@ -400,6 +409,7 @@ namespace IronArc.Memory
                 if (!PerformAddressTranslation)
                 {
                     systemMemory.WriteByteAt(value, address);
+                    return;
                 }
 
                 PageTable currentPageTable = pageTables[CurrentPageTableId];
@@ -432,7 +442,11 @@ namespace IronArc.Memory
 
             if (plane == 0)
             {
-                if (!PerformAddressTranslation) { systemMemory.WriteUShortAt(value, address); }
+                if (!PerformAddressTranslation)
+                {
+                    systemMemory.WriteUShortAt(value, address);
+                    return;
+                }
 
                 PageTable currentPageTable = pageTables[CurrentPageTableId];
                 ulong page = GetPage(address);
@@ -476,7 +490,11 @@ namespace IronArc.Memory
 
             if (plane == 0)
             {
-                if (!PerformAddressTranslation) { systemMemory.WriteUIntAt(value, address); }
+                if (!PerformAddressTranslation)
+                {
+                    systemMemory.WriteUIntAt(value, address);
+                    return;
+                }
 
                 PageTable currentPageTable = pageTables[CurrentPageTableId];
                 ulong page = GetPage(address);
@@ -524,7 +542,11 @@ namespace IronArc.Memory
 
             if (plane == 0)
             {
-                if (!PerformAddressTranslation) { systemMemory.WriteULongAt(value, address); }
+                if (!PerformAddressTranslation)
+                {
+                    systemMemory.WriteULongAt(value, address);
+                    return;
+                }
 
                 PageTable currentPageTable = pageTables[CurrentPageTableId];
                 ulong page = GetPage(address);

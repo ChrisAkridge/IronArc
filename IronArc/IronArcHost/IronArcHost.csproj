@@ -78,6 +78,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ByteBlockByteProvider.cs" />
     <Compile Include="CoreHardwareProvider.cs" />
     <Compile Include="DebuggerForm.cs">
       <SubType>Form</SubType>

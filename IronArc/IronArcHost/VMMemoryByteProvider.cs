@@ -14,7 +14,7 @@ namespace IronArcHost
 
         public VMMemoryByteProvider(DebugVM vm) => this.vm = vm;
 
-        public long Length => vm.MemorySize;
+        public long Length => vm.SystemMemorySize;
 
         public event EventHandler LengthChanged;
         public event EventHandler Changed;

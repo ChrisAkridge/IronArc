@@ -32,7 +32,8 @@ namespace IronArc.Hardware
                     Generator.ParseHardwareCall("void hwcall System::GetAllHardwareDeviceDescriptions(ptr destination)"),
                     Generator.ParseHardwareCall("uint32 hwcall System::CreatePageTable()"),
                     Generator.ParseHardwareCall("void hwcall System::DestroyPageTable(uint32 pageTableId)"),
-                    Generator.ParseHardwareCall("void hwcall System::ChangeCurrentPageTable(uint32 pageTableId)")
+                    Generator.ParseHardwareCall("void hwcall System::ChangeCurrentPageTable(uint32 pageTableId)"),
+                    Generator.ParseHardwareCall("void hwcall System::CopyMemory(uint8 direction, uint32 pageTableId, ptr srcAddress, ptr destAddress, uint64 length)")
                 });
 
         public SystemDevice(Guid machineId, uint deviceId)
@@ -49,10 +50,10 @@ namespace IronArc.Hardware
             if (lowerCased == "registerinterrupthandler")
             {
                 ulong handlerAddress = vm.Processor.PopExternal(OperandSize.QWord);
-                ulong interruptNamePointer = vm.Processor.PopExternal(OperandSize.QWord);
+                ulong interruptNameAddress = vm.Processor.PopExternal(OperandSize.QWord);
                 uint deviceId = (uint)vm.Processor.PopExternal(OperandSize.DWord);
 
-                string interruptName = vm.Processor.ReadStringFromMemory(interruptNamePointer);
+                string interruptName = vm.Processor.ReadStringFromMemory(interruptNameAddress);
                 RegisterInterruptHandler(vm, deviceId, interruptName, handlerAddress);
             }
             else if (lowerCased == "unregisterinterrupthandler")
@@ -125,6 +126,15 @@ namespace IronArc.Hardware
             {
                 uint pageTableId = (uint)vm.Processor.PopExternal(OperandSize.DWord);
                 ChangeCurrentPageTable(vm, pageTableId);
+            }
+            else if (lowerCased == "copymemory")
+            {
+                ulong length = (ulong)vm.Processor.PopExternal(OperandSize.QWord);
+                ulong destAddress = (ulong)vm.Processor.PopExternal(OperandSize.QWord);
+                ulong srcAddress = (ulong)vm.Processor.PopExternal(OperandSize.QWord);
+                uint pageTableId = (uint)vm.Processor.PopExternal(OperandSize.DWord);
+                byte direction = (byte)vm.Processor.PopExternal(OperandSize.Byte);
+                CopyMemory(vm, direction, pageTableId, srcAddress, destAddress, length);
             }
         }
 
@@ -215,8 +225,9 @@ namespace IronArc.Hardware
 
         private void CreatePageTable(VirtualMachine vm)
         {
-            vm.MemoryManager.CreatePageTable();
-            vm.Processor.PushExternal(vm.MemoryManager.CurrentPageTableId, OperandSize.DWord);
+            uint newPageTableId = vm.MemoryManager.CreatePageTable();
+            vm.Processor.PushExternal(newPageTableId, OperandSize.DWord);
+            vm.OnVirtualPageTableCreated($"Page Table {newPageTableId}");
         }
 
         private void DestroyPageTable(VirtualMachine vm, uint pageTableId)
@@ -236,6 +247,7 @@ namespace IronArc.Hardware
             }
             
             vm.MemoryManager.DestroyPageTable(pageTableId);
+            vm.OnVirtualPageTableDestroyed($"Page Table {pageTableId}");
         }
 
         private void ChangeCurrentPageTable(VirtualMachine vm, uint pageTableId)
@@ -244,6 +256,63 @@ namespace IronArc.Hardware
             {
                 vm.Processor.RaiseError(Error.HardwareError, $"Cannot change to page table with ID {pageTableId} because no page table has that ID.");
             }
+        }
+
+        private void CopyMemory(VirtualMachine vm, byte direction, uint pageTableId, ulong srcAddress, ulong destAddress, ulong length)
+        {
+            const byte RealToVirtual = 0;
+            const byte VirtualToReal = 1;
+
+            uint oldPageTableId = vm.MemoryManager.CurrentPageTableId;
+            if (!vm.MemoryManager.TryChangePageTable(pageTableId))
+            {
+                vm.Processor.RaiseError(Error.NoSuchPageTable, $"No page table has the ID #{pageTableId}.");
+            }
+            
+            byte[] sourceMemory;
+
+            switch (direction)
+            {
+                case RealToVirtual:
+                    try { sourceMemory = vm.SystemMemory.ReadAt(srcAddress, length); }
+                    catch (ArgumentOutOfRangeException)
+                    {
+                        vm.Processor.RaiseError(Error.AddressOutOfRange,
+                            $"Address {srcAddress:X16} is not in the range of real memory.");
+                        return;
+                    }
+
+                    try { vm.MemoryManager.Write(sourceMemory, destAddress); }
+                    catch (ArgumentOutOfRangeException)
+                    {
+                        vm.Processor.RaiseError(Error.AddressOutOfRange,
+                            $"Address {destAddress:X16} is not in the range of virtual page table #{vm.MemoryManager.CurrentPageTableId}.");
+                        return;
+                    }
+                    break;
+                case VirtualToReal:
+                    try { sourceMemory = vm.MemoryManager.Read(srcAddress, length); }
+                    catch (ArgumentOutOfRangeException)
+                    {
+                        vm.Processor.RaiseError(Error.AddressOutOfRange,
+                            $"Address {destAddress:X16} is not in the range of virtual page table #{vm.MemoryManager.CurrentPageTableId}.");
+                        return;
+                    }
+
+                    try { vm.MemoryManager.Write(sourceMemory, destAddress); }
+                    catch (ArgumentOutOfRangeException)
+                    {
+                        vm.Processor.RaiseError(Error.AddressOutOfRange,
+                            $"Address {srcAddress:X16} is not in the range of real memory.");
+                        return;
+                    }
+                    break;
+                default:
+                    vm.Processor.RaiseError(Error.GeneralError, $"The direction {direction} is not recognized; must be 0 (real → virtual) or 1 (virtual → real).");
+                    break;
+            }
+
+            vm.MemoryManager.TryChangePageTable(oldPageTableId);
         }
 
         /// <summary>Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.</summary>
