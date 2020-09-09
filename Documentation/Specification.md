@@ -39,9 +39,8 @@ The processor contains the following specific blocks of processor memory, all 8 
 - An flags register labelled EFLAGS
 - Two stack registers ESP (pointer to the top of the stack), and EBP (pointer to the start of the current stack frame)
 - A relative base pointer register, ERB, which always has the address of the very first instruction of the program. This allows programs to be loaded anywhere in memory and still have jumps using absolute addresses within the program.
-- A page table "high water mark", ENP, which points to the next 4096-byte section of real memory to allocate a page from.
 
-The processor reads and executes instruction sequentially through the memory space (real or virtual). Jump, call, and return instructions serve to change the flow of execution to different addresses. The execution begins by reading in the opcode at EIP and incrementing EIP by two bytes. Then, the opcode is compared to a table of opcodes, and the specific instruction code is called. The instruction code will then read the required operands from memory, incrementing the instruction pointer as it goes. The operands are then used to execute the instruction. Finally, the cycle begins again as the next opcode is read from memory.
+The processor reads and executes instruction sequentially through the memory space (real or virtual). Jump, call, and return instructions serve to change the flow of execution to different addresses. The execution of an instruction begins by reading in the opcode at EIP and incrementing EIP by two bytes. Then, the opcode is compared to a table of opcodes, and the specific instruction code is called. The instruction code will then read the required operands from memory, incrementing the instruction pointer as it goes. The operands are then used to execute the instruction. Finally, the cycle begins again as the next opcode is read from memory.
 
 A program is loaded into memory by the host process. The host process also sets the start address, the address where the program will be loaded. EIP and ERP is set to this address and begins execution from there.
 
@@ -80,7 +79,7 @@ Plane 0 supports the concept of virtual memory. The host process contains a list
 
 One of the bits in the `EFLAGS` register is the *virtual mode bit*. If set, any address in Plane 0 that an IronArc program uses is treated as a virtual address and *translated* using the page table into a real address. If clear, all addresses directly address real memory without using translation. Address translation supports reading and writing byte ranges that span arbitrarily many pages. However, the host process will raise a `MemoryAccessOutOfBounds` error if the program tries to read or write a byte range that spans over multiple pages.
 
-Virtual addresses are mapped to real addresses as needed. When a program tries to access a virtual address that has no real address mapped to it, a *page fault* is raised. In this case, `ENP` becomes the starting real address of a new page table entry for the page the address resides in. `ENP` is then increased by 4,096.
+Virtual addresses are mapped to real addresses as needed. When a program tries to access a virtual address that has no real address mapped to it, a *page fault* is raised. In this case, the memory manager uses an internal value to set the starting real address of a new page table entry for the page the address resides in. This internal value is then increased by 4,096.
 
 If there isn't enough system memory available to allocate a new page, `page compaction` occurs. Any unused pages in the real memory space are closed by copying the adjacent page into the unused page. The page table entry's starting real address is also updated to ensure the mapping still points to the correct addresses. Finally, `ENP` is set to the last allocated page. If there's still no free memory, the page fault fails, raising an `OutOfVirtualMemory` error.
 
@@ -163,7 +162,7 @@ Arguments can then be accessed using constructs like `DWORD *ebp`. for `a`, or `
 ## IronArc Programs
 
 ### IronArc Instruction Format
-An IronArc program is, at minimum, a file containing a space for global variables, a series of bytes that encode instructions, and a string table located at the end of the file. Each instruction is composed of an opcode, a flags byte for some instructions, and one or more operands appearing as memory addresses or literal values. IronArc instructions are widely varying in size, from at least two bytes (an opcode with no flags or operands, such as the No Operation instruction) to many bytes (an opcode with flags and four operands).
+An IronArc program is, at minimum, a file containing a space for global variables, a series of bytes that encode instructions, and a list of length-prefixed strings located at the end of the file. Each instruction is composed of an opcode, a flags byte for some instructions, and one or more operands appearing as memory addresses, registers, or literal values. IronArc instructions are widely varying in size, from at least two bytes (an opcode with no flags or operands, such as the No Operation instruction) to many bytes (an opcode with flags and three operands).
 
 The first portion of an instruction is a two-byte opcode. The opcode uniquely identifies the instruction and the processor can then tell how many operands will succeed the opcode. The high byte of an opcode defines a certain “class” of instructions, such as control flow (JMP, CALL, RET), data manipulation (PUSH, MOV, ADD), et cetera. The low byte of the opcode specifies the specific instruction. With 256 possible classes and 256 possible instructions per class, there are a total of 65,536 instructions that can be identified with these opcodes, although the actual number of instructions will be much lower in practice.
 
@@ -183,7 +182,7 @@ If an instruction has a size operand, it always appears first and the top two bi
 | 00           | The operand is an eight-byte memory address. This can address the memory, system program, stack memory, and memory mapped hardware. If the high bit is set, the memory address is treated as a pointer to another location in memory.                                                                                                                        |
 | 01           | The operand is a processor register. The operand will have one byte identifying up to 64 registers. If the high bit is set, the register is treated as a pointer to a memory location. If the second-highest bit is set, the operand will have a four-byte signed integer immediately following it that represents an offset from the value in the register. |
 | 10           | The operand is a literal numeric value. The size of the literal is determined by the size operand.                                                                                                                                                                                                                                                           |
-| 11           | The operand is a four-byte unsigned index to a string in the string table.                                                                                                                                                                                                                                                                                   |
+| 11           | This value is reserved and is not used by any operand type.                                                                                                                                                                                                                                                                                   |
 
 Each operand appears after the flags byte.
 
@@ -196,26 +195,21 @@ DWORD magicNumber = "IEXE";
 DWORD specificationVersion;
 DWORD assemblerVersion;
 QWORD firstInstructionAddress;
-QWORD stringTableAddress;
 ```
 
-The header is `4 + 4 + 4 + 8 + 8 = 28` bytes long.
+The header is `4 + 4 + 4 + 8 = 20` bytes long.
 
 The file opens with a magic number `IEXE`, followed by an IronArc specification version and an assembler version. These versions are split into the high and low words for the major and minor version.
 
-**This specification is major version 1 and minor version 3.**
+**This specification is major version 2 and minor version 0.**
 
-The assembler version is written by whichever assembler made the program. If the program is composed by hand, the version should be major version 0 and minor version 0.
-
-Up next is the address of the start of the first instruction, followed by the start of the string table.
+The assembler version is written by whichever assembler made the program. If the program is composed by hand, the version should be major version 0 and minor version 0. Up next is the address of the start of the first instruction.
 
 Immediately following the header is a group of bytes that are used to store global variables. The number of bytes in this group is defined by the assembler. These bytes are all `00` by default, but can be changed by the program.
 
 Following the global variables bytes is all the instructions of the program. The `EIP` register is initialiazed to this value and execution begins here. It will continue through the memory space unless control flow is changed by the control flow instructions.
 
-After the instruction space is a string table. The string table start with a 32-bit unsigned integer stating the number of strings in the table. An array of addresses to the start of each string follows, then the strings themselves. Each string is prefixed with the number of bytes it is as a four-byte unsigned integer, followed by the text of the string in UTF-8 format.
-
-IronArc Binary files are stored on the host machine as files with the IEXE extension, although any arbitrary file can be used as a program (most of them will crash the processor or invalidate state, though).
+After the instruction space is a list of strings. Each string is prefixed with the number of bytes it has as a four-byte unsigned integer, followed by the text of the string in UTF-8 format.
 
 These programs are loaded at a start address specified when starting the VM in the memory space. If the program is larger than the assigned memory space, the processor will immediately fail. EIP and ERP is set to the specified address and execution begins from EIP. The remainder of memory is initialized to zeroes. The stack immediately follows (unless set to another address when starting the VM), as reflected by ESP = EBP = (start address + program size).
 
