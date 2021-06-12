@@ -146,6 +146,18 @@ namespace IronArc.Memory
             throw new VMErrorException(Error.ReservedPlaneAccess, $"Read byte at 0x{address:X16} in reserved plane");
         }
 
+        public byte ReadByteInPageTable(ulong address, uint pageTableId)
+        {
+            PageTable pageTable = pageTables[pageTableId];
+            ulong page = GetPage(address);
+
+            if (!pageTable.ContainsKey(page)) { return 0; }
+
+            ulong addressInPage = address & AddressInPageMask;
+
+            return systemMemory.ReadByteAt(pageTable[page] + addressInPage);
+        }
+
         public sbyte ReadSByte(ulong address) => (sbyte)ReadByte(address);
 
         public ushort ReadUShort(ulong address)
@@ -343,10 +355,14 @@ namespace IronArc.Memory
                     WriteVirtual(bytes, address);
                 }
                 else { systemMemory.WriteAt(bytes, address); }
+
+                return;
             }
             else if (plane == 1)
             {
                 hardwareMemory.Write(bytes, address);
+
+                return;
             }
 
             throw new VMErrorException(Error.ReservedPlaneAccess,
@@ -427,6 +443,17 @@ namespace IronArc.Memory
             }
 
             throw new VMErrorException(Error.ReservedPlaneAccess, $"Write byte at 0x{address:X16} in reserved plane");
+        }
+
+        public void WriteByteInPageTable(byte value, ulong address, uint pageTableId)
+        {
+            PageTable pageTable = pageTables[pageTableId];
+            ulong page = GetPage(address);
+
+            if (!pageTable.ContainsKey(page)) { PageFault(page); }
+
+            ulong addressInPage = address & AddressInPageMask;
+            systemMemory.WriteByteAt(value, pageTable[page] + addressInPage);
         }
 
         public void WriteSByte(sbyte value, ulong address) => WriteByte((byte)value, address);

@@ -43,7 +43,7 @@ namespace IronArc
         MemoryAddress,
         Register,
         NumericLiteral,
-        StringEntry
+        Reserved
     }
 
     public enum VMMessage

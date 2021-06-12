@@ -44,23 +44,22 @@ namespace IronArc.Hardware
 
         public override void HardwareCall(string functionName, VirtualMachine vm)
         {
-            // TODO: pass vm as a parameter to the hardware call functions
             string lowerCased = functionName.ToLowerInvariant();
 
             if (lowerCased == "registerinterrupthandler")
             {
-                ulong handlerAddress = vm.Processor.PopExternal(OperandSize.QWord);
-                ulong interruptNameAddress = vm.Processor.PopExternal(OperandSize.QWord);
                 uint deviceId = (uint)vm.Processor.PopExternal(OperandSize.DWord);
+                ulong interruptNameAddress = vm.Processor.PopExternal(OperandSize.QWord);
+                ulong handlerAddress = vm.Processor.PopExternal(OperandSize.QWord);
 
                 string interruptName = vm.Processor.ReadStringFromMemory(interruptNameAddress);
                 RegisterInterruptHandler(vm, deviceId, interruptName, handlerAddress);
             }
             else if (lowerCased == "unregisterinterrupthandler")
             {
-                byte handlerIndex = (byte)vm.Processor.PopExternal(OperandSize.Byte);
-                ulong interruptNamePointer = vm.Processor.PopExternal(OperandSize.QWord);
                 uint deviceId = (uint)vm.Processor.PopExternal(OperandSize.DWord);
+                ulong interruptNamePointer = vm.Processor.PopExternal(OperandSize.QWord);
+                byte handlerIndex = (byte)vm.Processor.PopExternal(OperandSize.Byte);
 
                 string interruptName = vm.Processor.ReadStringFromMemory(interruptNamePointer);
                 UnregisterInterruptHandler(vm, deviceId, interruptName, handlerIndex);
@@ -72,9 +71,9 @@ namespace IronArc.Hardware
             }
             else if (lowerCased == "registererrorhandler")
             {
-                ulong handlerAddress = vm.Processor.PopExternal(OperandSize.QWord);
                 uint errorCode = (uint)vm.Processor.PopExternal(OperandSize.DWord);
-                
+                ulong handlerAddress = vm.Processor.PopExternal(OperandSize.QWord);
+
                 RegisterErrorHandler(vm, errorCode, handlerAddress);
             }
             else if (lowerCased == "unregistererrorhandler")
@@ -100,8 +99,8 @@ namespace IronArc.Hardware
             }
             else if (lowerCased == "gethardwaredevicedescription")
             {
-                ulong destination = vm.Processor.PopExternal(OperandSize.QWord);
                 uint deviceId = (uint)vm.Processor.PopExternal(OperandSize.DWord);
+                ulong destination = vm.Processor.PopExternal(OperandSize.QWord);
                 GetHardwareDeviceDescription(vm, deviceId, destination);
             }
             else if (lowerCased == "getallhardwaredevicedescriptionssize")
@@ -129,11 +128,11 @@ namespace IronArc.Hardware
             }
             else if (lowerCased == "copymemory")
             {
-                ulong length = (ulong)vm.Processor.PopExternal(OperandSize.QWord);
-                ulong destAddress = (ulong)vm.Processor.PopExternal(OperandSize.QWord);
-                ulong srcAddress = (ulong)vm.Processor.PopExternal(OperandSize.QWord);
-                uint pageTableId = (uint)vm.Processor.PopExternal(OperandSize.DWord);
                 byte direction = (byte)vm.Processor.PopExternal(OperandSize.Byte);
+                uint pageTableId = (uint)vm.Processor.PopExternal(OperandSize.DWord);
+                ulong srcAddress = (ulong)vm.Processor.PopExternal(OperandSize.QWord);
+                ulong destAddress = (ulong)vm.Processor.PopExternal(OperandSize.QWord);
+                ulong length = (ulong)vm.Processor.PopExternal(OperandSize.QWord);
                 CopyMemory(vm, direction, pageTableId, srcAddress, destAddress, length);
             }
         }
@@ -282,7 +281,13 @@ namespace IronArc.Hardware
                         return;
                     }
 
-                    try { vm.MemoryManager.Write(sourceMemory, destAddress); }
+                    try
+                    {
+                        bool wasTranslatingAddresses = vm.MemoryManager.PerformAddressTranslation;
+                        vm.MemoryManager.PerformAddressTranslation = true;
+                        vm.MemoryManager.Write(sourceMemory, destAddress);
+                        vm.MemoryManager.PerformAddressTranslation = wasTranslatingAddresses;
+                    }
                     catch (ArgumentOutOfRangeException)
                     {
                         vm.Processor.RaiseError(Error.AddressOutOfRange,
@@ -291,7 +296,13 @@ namespace IronArc.Hardware
                     }
                     break;
                 case VirtualToReal:
-                    try { sourceMemory = vm.MemoryManager.Read(srcAddress, length); }
+                    try
+                    {
+                        bool wasTranslatingAddresses = vm.MemoryManager.PerformAddressTranslation;
+                        vm.MemoryManager.PerformAddressTranslation = true;
+                        sourceMemory = vm.MemoryManager.Read(srcAddress, length);
+                        vm.MemoryManager.PerformAddressTranslation = wasTranslatingAddresses;
+                    }
                     catch (ArgumentOutOfRangeException)
                     {
                         vm.Processor.RaiseError(Error.AddressOutOfRange,
@@ -299,7 +310,7 @@ namespace IronArc.Hardware
                         return;
                     }
 
-                    try { vm.MemoryManager.Write(sourceMemory, destAddress); }
+                    try { vm.SystemMemory.WriteAt(sourceMemory, destAddress); }
                     catch (ArgumentOutOfRangeException)
                     {
                         vm.Processor.RaiseError(Error.AddressOutOfRange,

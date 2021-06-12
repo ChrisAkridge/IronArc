@@ -75,7 +75,7 @@ namespace IronArc
                 case Error.InvalidDestinationType: return "This value cannot be written here.";
                 case Error.HeaderInvalid: return "The loaded program has an invalid header.";
                 case Error.StringIndexOutOfRange: return "There is no string at the requested index.";
-                case Error.StackUnderflow: return "The stack has popped more item than it has.";
+                case Error.StackUnderflow: return "The stack has popped more items than it has.";
                 case Error.NoSuchPageTable: return "There is no page table with this ID.";
                 case Error.CannotDestroyCurrentPageTable:
                     return "Attempted to destroy the page table that is currently in use.";

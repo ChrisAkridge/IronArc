@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using IronArc.HardwareDefinitionGenerator.Models;
@@ -15,7 +16,7 @@ namespace IronArc.HardwareDefinitionGenerator
         {
             var hardwareTypes = GetHardwareTypes();
             IEnumerable<HardwareDevice> devices =
-                hardwareTypes.Select(t => (HardwareDevice)Activator.CreateInstance(t, new Guid())).ToList();
+                hardwareTypes.Select(t => (HardwareDevice)Activator.CreateInstance(t, new Guid(), 0u)).ToList();
             IEnumerable<Models.HardwareDevice> deviceDefinitions =
                 devices.Select(d => d.Definition);
             var definition = new Models.HardwareDefinition(version, deviceDefinitions.ToList());
@@ -31,18 +32,23 @@ namespace IronArc.HardwareDefinitionGenerator
         internal static HardwareCall ParseHardwareCall(string callDescription)
         {
             int argumentsStart = callDescription.IndexOf('(');
-            var parameters = callDescription
-                .Substring(argumentsStart)
-                .TrimStart('(')
-                .TrimEnd(')')
-                .Split(',')
-                .Select(param => param.Trim().Split(' '))
-                .Select(param => new HardwareCallParameter(
-                    param[1],
-                    MapHardwareCallTypeToCixType(param[0].TrimEnd('*'), param[0].Count(c => c == '*'))
-                ))
-                .ToList();
 
+            var parameterListText = callDescription
+                .Substring(argumentsStart);
+
+            var parameters = (parameterListText != "()")
+                ? parameterListText
+                    .TrimStart('(')
+                    .TrimEnd(')')
+                    .Split(',')
+                    .Select(param => param.Trim().Split(' '))
+                    .Select(param => new HardwareCallParameter(
+                        param[1],
+                        MapHardwareCallTypeToCixType(param[0].TrimEnd('*'), param[0].Count(c => c == '*'))
+                    ))
+                    .ToList()
+                : new List<HardwareCallParameter>();
+            
             var typeAndName = callDescription
                 .Substring(0, argumentsStart)
                 .Split(' ');
@@ -86,8 +92,11 @@ namespace IronArc.HardwareDefinitionGenerator
             var ironArcTypes = ironArc.GetTypes();
             const string namespaceName = "IronArc.Hardware";
 
+            // https://stackoverflow.com/a/16349607/2709212
             return ironArcTypes.Where(t => t.Namespace == namespaceName)
-                .Where(t => !t.IsInterface);
+                .Where(t => 
+                    !t.IsInterface
+                    && t.GetCustomAttribute(typeof(CompilerGeneratedAttribute), true) == null);
         }
     }
 }

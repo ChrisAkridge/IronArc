@@ -6,6 +6,8 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using IronArc.Memory;
+
 // ReSharper disable InconsistentNaming
 
 namespace IronArc
@@ -28,6 +30,7 @@ namespace IronArc
         public ConcurrentQueue<Message> MessageQueue { get; }
         public VMState VMState => vm.State;
         public Guid MachineID => vm.MachineId;
+        public MemoryManager MemoryManager => vm.MemoryManager;
 
         public IEnumerable<string> MemorySpaceNames => memorySpaceNames;
 

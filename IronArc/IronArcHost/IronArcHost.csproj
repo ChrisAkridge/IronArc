@@ -105,6 +105,7 @@
     <Compile Include="LauncherForm.Designer.cs">
       <DependentUpon>LauncherForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="MemoryManagerByteProvider.cs" />
     <Compile Include="NewVMForm.cs">
       <SubType>Form</SubType>
     </Compile>

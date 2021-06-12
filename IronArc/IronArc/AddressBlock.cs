@@ -80,10 +80,7 @@ namespace IronArc
                             throw new ArgumentException($"Invalid operand size {size}.", nameof(size));
                     }
                     break;
-                case AddressType.StringEntry:
-                    value = memory.ReadUIntAt(operandAddress);
-                    operandLength = 4UL;
-                    break;
+                case AddressType.Reserved:
                 default:
                     throw new ArgumentException($"Invalid address type {type}.", nameof(type));
             }
@@ -146,10 +143,7 @@ namespace IronArc
                             throw new ArgumentException($"Invalid operand size {size}.", nameof(size));
                     }
                     break;
-                case AddressType.StringEntry:
-                    value = memory.ReadUInt(operandAddress);
-                    operandLength = 4UL;
-                    break;
+                case AddressType.Reserved:
                 default:
                     throw new ArgumentException($"Invalid address type {type}.", nameof(type));
             }

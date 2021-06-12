@@ -275,6 +275,11 @@ namespace IronArcHost
             {
                 HexMemory.ByteProvider = new VMMemoryByteProvider(vm);
             }
+            else if (memorySpaceName.StartsWith("Page Table", StringComparison.Ordinal))
+            {
+                uint pageTableId = uint.Parse(memorySpaceName.Split(' ')[2]);
+                HexMemory.ByteProvider = new MemoryManagerByteProvider(vm.MemoryManager);
+            }
             else
             {
                 uint deviceId = uint.Parse(memorySpaceName.Split(' ')[1]);

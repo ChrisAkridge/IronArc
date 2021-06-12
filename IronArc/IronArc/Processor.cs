@@ -94,7 +94,7 @@ namespace IronArc
 
             try
             {
-                switch ((opcode >> 8))
+                switch (opcode >> 8)
                 {
                     case 0x00: /* Control Flow Instructions */
                         switch (opcode & 0xFF)
@@ -255,7 +255,7 @@ namespace IronArc
                 case 0: return AddressType.MemoryAddress;
                 case 1: return AddressType.Register;
                 case 2: return AddressType.NumericLiteral;
-                case 3: return AddressType.StringEntry;
+                case 3: return AddressType.Reserved;
                 default:
                     throw new ArgumentException("Implementation error: You didn't give me a value between 0 and 3 for an address type in a flags byte.");
             }
@@ -316,26 +316,14 @@ namespace IronArc
                         return block.value;
                     }
                     break;
-                case AddressType.StringEntry:
-                    return LookupStringAddress((uint)block.value);
+                case AddressType.Reserved:
+                    RaiseError(Error.InvalidAddressType);
+                    break;
                 default:
-                    throw new ArgumentException("Implementation error: An address block has a wrong type.");
+                    throw new ArgumentException($"Invalid address block type {block.type}");
             }
 
             return 0UL;
-        }
-
-        private ulong LookupStringAddress(uint stringIndex)
-        {
-            uint numberOfStrings = memory.ReadUInt(stringsTableAddress);
-            if (numberOfStrings <= stringIndex)
-            {
-                RaiseError(Error.StringIndexOutOfRange);
-                return 0UL;
-            }
-
-            ulong stringAddressAddress = stringsTableAddress + 4 + (8 * stringIndex);
-            return memory.ReadULong(stringAddressAddress);
         }
 
         private ulong ReadDataFromAddressBlock(AddressBlock block, OperandSize size)
@@ -361,8 +349,9 @@ namespace IronArc
                     }
                 case AddressType.NumericLiteral:
                     return block.value;
-                case AddressType.StringEntry:
-                    return LookupStringAddress((uint)block.value);
+                case AddressType.Reserved:
+                    RaiseError(Error.InvalidAddressType);
+                    return 0UL;
                 default:
                     throw new ArgumentException($"Invalid address block type {block.type}");
             }
@@ -392,7 +381,7 @@ namespace IronArc
                     }
                     break;
                 case AddressType.NumericLiteral:
-                case AddressType.StringEntry:
+                case AddressType.Reserved:
                     RaiseError(Error.InvalidAddressType);
                     break;
                 default:
@@ -503,9 +492,6 @@ namespace IronArc
         }
 
         public string ReadStringFromMemory(ulong stringAddress) => memory.ReadString(stringAddress, out _);
-
-        public string ReadStringFromMemoryByIndex(uint stringIndex) =>
-            ReadStringFromMemory(LookupStringAddress(stringIndex));
         
         public void WriteStringToMemory(ulong stringAddress, string text) =>
             memory.WriteString(text, stringAddress);
@@ -742,12 +728,15 @@ namespace IronArc
             //	InvalidAddressType: Raised if the address block is a numeric literal.
             //	AddressOutOfRange: Raised if the address is beyond the range of memory.
             // Flags byte: 00XX0000 where XX is the type of the address block.
+            
+            // WYLO: IronAssembler is emtting pointers to strings one after the one
+            // we need a pointer to
 
             byte flagsByte = (byte)((ReadProgramByte() & 0x30) >> 4);
             var block = new AddressBlock(OperandSize.QWord, ReadAddressType(flagsByte),
                 memory, EIP);
             EIP += block.operandLength;
-            ulong stringAddress = ReadDataFromAddressBlock(block, OperandSize.QWord);
+            ulong stringAddress = block.value;
 
             string hwcall = memory.ReadString(stringAddress, out _);
             vm.HardwareCall(hwcall);
@@ -869,7 +858,7 @@ namespace IronArc
             var sizeInBytes = size.GetSizeInBytes();
             var destType = ReadAddressType((byte)((flagsByte & 0x30) >> 4));
 
-            if (destType == AddressType.NumericLiteral || destType == AddressType.StringEntry)
+            if (destType == AddressType.NumericLiteral || destType == AddressType.Reserved)
             {
                 RaiseError(Error.InvalidDestinationType);
             }
@@ -1112,7 +1101,7 @@ namespace IronArc
                 case NumericOperation.LogicalNOT: return (right == 0) ? 1UL : 0UL;
                 case NumericOperation.Compare:
                     SetFlagsByComparison(left.CompareTo(right));
-                    return 0UL;	// Compare doesn't push anything to the stack, but we still need to return something
+                    return 0UL; // Compare doesn't push anything to the stack, but we still need to return something
                 default: throw new ArgumentException($"Implementation error: Invalid operation {operation}");
             }
         }
