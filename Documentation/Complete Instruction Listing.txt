@@ -367,18 +367,20 @@ Integral/Bitwise Operations
 	Long Increment
 		Opcode: 0x0217
 		Mnemonic: incl
-		Arguments: incl <source-address>
-			<source-address>: An addressing block containing the operand.
-		Description: The value at the source address is incremented.
+		Arguments: incl <source-address> <dest-address>
+			<source-address>: An addressing block containing the value to increment.
+			<dest-address>: An addressing block containing the place to store the incremented value.
+		Description: The value at the source address is incremented and stored in the destination address.
 		Errors:
 			ArithmeticOverflow: Raised if the value is higher than the maximum value of the datatype.
 			
 	Long Decrement
 		Opcode: 0x0218
 		Mnemonic: decl
-		Arguments: decl <source-address>
+		Arguments: decl <source-address> <dest-address>
 			<source-address>: An addressing block containing the operand.
-		Description: The value at the source address is decremented.
+			<dest-address>: An addressing block containing the place to store the incremented value.
+		Description: The value at the source address is decremented and stored in the destination address.
 		Errors:
 			ArithmeticUnderflow: Raised if the value is lower than the minimum value of the datatype.
 			

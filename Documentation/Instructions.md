@@ -116,7 +116,7 @@
 * Opcode: `0x000C`
 * Mnemonic: `hwcall`
 * Arguments: `hwcall <addressToString>`
-* Description: Loads a length-prefixed string that contains a hardware command from the given address and performs a hardware call to perform the command. If any arguments are needed for the call, `stackargs` should be executed, then all arguments should be pushed before the call.
+* Description: Loads a length-prefixed string that contains a hardware command from the given address and performs a hardware call to perform the command. ~~If any arguments are needed for the call, `stackargs` should be executed, then all arguments should be pushed before the call.~~ I don't think we need `stackargs` for these.
 * Errors:
 	* `InvalidAddressType`: Raised if the given address block is not a memory address.
 	* `AddressOutOfRange`: Raised if the given address points to a memory location beyond the bounds of the memory space or not mapped to any memory space or hardware device.

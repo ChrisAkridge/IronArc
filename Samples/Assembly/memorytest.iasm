@@ -14,7 +14,7 @@ start:
 	hwcall "System::RegisterInterruptHandler"
 	push QWORD _print_removed_hardware
 	push "HardwareDeviceRemoved"
-	push QWORD _print_attached_hardware
+	push DWORD 0
 	hwcall "System::RegisterInterruptHandler"
 
 	# Create a page table

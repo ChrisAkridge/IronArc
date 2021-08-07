@@ -1,0 +1,112 @@
+globals:  0
+start:
+mov QWORD eax ebp
+mov QWORD eax esp
+push QWORD _print_attached_hardware
+push QWORD str:0
+push DWORD 0
+hwcall str:1
+push QWORD _print_removed_hardware
+push QWORD str:2
+push QWORD _print_attached_hardware
+hwcall str:1
+hwcall str:3
+pop DWORD ecx
+push QWORD eax
+push QWORD 0
+push QWORD 0
+push DWORD ecx
+push BYTE 0
+hwcall str:4
+mov QWORD 3405691582 eflags
+loop_test:
+push QWORD ebx
+push QWORD 262144
+cmp QWORD
+jlt  loop_main
+jmp  loop_after
+loop_main:
+mov BYTE *ebx ecx
+jmp  loop_test
+loop_after:
+jmp  system_call_tests
+_print_attached_hardware:
+push QWORD str:5
+hwcall str:6
+_print_removed_hardware:
+push QWORD str:7
+hwcall str:6
+_print_error:
+push QWORD str:8
+hwcall str:6
+hwcall str:9
+pop QWORD ecx
+mov QWORD 0 edx
+addl QWORD eax edx edx
+addl QWORD 1024 edx edx
+push QWORD edx
+hwcall str:10
+push QWORD *edx
+hwcall str:6
+system_call_tests:
+push QWORD _print_error
+push DWORD 0
+hwcall str:11
+push DWORD 0
+hwcall str:12
+push DWORD 0
+hwcall str:13
+push DWORD 1
+hwcall str:14
+hwcall str:6
+push DWORD 0
+hwcall str:15
+mov QWORD 0 edx
+addl QWORD eax edx edx
+addl QWORD 1024 edx edx
+push QWORD edx
+push DWORD 0
+hwcall str:16
+push QWORD *edx
+hwcall str:6
+hwcall str:17
+mov QWORD 0 edx
+addl QWORD eax edx edx
+addl QWORD 1024 edx edx
+push QWORD edx
+hwcall str:18
+hwcall str:3
+pop DWORD edx
+push QWORD eax
+push QWORD 0
+push QWORD 0
+push DWORD edx
+push BYTE 0
+hwcall str:4
+push DWORD edx
+hwcall str:19
+push DWORD edx
+subl DWORD edx 1 edx
+hwcall str:20
+strings:
+0: "HardwareDeviceAttached"
+1: "System::RegisterInterruptHandler"
+2: "HardwareDeviceRemoved"
+3: "System::CreatePageTable"
+4: "System::CopyMemory"
+5: "Hardware attached!"
+6: "Terminal::WriteLine"
+7: "Hardware removed!"
+8: "Error!"
+9: "System::GetLastErrorDescriptionSize"
+10: "System::GetLastErrorDescription"
+11: "System::RegisterErrorHandler"
+12: "System::RaiseError"
+13: "System::UnregisterErrorHandler"
+14: "System::GetHardwareDeviceCount"
+15: "System::GetHardwareDeviceDescriptionSize"
+16: "System::GetHardwareDeviceDescription"
+17: "System::GetAllHardwareDeviceDescriptionSize"
+18: "System::GetAllHardwareDeviceDescriptions"
+19: "System::ChangeCurrentPageTable"
+20: "System::DestroyPageTable"
