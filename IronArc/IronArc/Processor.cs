@@ -138,7 +138,8 @@ namespace IronArc
                                 HardwareCall();
                                 break;
                             case 0x0D:
-                                StackArgumentPrologue();
+                                // Formerly stackargs, left here so that the
+                                // switch is still a jump table.
                                 break;
                             default: break;
                         }
@@ -225,10 +226,7 @@ namespace IronArc
                 case 8UL: EBP = value; break;
                 case 9UL: ESP = value; break;
                 case 10UL: EIP = value; break;
-                case 11UL:
-                    EFLAGS = value;
-                    memory.PerformAddressTranslation = (EFLAGS & EFlags.PerformAddressTranslation) != 0;
-                    break;
+                case 11UL: EFLAGS = value; break;
                 case 12UL: ERP = value; break;
                 default:
                     throw new ArgumentException($"There is no register numbered {registerNumber}. Please ensure you've masked out the high two bits.");
@@ -411,11 +409,6 @@ namespace IronArc
 
         private void CallImpl(ulong callAddress)
         {
-            var oldFlags = EFLAGS;
-
-            // Clear the stackargs flag.
-            EFLAGS &= ~EFlags.StackArgsSet;
-
             // Create and push the call stack frame.
             var frame = new CallStackFrame(callAddress, EIP, EAX, EBX, ECX, EDX, EEX,
                 EFX, EGX, EHX, EFLAGS, EBP);
@@ -424,14 +417,8 @@ namespace IronArc
             // Clear most registers.
             EAX = EBX = ECX = EDX = EEX = EFX = EGX = EHX = EFLAGS = 0UL;
 
-            // Check stackargs and set EBP accordingly
-            if ((oldFlags & EFlags.StackArgsSet) != 0)
-            {
-                EBP = stackArgsMarker;
-                stackArgsMarker = 0;
-            }
-            else { EBP = ESP; }
-
+            // Set up the stack and make the call.
+            EBP = ESP;
             EIP = callAddress;
         }
 
@@ -740,19 +727,6 @@ namespace IronArc
 
             string hwcall = memory.ReadString(stringAddress, out _);
             vm.HardwareCall(hwcall);
-        }
-
-        private void StackArgumentPrologue()
-        {
-            // stackargs
-            // Errors: None.
-            // Flags Byte: None.
-
-            // Set the stackargs flag on EFLAGS.
-            EFLAGS |= EFlags.StackArgsSet;
-
-            // Set the stackargs marker to the current value of ESP.
-            stackArgsMarker = ESP;
         }
         #endregion
 

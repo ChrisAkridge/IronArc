@@ -42,10 +42,7 @@ namespace IronArc
             MessageQueue = new ConcurrentQueue<Message>();
 
             memorySpaceNames = new List<string> { "System Memory" };
-            memorySpaceNames.AddRange(vm.Hardware.Where(h => h.MemoryMapping != null).Select(h => $"{h.DeviceName} {h.DeviceId}"));
-
-            vm.VirtualPageTableCreated += VirtualPageTableCreated;
-            vm.VirtualPageTableDestroyed += VirtualPageTableDestroyed;
+            // memorySpaceNames.AddRange(vm.Hardware.Where(h => h.MemoryMapping != null).Select(h => $"{h.DeviceName} {h.DeviceId}"));
         }
 
         #region Register Properties
@@ -130,8 +127,7 @@ namespace IronArc
 
         public UnmanagedMemoryStream CreateMemoryStream() => vm.SystemMemory.CreateStream();
 
-        public ByteBlock GetHardwareMemoryByteBlock(uint deviceId) =>
-            vm.Hardware.First(h => h.DeviceId == deviceId).MemoryMapping.MemoryReference;
+        public ByteBlock GetHardwareMemoryByteBlock(uint deviceId) => null;
 
         public CallStackFrame GetCallStackTop() => vm.Processor.callStack.Peek();
 

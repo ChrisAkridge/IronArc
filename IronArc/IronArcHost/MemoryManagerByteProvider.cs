@@ -21,15 +21,14 @@ namespace IronArcHost
         /// </summary>
         /// <param name="index">the index of the byte to read</param>
         /// <returns>the byte to read</returns>
-        public byte ReadByte(long index) => manager.ReadByteInPageTable((ulong)index, ViewedPageTableId);
+        public byte ReadByte(long index) => manager.ReadByte((ulong)index);
 
         /// <summary>
         /// Writes a byte into the provider
         /// </summary>
         /// <param name="index">the index of the byte to write</param>
         /// <param name="value">the byte to write</param>
-        public void WriteByte(long index, byte value) =>
-            manager.WriteByteInPageTable(value, (ulong)index, ViewedPageTableId);
+        public void WriteByte(long index, byte value) => manager.WriteByte(value, (ulong)index);
 
         /// <summary>
         /// Inserts bytes into the provider

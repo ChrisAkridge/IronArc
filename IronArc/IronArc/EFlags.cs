@@ -13,9 +13,5 @@ namespace IronArc
         public const ulong GreaterThanFlag = 0x10_00_00_00_00_00_00_00;
         public const ulong LessThanOrEqualToFlag = 0x08_00_00_00_00_00_00_00;
         public const ulong GreaterThanOrEqualToFlag = 0x04_00_00_00_00_00_00_00;
-
-        public const ulong StackArgsSet = 0x00_00_00_00_80_00_00_00;
-        public const ulong PerformAddressTranslation
-            = 0x00_00_00_40_00_00_00;
     }
 }

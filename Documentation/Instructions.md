@@ -124,11 +124,11 @@
 	* `InvalidHWCall`: Raised if the string at the address does not name any hardware call.
 	* Plus any number of errors that can be raised by any hardware call.
 
-### Stack Argument Marker
+### Removed Instruction (formerly Stack Argument Marker)
 * Opcode: `0x000D`
-* Mnemonic: `stackargs`
+* Mnemonic: None
 * Arguments: None
-* Description: Indicates that anything pushed onto the stack is going to be an argument to a function call. Calling a function sets EBP equal to ESP to create a new stack frame. Since arguments are pushed on the stack, anything pushed after a stackargs instruction will be placed after EBP.
+* Description: ~~Indicates that anything pushed onto the stack is going to be an argument to a function call. Calling a function sets EBP equal to ESP to create a new stack frame. Since arguments are pushed on the stack, anything pushed after a stackargs instruction will be placed after EBP.~~ Removed since I realized that having one stackargs marker prevents nested function calls.
 
 ## Data Operations
 ### Move Data
@@ -203,6 +203,61 @@
 * Errors:
 	* `AddressOutOfRange`: Raised if the address calculated from the size and index points to a memory location beyond the bounds of the memory space or not mapped to any memory space or hardware device. Also raised if `<data>` doesn't point to a valid address.
 	* `StackUnderflow`: Raised if `ESP` is less than `EBP` after the array's start address is popped off the stack.
+	
+## Create Context
+
+- Opcode: `0x0106`
+- Mnemonic: `ctxcreate`
+- Arguments: `ctxcreate MEM_SIZE`
+	- `MEM_SIZE`: The amount of memory to allocate for the new context. Implicitly QWORD.
+- Description: Creates a new context with `MEM_SIZE` bytes of memory. The context is given the next available ID. If the last used context ID is `0xFFFFFFFF`, the next ID is `0x00000001`, skipping 0. If `0x00000001` happens to be in use, a VM error is raised and the developer is encouraged to consider why they have billions of active contexts at the same time. The context's new ID is pushed onto the stack and its saved set of registers are all initialized to 0.
+- Errors:
+  - Raises `MaybeJustKeepItToTheLowHundredMillionsOfContexts` if the new context's ID is already in use
+  - Raises `UnauthorizedContextOperation` if `ECC` is not 0 (that is, we're not in the kernel context)
+  
+## Destroy Context
+
+- Opcode: `0x0107`
+- Mnemonic: `ctxdestroy`
+- Arguments: `ctxdestroy CTX_ID`
+	- `CTX_ID`: The ID of the context to destroy. Implicitly DWORD.
+- Description: Destroys the context with ID `CTX_ID` and frees its memory block.
+- Errors:
+  - Raises `NoSuchContext` if the context ID is not in use.
+  - Raises `UnauthorizedContextOperation` if `ECC` is not 0 (that is, we're not in the kernel context)
+  
+## Context Switch
+
+- Opcode: `0x0108`
+- Mnemonic: `ctxswitch`
+- Arguments: `ctxswitch CTX_ID`
+	- `CTX_ID`: The ID of the context to switch to. Implicitly DWORD.
+- Description: Changes `ECC` to `CTX_ID` and loads saved registers for that context. Execution immediately continues in the new context.
+- Errors:
+  - Raises `NoSuchContext` if the context ID is not in use.
+  - Raises `CannotSwitchToHardwareContext` if `CTX_ID` is 1.
+
+## Set Destination Context
+
+- Opcode: `0x0109`
+- Mnemomic: `ctxdest`
+- Arguments: `ctxdest CTX_ID`
+	- `CTX_ID`: The ID of the context that should be the destination of memory moves. Implicitly DWORD.
+- Description: Specifies which context that any further `ctxmov` instructions should move memory to until the next `ctxdest` instruction is executed.
+- Errors:
+	- Raises `NoSuchContext` if the context ID is not in use.
+
+## Move Memory to Context
+
+- Opcode: `0x010A`
+- Mnemonic: `ctxmov`
+- Arguments: `ctxmov CA_SRC CB_DST COUNT`
+	- `CA_SRC`: The address of the first byte in the current context to move memory from. Implicitly QWORD.
+	- `CB_DST`: The address of the first byte in the destination context to move memory to. Implicitly QWORD.
+	- `COUNT`: The number of bytes to move. Implicitly DWORD.
+- Description: Copies `COUNT` bytes from `CA_SRC` in the current context (indicated by `ECC`) to `CB_DST` in the destination context (as set by `ctxdest`).
+- Errors:
+	- Raises `AddressOutOfRange` if either `CA_SRC`, `CB_DST`, `CA_SRC + COUNT`, or `CB_DST + COUNT` are out of range of the context's memory space.
 
 ## Integral/Bitwise Operations
 ### Stack Addition

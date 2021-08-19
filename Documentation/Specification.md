@@ -32,15 +32,16 @@ Up next is the IronArc assembler, [IronAssembler](https://www.github.com/ChrisAk
 ### Definition
 The IronArc processor is a set of rules that apply to a set of data. The data, stored in memory, consists of an executable program containing instructions. Each instruction is composed of a two-byte opcode followed by zero to four operands. Each operand is an addressing block that can address multiple kinds of memory or a numeric literal. For instructions that take operands, a byte after the opcode specifies what each operand is, using two bits per operand.
 
-The processor contains the following specific blocks of processor memory, all 8 bytes in size and initialized to 0 (except EAX) at VM start:
+The processor contains the following specific blocks of processor memory, all 8 bytes in size and initialized to 0 (except EAX and ERP) at VM start:
 
 - Eight registers labelled EAX through EHX
 - The instruction pointer register EIP, which points to the currently executing instruction in memory,
 - An flags register labelled EFLAGS
 - Two stack registers ESP (pointer to the top of the stack), and EBP (pointer to the start of the current stack frame)
-- A relative base pointer register, ERB, which always has the address of the very first instruction of the program. This allows programs to be loaded anywhere in memory and still have jumps using absolute addresses within the program.
+- A relative base pointer register, ERP, which always has the address of the very first instruction of the program. This allows programs to be loaded anywhere in memory and still have jumps using absolute addresses within the program.
+- A context ID ECC that contains the ID of the current "context", which are blocks of memory that each start at address 0. Contexts allow for separation between an OS and its programs, while also providing space for hardware-mapped memory.
 
-The processor reads and executes instruction sequentially through the memory space (real or virtual). Jump, call, and return instructions serve to change the flow of execution to different addresses. The execution of an instruction begins by reading in the opcode at EIP and incrementing EIP by two bytes. Then, the opcode is compared to a table of opcodes, and the specific instruction code is called. The instruction code will then read the required operands from memory, incrementing the instruction pointer as it goes. The operands are then used to execute the instruction. Finally, the cycle begins again as the next opcode is read from memory.
+The processor reads and executes instruction sequentially through the memory space. Jump, call, and return instructions serve to change the flow of execution to different addresses. The execution of an instruction begins by reading in the opcode at EIP and incrementing EIP by two bytes. Then, the opcode is compared to a table of opcodes, and the specific instruction's code is called. The instruction's code will then read the required operands from memory, incrementing the instruction pointer as it goes. The operands are then used to execute the instruction. Finally, the cycle begins again as the next opcode is read from memory.
 
 A program is loaded into memory by the host process. The host process also sets the start address, the address where the program will be loaded. EIP and ERP is set to this address and begins execution from there.
 
@@ -49,7 +50,7 @@ Opcodes are two-byte values that indicate the instruction to be executed. The fi
 ## Memory
 
 ### Memory Spaces
-The processor has access to various spaces of memory mapped into a single address space. Memory is addressed using 64-bit pointers, and different sources of memory (system memory, hardware-mapped, memory-mapped files, etc.) are mapped to different portions of the address space.
+The processor has access to various spaces of memory mapped into a single address space. Memory is addressed using 64-bit pointers.
 
 The system memory space is the primary source of memory to the IronArc VM. This memory space has its size defined by the user. The default size is considered to be 1MB. The processor can address, read, and write memory in this space through its instructions. More advanced programs may also have code that can dynamically allocate memory.
 
@@ -58,10 +59,12 @@ Using the ESP and EBP registers, a stack can be defined somewhere in the system 
 
 The location of the top of the stack is defined by the ESP register. The EBP register stores the bottom of the “stack frame” - a block of stack memory used since the last call instruction.
 
-### Memory Addresses, Pointers, and Memory Mapping
+### Memory Addresses, Pointers, and Contexts
 A memory address in an IronArc program is an eight-byte value that can point to most addresses available to the IronArc VM, including system memory or memory-mapped virtual hardware devices such as virtual monitors which require quick access to memory. Registers are accessed with different notation, see the section on Address Blocks below.
 
-The bottom 55 bits of any address addresses a specific byte in a memory space. This allows the addressing of up to 8 exabytes (2^63 bytes) of memory, or 32 petabytes (2^55 bytes) per plane. The highest bit indicates that this memory address contains a pointer to another value in memory. Bits 62 to 54 contain the *plane number*, which divides the memory space into 256 planes. Plane 0 contains the system memory. Plane 1 contains any memory used by hardware devices. Planes 2 through 255 are reserved for future use.
+Separate memory spaces are implemented using contexts, each of which has a 32-bit ID. The ID of the current context is stored in the `ECC` register. The system and OS uses context ID 0 and hardware mapped memory uses context ID 1. IronArc instructions can create and destroy contexts, which are assigned the next available context ID on creation. When a context is destroyed, its ID is freed and can be used again.
+
+`ECC` can be read but not directly updated; instead, the `ctxswitch` instruction switches to another context. When a context switch occurs, the registers for the old context are saved, the value in `ECC` is changed, and the saved registers for that context are restored (if there aren't any, all registers are zero-initialized). The context with ID 1 (the hardware memory context) cannot be switched to, as it stores hardware-mapped memory. Other instructions can copy memory between contexts, which provides a way for memory-mapped hardware to be written and read.
 
 Pointers are defined within the program itself. Within listings of assembly code, pointers are denoted with asterisk characters preceding the memory being addressed.
 
@@ -73,22 +76,12 @@ mov *eax eax    // moves the value being pointed to by eax into eax
 mov *eax eax    // moves the value being pointed to by the pointer in memory into eax
 ```
 
-### Virtual Memory
-
-Plane 0 supports the concept of virtual memory. The host process contains a list of *page tables*, each of which has a 32-bit identifier and can be created or destroyed at will. Each page table contains a list of page table entries that map a 32 petabyte *virtual address space* into the "real" addresses of Plane 0 as pages of 4,096 bytes. A page table entry states the starting virtual address and the starting real address it maps to. The ending addresses can be found by adding 4,095 to the starting addresses.
-
-One of the bits in the `EFLAGS` register is the *virtual mode bit*. If set, any address in Plane 0 that an IronArc program uses is treated as a virtual address and *translated* using the page table into a real address. If clear, all addresses directly address real memory without using translation. Address translation supports reading and writing byte ranges that span arbitrarily many pages. However, the host process will raise a `MemoryAccessOutOfBounds` error if the program tries to read or write a byte range that spans over multiple pages.
-
-Virtual addresses are mapped to real addresses as needed. When a program tries to access a virtual address that has no real address mapped to it, a *page fault* is raised. In this case, the memory manager uses an internal value to set the starting real address of a new page table entry for the page the address resides in. This internal value is then increased by 4,096.
-
-If there isn't enough system memory available to allocate a new page, `page compaction` occurs. Any unused pages in the real memory space are closed by copying the adjacent page into the unused page. The page table entry's starting real address is also updated to ensure the mapping still points to the correct addresses. Finally, `ENP` is set to the last allocated page. If there's still no free memory, the page fault fails, raising an `OutOfVirtualMemory` error.
-
 ### Control Flow Instructions
 The `jmp`, `call`, `ret`, `je`, `jne`, `jlt`, `jgt`, `jlte`, `jgte`, `jmpa`, `hwcall`, and `stackargs` instructions all either modify or set up changes to the flow of the program.
 
 The `jmp`, `call`, and conditional jump instructions all perform "relative jumps" - jumps relative to the start of the program, stored in ERP. ERP, or the relative register, is set to the address of the program's first instruction, and when a relative jump is performed, ERP is added to the address to be jumped to.
 
-For example, consider a program loaded at the address `0x100000`. If a jump is performed to the instruction at `0x1000`, the actual address jumped to would be `0x100000 + 0x1000 = 0x101000`, the location of the instruction in actual memory. This allows programs to be loaded at arbitrary addresses, a powerful feature for operating system loading.
+For example, consider a program loaded at the address `0x100000`, which is also the value of `ERP`. If a jump is performed to the instruction at `0x1000`, the actual address jumped to would be `0x100000 + 0x1000 = 0x101000`, the location of the instruction in actual memory. This allows programs to be loaded at arbitrary addresses, a powerful feature for operating system loading.
 
 ### Calling Addresses
 Jumping to an address moves the instruction pointer to an address with no way of jumping back. A call is a jump that remembers which instruction made the call, as well as large parts of processor state.
@@ -116,9 +109,9 @@ Consider the following example function:
 int* func(int a, int b, int c);
 ```
 
-To call this function with the arguments in IronArc, the first instruction to use is the `stackargs` instruction. This marks the start of the function's arguments, and any values pushed onto the stack are considered the function's arguments.
+To call this function with the arguments in IronArc, the arguments are pushed in the order they're defined in the function.
 
-All arguments are pushed in the order they appear in the function. In our example (with made-up addresses for the arguments):
+In our example (with made-up addresses for the arguments):
 ```
 push DWORD *0x000000000000740A	// pushes a onto the stack
 push DWORD *0x0034009F00DB00A4	// pushes b onto the stack
@@ -128,41 +121,33 @@ push DWORD *0x00007FFFFFFFFFFE	// pushes c onto the stack
 Thus, after the pushed arguments, the stack looks like this:
 
 ```
-ESP------>+===+
-          | c |
-          +===+
-          | b |
-          +===+
-          | a |
-stackargs>+===+
-          |...|
-          +===+
+EBP->+===+
+     | a |
+	 +===+
+	 | b |
+	 +===+
+	 | c |
+ESP->+===+
 ```
 
-...that is, the arguments are in reverse order. Upon calling the function:
+When the function is called...
 
 ```
 call 0x0000000004003212
 ```
 
-...the flag set by stackargs is cleared, and `EBP` is set to the start of the arguments that were pushed - that is, the address `ESP` was at when `stackargs` was executed. ESP is still at the top of the stack, after `c`. The stack looks like this:
+...most registers are pushed onto the call stack and the function begins execution. Since `call` sets `EBP` to `ESP`, the function will first have to subtract the size of the arguments from `EBP` to correctly set the base pointer:
 
 ```
-ESP------>+===+
-          | c |
-          +===+
-          | b |
-          +===+
-          | a |
-EBP------>+===+
+subl QWORD ebp 12 ebp
 ```
 
-Arguments can then be accessed using constructs like `DWORD *ebp`. for `a`, or `DWORD *ebp+8` for `c`.
+The stack is then correct, with `a` at `*ebp+0`, `b` at `*ebp+4` and `c` at `*ebp+8`. To return a value, the function must first reset the stack by running `mov QWORD ebp esp` and then push the result onto the stack before running `ret`.
 
 ## IronArc Programs
 
 ### IronArc Instruction Format
-An IronArc program is, at minimum, a file containing a space for global variables, a series of bytes that encode instructions, and a list of length-prefixed strings located at the end of the file. Each instruction is composed of an opcode, a flags byte for some instructions, and one or more operands appearing as memory addresses, registers, or literal values. IronArc instructions are widely varying in size, from at least two bytes (an opcode with no flags or operands, such as the No Operation instruction) to many bytes (an opcode with flags and three operands).
+An IronArc program is, at minimum, a file containing a space for global variables, a series of bytes that encode instructions, and a list of length-prefixed strings following the instructions. Each instruction is composed of an opcode, a flags byte for some instructions, and one or more operands appearing as memory addresses, registers, or literal values. IronArc instructions are widely varying in size, from at least two bytes (an opcode with no flags or operands, such as the No Operation instruction) to many bytes (an opcode with flags and three operands).
 
 The first portion of an instruction is a two-byte opcode. The opcode uniquely identifies the instruction and the processor can then tell how many operands will succeed the opcode. The high byte of an opcode defines a certain “class” of instructions, such as control flow (JMP, CALL, RET), data manipulation (PUSH, MOV, ADD), et cetera. The low byte of the opcode specifies the specific instruction. With 256 possible classes and 256 possible instructions per class, there are a total of 65,536 instructions that can be identified with these opcodes, although the actual number of instructions will be much lower in practice.
 
@@ -179,8 +164,8 @@ If an instruction has a size operand, it always appears first and the top two bi
 
 | **Bit Pair** | **Description**                                                                                                                                                                                                                                                                                                                                              |
 |--------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| 00           | The operand is an eight-byte memory address. This can address the memory, system program, stack memory, and memory mapped hardware. If the high bit is set, the memory address is treated as a pointer to another location in memory.                                                                                                                        |
-| 01           | The operand is a processor register. The operand will have one byte identifying up to 64 registers. If the high bit is set, the register is treated as a pointer to a memory location. If the second-highest bit is set, the operand will have a four-byte signed integer immediately following it that represents an offset from the value in the register. |
+| 00           | The operand is an eight-byte memory address. This can address the memory of the current context. If the high bit is set, the memory address is treated as a pointer to another location in memory.                                                                                                                        |
+| 01           | The operand is a processor register. The operand will have one byte, with the low six bits identifying one of 64 possible registers. If the high bit is set, the register is treated as a pointer to a memory location. If the second-highest bit is set, the operand will have a four-byte signed integer immediately following it that represents an offset from the value in the register. |
 | 10           | The operand is a literal numeric value. The size of the literal is determined by the size operand.                                                                                                                                                                                                                                                           |
 | 11           | This value is reserved and is not used by any operand type.                                                                                                                                                                                                                                                                                   |
 
@@ -201,17 +186,17 @@ The header is `4 + 4 + 4 + 8 = 20` bytes long.
 
 The file opens with a magic number `IEXE`, followed by an IronArc specification version and an assembler version. These versions are split into the high and low words for the major and minor version.
 
-**This specification is major version 2 and minor version 0.**
+**This specification is major version 3 and minor version 0.**
 
 The assembler version is written by whichever assembler made the program. If the program is composed by hand, the version should be major version 0 and minor version 0. Up next is the address of the start of the first instruction.
 
-Immediately following the header is a group of bytes that are used to store global variables. The number of bytes in this group is defined by the assembler. These bytes are all `00` by default, but can be changed by the program.
+Immediately following the header is a group of bytes that are used to store global variables. The number of bytes in this group is defined by the assembler. These bytes are all `00`, but can be changed by the program.
 
 Following the global variables bytes is all the instructions of the program. The `EIP` register is initialiazed to this value and execution begins here. It will continue through the memory space unless control flow is changed by the control flow instructions.
 
-After the instruction space is a list of strings. Each string is prefixed with the number of bytes it has as a four-byte unsigned integer, followed by the text of the string in UTF-8 format.
+After the instruction space is a list of strings. Each string is prefixed with the number of bytes it has as a four-byte unsigned integer, followed by the text of the string in UTF-8 encoding.
 
-These programs are loaded at a start address specified when starting the VM in the memory space. If the program is larger than the assigned memory space, the processor will immediately fail. EIP and ERP is set to the specified address and execution begins from EIP. The remainder of memory is initialized to zeroes. The stack immediately follows (unless set to another address when starting the VM), as reflected by ESP = EBP = (start address + program size).
+These programs are loaded at a start address specified when starting the VM in the memory space. If the program is larger than the assigned memory space, the processor will immediately fail. EIP and ERP is set to the specified addresses and execution begins from EIP. The remainder of memory is initialized to zeroes.
 
 The size of the program, with the header, global variable space, and string table, in bytes, will be initially stored in the EAX register when the program is loaded. The program is free to use or clear this value as necessary.
 
@@ -240,11 +225,11 @@ An interrupt is a named event with optional information raised by a hardware dev
 
 Interrupts are generated by the hardware device and can include one or more arguments containing information about the interrupt. The interrupt is sent to the host process, which references its table of interrupt handler addresses. If there is one registered event handler for the interrupt, the arguments are pushed onto the stack in reverse order, and the handler is called as if a call instruction was used (thus preserving lower stack frames). If there are no registered handlers, the interrupt and its arguments are discarded. If there are multiple registered handlers, the host process calls them in the order they were registered, pushing the arguments onto the stack before each call.
 
-An interrupt event handler is a section of executable code in the program that can handle an interrupt and perform tasks related to it. Interrupt event handlers can be registered by placing a hardware call to the `uint8 hwcall System::RegisterInterruptHandler(uint32 deviceIndex, lpstring* interruptName, ptr handlerAddress)` hardware call. This hardware call accepts a device index, the name of the interrupt, the address of the handler, and a value indicating whether the handler is in the system program. The return code denotes the index of the handler (multiple handlers will receive sequential indices). If the call fails, the system will halt in an error state.
+An interrupt event handler is a section of executable code in the program that can handle an interrupt and perform tasks related to it. Interrupt event handlers can be registered by running a hardware call to the `uint8 hwcall System::RegisterInterruptHandler(uint32 deviceIndex, lpstring* interruptName, ptr handlerAddress)` hardware call. This hardware call accepts a device index, the name of the interrupt, the address of the handler, and a value indicating whether the handler is in the system program. The return code denotes the index of the handler (multiple handlers will receive sequential indices). If the call fails, the system will halt in an error state.
 
 Up to 256 handlers can be registered on the same interrupt by calling the function multiple times with different addresses. Each handler will be given an index, starting at 0 for the first handler, up to 255. When the interrupt is raised, each registered handler will be called in the order they were registered.
 
-The interrupt handler can handle the interrupt in any way it desires, but it must ensure that any values it pushed on the stack have been popped off. This is very important, as the program that was running before the interrupt expected the stack to be in a certain state.
+The interrupt handler can handle the interrupt in any way it desires, but it must ensure that any values it pushed on the stack have been popped off. This is very important, as the program that was running before the interrupt will not expect the stack to have been changed.
 
 Interrupt handlers can be unregistered by calling the `void hwcall System::UnregisterInterruptHandler(uint32 deviceIndex, lpstring* interruptName, uint8 handlerIndex)` hardware call. This frees the interrupt handler index, which will then be retaken first if another handler is registered for the interrupt.
 
@@ -274,11 +259,11 @@ Hardware calls should be stylized in literature and documentation in the form `<
 
 ### Hardware Memory Mapping
 
-Hardware devices can map memory into the VM's memory space. All hardware memory is mapped into Plane 1. Each instance of a hardware device can map memory only once.
+Hardware devices can map memory into the VM's memory space. All hardware memory is mapped into the context with the ID of 1 (henceforth, context 1). Each instance of a hardware device can map memory only once.
 
-Hardware devices can directly call a function in the implementation to map memory into Plane 1. When called, the function creates a buffer of the requested size, places it into Plane 1, and returns the starting real address of the newly mapped memory, along with a pointer/reference to the buffer, so the hardware device can directly read and write to its memory. Another implementation function can be used to free mapped memory and remove it from Plane 1.
+Hardware devices can directly call a function in the implementation to map memory into context 1. When called, the function creates a buffer of the requested size, places it into context 1 after any other allocated memory, and returns the starting real address of the newly mapped memory, along with a pointer to the buffer, so the hardware device can directly read and write to its memory. Another implementation function can be used to free mapped memory and remove it from context 1.
 
-Hardware device memory is mapped contiguously into Plane 1, such that new memory is allocated immediately after the last. Freeing mapped memory does cause gaps in Plane 1, but I don't think we'll need compaction here.
+Hardware device memory is mapped contiguously into context 1, such that new memory is allocated immediately after the last. Freeing mapped memory does cause gaps in context 1, but I don't think we'll need compaction here.
 
 The hardware calls `void hwcall System::GetHardwareDeviceDescription(ptr destination)` and `void hwcall System::GetAllHardwareDeviceDescriptions(ptr destination)` can be used by an IronArc program to find out what hardware devices are on the system and where their memory, if any, is mapped. A single device description looks like the following structure, with each field stored sequentially:
 

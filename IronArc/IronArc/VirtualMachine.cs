@@ -12,8 +12,8 @@ namespace IronArc
 {
     public sealed class VirtualMachine
     {
-        public const ushort SpecificationMajorVersion = 0x0001;
-        public const ushort SpecificationMinorVersion = 0x0001;
+        public const ushort SpecificationMajorVersion = 0x0003;
+        public const ushort SpecificationMinorVersion = 0x0000;
         public const uint MagicNumber = 0x45584549; // "IEXE"
         private const ulong HeaderSize = 28UL;
 
@@ -21,14 +21,10 @@ namespace IronArc
         private ulong stringsTableAddress;
         private uint nextHardwareDeviceId;
 
-        public event EventHandler<string> VirtualPageTableCreated;
-        public event EventHandler<string> VirtualPageTableDestroyed;
-
         public Guid MachineId { get; }
         public Processor Processor { get; }
         public ByteBlock SystemMemory { get; }
         public List<HardwareDevice> Hardware { get; }
-        public HardwareMemory HardwareMemory { get; }
         public MemoryManager MemoryManager { get; }
         public ConcurrentQueue<Message> MessageQueue { get; }
         public VMState State { get; private set; }
@@ -47,8 +43,7 @@ namespace IronArc
             SystemMemory = ByteBlock.FromLength(memorySize);
             SystemMemory.WriteAt(program, loadAddress);
             
-            HardwareMemory = new HardwareMemory();
-            MemoryManager = new MemoryManager(SystemMemory, HardwareMemory);
+            MemoryManager = new MemoryManager(SystemMemory);
 
             Processor = new Processor(MemoryManager, loadAddress, (ulong)program.Length + HeaderSize,
                 stringsTableAddress, this);
@@ -221,15 +216,15 @@ namespace IronArc
             var device = Hardware.FirstOrDefault(d => d.DeviceId == deviceId);
 
             var deviceIdBytes = BitConverter.GetBytes(deviceId);
-            var memoryStart = BitConverter.GetBytes(device.MemoryMapping.StartAddress);
-            var memoryEnd = BitConverter.GetBytes(device.MemoryMapping.EndAddress);
+            //var memoryStart = BitConverter.GetBytes(device.MemoryMapping.StartAddress);
+            //var memoryEnd = BitConverter.GetBytes(device.MemoryMapping.EndAddress);
             var nameBytes = device.DeviceName.ToLPString();
             var namePointer = BitConverter.GetBytes(destination + 8UL + 4UL + 8UL + 8UL);
 
             return namePointer
                 .Concat(deviceIdBytes)
-                .Concat(memoryStart)
-                .Concat(memoryEnd)
+                //.Concat(memoryStart)
+                //.Concat(memoryEnd)
                 .Concat(nameBytes);
         }
 
@@ -260,9 +255,5 @@ namespace IronArc
                 .Concat(hardwareDescriptions)
                 .ToArray();
         }
-
-        internal void OnVirtualPageTableCreated(string pageTableName) => VirtualPageTableCreated?.Invoke(this, pageTableName);
-
-        internal void OnVirtualPageTableDestroyed(string pageTableName) => VirtualPageTableDestroyed?.Invoke(this, pageTableName);
     }
 }

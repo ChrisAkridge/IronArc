@@ -102,8 +102,7 @@ namespace IronArc
                 case AddressType.MemoryAddress:
                     value = memory.ReadULong(operandAddress);
                     isPointer = (value & MemoryPointerMask) != 0;
-                    if (isPointer)
-                    { value &= 0x7FFF_FFFF_FFFF_FFFF; }
+                    if (isPointer) { value &= 0x7FFF_FFFF_FFFF_FFFF; }
                     operandLength = 8UL;
                     break;
                 case AddressType.Register:
