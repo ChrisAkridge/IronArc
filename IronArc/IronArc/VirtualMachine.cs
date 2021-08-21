@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Diagnostics.Eventing.Reader;
 using System.IO;
 using System.Linq;
-using System.Text;
 using IronArc.Hardware;
 using IronArc.Memory;
 
@@ -34,7 +32,7 @@ namespace IronArc
         public VirtualMachine(ulong memorySize, string programPath, ulong loadAddress,
             IEnumerable<string> hardwareDeviceNames)
         {
-            byte[] program = File.ReadAllBytes(programPath);
+            var program = File.ReadAllBytes(programPath);
             ParseHeader(program);
 
             MachineId = Guid.NewGuid();
@@ -154,39 +152,36 @@ namespace IronArc
                 // TryDequeue is usually used as the solution to this two-stage check, but it isn't
                 // as performant - it calls IsEmpty internally, which makes it less performant than
                 // just using IsEmpty. So we'll use IsEmpty until we don't have do.
-                if (!MessageQueue.IsEmpty)
+                if (MessageQueue.IsEmpty) { continue; }
+
+                // For now, we'll just respond to SetVMState.
+                if (!MessageQueue.TryDequeue(out var message))
                 {
-                    // For now, we'll just respond to SetVMState.
-                    if (!MessageQueue.TryDequeue(out Message message))
-                    {
-                        throw new InvalidOperationException("Tried to dequeue a message from an empty queue.");
-                        // yay race conditions
-                        // although the only things doing dequeues SHOULD be VMs, hopefully
-                    }
+                    throw new InvalidOperationException("Tried to dequeue a message from an empty queue.");
+                    // yay race conditions
+                    // although the only things doing dequeues SHOULD be VMs, hopefully
+                }
 
-                    if (message.VMMessage == VMMessage.SetVMState)
-                    {
-                        // WParam stores the new state to switch to
-                        if ((VMState)message.WParam != VMState.Paused) { continue; }
+                if (message.VMMessage == VMMessage.SetVMState)
+                {
+                    // WParam stores the new state to switch to
+                    if ((VMState)message.WParam != VMState.Paused) { continue; }
 
-                        Pause();
+                    Pause();
+                    break;
+                }
+
+                switch (message.VMMessage)
+                {
+                    case VMMessage.AddHardwareDevice:
+                        AddHardwareDevice((HardwareDevice)message.Data);
                         break;
-                    }
-                    else
-                    {
-                        switch (message.VMMessage)
-                        {
-                            case VMMessage.AddHardwareDevice:
-                                AddHardwareDevice((HardwareDevice)message.Data);
-                                break;
-                            case VMMessage.RemoveHardwareDevice:
-                                RemoveHardwareDevice((Type)message.Data);
-                                break;
-                            case VMMessage.HardwareInterrupt:
-                                Processor.HandleInterrupt((Interrupt)message.Data);
-                                break;
-                        }
-                    }
+                    case VMMessage.RemoveHardwareDevice:
+                        RemoveHardwareDevice((Type)message.Data);
+                        break;
+                    case VMMessage.HardwareInterrupt:
+                        Processor.HandleInterrupt((Interrupt)message.Data);
+                        break;
                 }
             }
         }
@@ -199,7 +194,10 @@ namespace IronArc
 
         internal void HardwareCall(string hwcall)
         {
-            string[] hwcallParts = hwcall.Split(new[] { "::" }, StringSplitOptions.None);
+            var hwcallParts = hwcall.Split(new[]
+            {
+                "::"
+            }, StringSplitOptions.None);
 
             foreach (var hwDevice in Hardware.Where(d => d.DeviceName == hwcallParts[0]))
             {

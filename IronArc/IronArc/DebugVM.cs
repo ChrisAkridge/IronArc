@@ -3,9 +3,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 using IronArc.Memory;
 
 // ReSharper disable InconsistentNaming
@@ -173,9 +171,10 @@ namespace IronArc
                     NotifyUIThreadOfPause();
                     break;
                 }
-                else if (!MessageQueue.IsEmpty)
+
+                if (!MessageQueue.IsEmpty)
                 {
-                    MessageQueue.TryDequeue(out Message message);
+                    MessageQueue.TryDequeue(out var message);
 
                     if (message.VMMessage != VMMessage.SetVMState || (VMState)message.WParam != VMState.Paused) { continue; }
 
@@ -286,31 +285,18 @@ namespace IronArc
                     NotifyUIThreadOfPause();
                     break;
                 }
-                else if (opcode == 0x0001 /* end */)
+
+                if (opcode == 0x0001 /* end */)
                 {
                     NotifyUIThreadOfPause();
                     break;
                 }
-                else
-                {
-                    vm.ExecuteOneInstruction();
-                }
+
+                vm.ExecuteOneInstruction();
             }
         }
 
         private void OnDebugDisplayInvalidated() => DebugDisplayInvalidated?.Invoke(this, new EventArgs());
         private void OnMemorySpacesChanged() => MemorySpacesChanged?.Invoke(this, new EventArgs());
-
-        private void VirtualPageTableCreated(object sender, string e)
-        {
-            memorySpaceNames.Add(e);
-            OnMemorySpacesChanged();
-        }
-
-        private void VirtualPageTableDestroyed(object sender, string e)
-        {
-            memorySpaceNames.Remove(e);
-            OnMemorySpacesChanged();
-        }
     }
 }

@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using IronArc.HardwareDefinitionGenerator;
 using IronArc.HardwareDefinitionGenerator.Models;
 using DefinitionDevice = IronArc.HardwareDefinitionGenerator.Models.HardwareDevice;
@@ -71,7 +69,11 @@ namespace IronArc.Hardware
                     case "Read":
                     {
                         var character = Read();
-                        vm.Processor.PushExternal(new[] { (byte)(character & 0xFF), (byte)(character >> 8) });
+
+                        vm.Processor.PushExternal(new[]
+                        {
+                            (byte)(character & 0xFF), (byte)(character >> 8)
+                        });
 
                         break;
                     }

@@ -29,7 +29,6 @@ namespace IronArc
         public ulong EFLAGS;
         public ulong ERP;
 
-        public ulong stackArgsMarker;
         public ulong stringsTableAddress;
 
         public Dictionary<InterruptHandlerKey, ulong?[]> interruptTable;
@@ -87,7 +86,6 @@ namespace IronArc
         }
         #endregion
 
-        [SuppressMessage("ReSharper", "MultipleStatementsOnOneLine")]
         public void ExecuteNextInstruction()
         {
             ushort opcode = ReadProgramWord();
@@ -533,7 +531,7 @@ namespace IronArc
 
             for (int i = 0; i < 256; i++)
             {
-                ulong? callAddress = interruptTable[handlerKey][i];
+                var callAddress = interruptTable[handlerKey][i];
                 if (callAddress.HasValue) { CallImpl(callAddress.Value); }
             }
         }
@@ -743,13 +741,13 @@ namespace IronArc
             // Flags Byte: ZZSSDD00, where Z is the size, S is the source type, D is the destination type.
 
             byte flagsByte = ReadProgramByte();
-            OperandSize size = ReadOperandSize((byte)(flagsByte >> 6));
-            AddressType sourceType = ReadAddressType((byte)((flagsByte & 0x30) >> 4));
-            AddressType destinationType = ReadAddressType((byte)((flagsByte & 0x0C) >> 2));
+            var size = ReadOperandSize((byte)(flagsByte >> 6));
+            var sourceType = ReadAddressType((byte)((flagsByte & 0x30) >> 4));
+            var destinationType = ReadAddressType((byte)((flagsByte & 0x0C) >> 2));
 
-            AddressBlock sourceBlock = new AddressBlock(size, sourceType, memory, EIP);
+            var sourceBlock = new AddressBlock(size, sourceType, memory, EIP);
             EIP += sourceBlock.operandLength;
-            AddressBlock destinationBlock = new AddressBlock(size, destinationType, memory, EIP);
+            var destinationBlock = new AddressBlock(size, destinationType, memory, EIP);
             EIP += destinationBlock.operandLength;
 
             ulong sourceData = ReadDataFromAddressBlock(sourceBlock, size);
@@ -774,15 +772,15 @@ namespace IronArc
             //	LL is the length type.
 
             byte flagsByte = ReadProgramByte();
-            AddressType sourceType = ReadAddressType((byte)((flagsByte & 0x30) >> 4));
-            AddressType destinationType = ReadAddressType((byte)((flagsByte & 0x0C) >> 2));
-            AddressType lengthType = ReadAddressType((byte)(flagsByte & 0x03));
+            var sourceType = ReadAddressType((byte)((flagsByte & 0x30) >> 4));
+            var destinationType = ReadAddressType((byte)((flagsByte & 0x0C) >> 2));
+            var lengthType = ReadAddressType((byte)(flagsByte & 0x03));
 
-            AddressBlock sourceBlock = new AddressBlock(OperandSize.QWord, sourceType, memory, EIP);
+            var sourceBlock = new AddressBlock(OperandSize.QWord, sourceType, memory, EIP);
             EIP += sourceBlock.operandLength;
-            AddressBlock destinationBlock = new AddressBlock(OperandSize.QWord, destinationType, memory, EIP);
+            var destinationBlock = new AddressBlock(OperandSize.QWord, destinationType, memory, EIP);
             EIP += destinationBlock.operandLength;
-            AddressBlock lengthBlock = new AddressBlock(OperandSize.DWord, lengthType, memory, EIP);
+            var lengthBlock = new AddressBlock(OperandSize.DWord, lengthType, memory, EIP);
             EIP += lengthBlock.operandLength;
 
             uint length = (uint)ReadDataFromAddressBlock(lengthBlock, OperandSize.DWord);
@@ -804,10 +802,10 @@ namespace IronArc
             // Flags Byte: SSDD0000, where SS is the size and DD is the type of the data.
 
             byte flagsByte = ReadProgramByte();
-            OperandSize size = ReadOperandSize((byte)(flagsByte >> 6));
-            AddressType dataType = ReadAddressType((byte)((flagsByte & 0x30) >> 4));
+            var size = ReadOperandSize((byte)(flagsByte >> 6));
+            var dataType = ReadAddressType((byte)((flagsByte & 0x30) >> 4));
 
-            AddressBlock dataBlock = new AddressBlock(size, dataType, memory, EIP);
+            var dataBlock = new AddressBlock(size, dataType, memory, EIP);
             EIP += dataBlock.operandLength;
 
             ulong data = ReadDataFromAddressBlock(dataBlock, size);

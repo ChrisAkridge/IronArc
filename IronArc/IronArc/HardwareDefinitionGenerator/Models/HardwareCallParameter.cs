@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace IronArc.HardwareDefinitionGenerator.Models
+﻿namespace IronArc.HardwareDefinitionGenerator.Models
 {
     public sealed class HardwareCallParameter
     {

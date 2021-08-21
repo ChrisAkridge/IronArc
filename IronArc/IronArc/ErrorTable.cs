@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
@@ -51,9 +50,9 @@ namespace IronArc
 
         public byte[] GetErrorDescription(ulong address)
         {
-            byte[] errorCodeBytes = BitConverter.GetBytes((uint)Error);
-            byte[] messageLengthBytes = BitConverter.GetBytes(MessageUtf8.Length);
-            byte[] messagePointerBytes = BitConverter.GetBytes(address + 8UL + (ulong)errorCodeBytes.Length);
+            var errorCodeBytes = BitConverter.GetBytes((uint)Error);
+            var messageLengthBytes = BitConverter.GetBytes(MessageUtf8.Length);
+            var messagePointerBytes = BitConverter.GetBytes(address + 8UL + (ulong)errorCodeBytes.Length);
 
             return messagePointerBytes.Concat(errorCodeBytes.Concat(messageLengthBytes.Concat(MessageUtf8))).ToArray();
         }

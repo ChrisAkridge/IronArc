@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
 using IronArc.HardwareDefinitionGenerator.Models;
 using Newtonsoft.Json;
 
@@ -17,9 +15,9 @@ namespace IronArc.HardwareDefinitionGenerator
             var hardwareTypes = GetHardwareTypes();
             IEnumerable<HardwareDevice> devices =
                 hardwareTypes.Select(t => (HardwareDevice)Activator.CreateInstance(t, new Guid(), 0u)).ToList();
-            IEnumerable<Models.HardwareDevice> deviceDefinitions =
+            var deviceDefinitions =
                 devices.Select(d => d.Definition);
-            var definition = new Models.HardwareDefinition(version, deviceDefinitions.ToList());
+            var definition = new HardwareDefinition(version, deviceDefinitions.ToList());
 
             foreach (HardwareDevice device in devices)
             {
@@ -54,8 +52,11 @@ namespace IronArc.HardwareDefinitionGenerator
                 .Split(' ');
 
             var returnType = typeAndName[0];
-            var deviceAndCallName = typeAndName[2].Split(new[] {"::"}, StringSplitOptions.None);
-            var deviceName = deviceAndCallName[0];
+            var deviceAndCallName = typeAndName[2]
+                .Split(new[]
+                {
+                    "::"
+                }, StringSplitOptions.None);
             var callName = deviceAndCallName[1];
             
             return new HardwareCall(MapHardwareCallTypeToCixType(returnType, 0),

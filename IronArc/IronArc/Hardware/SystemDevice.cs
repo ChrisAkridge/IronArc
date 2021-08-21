@@ -1,11 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using IronArc.HardwareDefinitionGenerator;
 using IronArc.HardwareDefinitionGenerator.Models;
-using IronArc.Memory;
 
 namespace IronArc.Hardware
 {
@@ -42,75 +39,98 @@ namespace IronArc.Hardware
         {
             string lowerCased = functionName.ToLowerInvariant();
 
-            if (lowerCased == "registerinterrupthandler")
+            switch (lowerCased)
             {
-                uint deviceId = (uint)vm.Processor.PopExternal(OperandSize.DWord);
-                ulong interruptNameAddress = vm.Processor.PopExternal(OperandSize.QWord);
-                ulong handlerAddress = vm.Processor.PopExternal(OperandSize.QWord);
+                case "registerinterrupthandler":
+                {
+                    uint deviceId = (uint)vm.Processor.PopExternal(OperandSize.DWord);
+                    ulong interruptNameAddress = vm.Processor.PopExternal(OperandSize.QWord);
+                    ulong handlerAddress = vm.Processor.PopExternal(OperandSize.QWord);
 
-                string interruptName = vm.Processor.ReadStringFromMemory(interruptNameAddress);
-                RegisterInterruptHandler(vm, deviceId, interruptName, handlerAddress);
-            }
-            else if (lowerCased == "unregisterinterrupthandler")
-            {
-                uint deviceId = (uint)vm.Processor.PopExternal(OperandSize.DWord);
-                ulong interruptNamePointer = vm.Processor.PopExternal(OperandSize.QWord);
-                byte handlerIndex = (byte)vm.Processor.PopExternal(OperandSize.Byte);
+                    string interruptName = vm.Processor.ReadStringFromMemory(interruptNameAddress);
+                    RegisterInterruptHandler(vm, deviceId, interruptName, handlerAddress);
 
-                string interruptName = vm.Processor.ReadStringFromMemory(interruptNamePointer);
-                UnregisterInterruptHandler(vm, deviceId, interruptName, handlerIndex);
-            }
-            else if (lowerCased == "raiseerror")
-            {
-                uint errorCode = (uint)vm.Processor.PopExternal(OperandSize.DWord);
-                RaiseError(vm, errorCode);
-            }
-            else if (lowerCased == "registererrorhandler")
-            {
-                uint errorCode = (uint)vm.Processor.PopExternal(OperandSize.DWord);
-                ulong handlerAddress = vm.Processor.PopExternal(OperandSize.QWord);
+                    break;
+                }
+                case "unregisterinterrupthandler":
+                {
+                    uint deviceId = (uint)vm.Processor.PopExternal(OperandSize.DWord);
+                    ulong interruptNamePointer = vm.Processor.PopExternal(OperandSize.QWord);
+                    byte handlerIndex = (byte)vm.Processor.PopExternal(OperandSize.Byte);
 
-                RegisterErrorHandler(vm, errorCode, handlerAddress);
-            }
-            else if (lowerCased == "unregistererrorhandler")
-            {
-                uint errorCode = (uint)vm.Processor.PopExternal(OperandSize.DWord);
+                    string interruptName = vm.Processor.ReadStringFromMemory(interruptNamePointer);
+                    UnregisterInterruptHandler(vm, deviceId, interruptName, handlerIndex);
+
+                    break;
+                }
+                case "raiseerror":
+                {
+                    uint errorCode = (uint)vm.Processor.PopExternal(OperandSize.DWord);
+                    RaiseError(vm, errorCode);
+
+                    break;
+                }
+                case "registererrorhandler":
+                {
+                    uint errorCode = (uint)vm.Processor.PopExternal(OperandSize.DWord);
+                    ulong handlerAddress = vm.Processor.PopExternal(OperandSize.QWord);
+
+                    RegisterErrorHandler(vm, errorCode, handlerAddress);
+
+                    break;
+                }
+                case "unregistererrorhandler":
+                {
+                    uint errorCode = (uint)vm.Processor.PopExternal(OperandSize.DWord);
                 
-                UnregisterErrorHandler(vm, errorCode);
-            }
-            else if (lowerCased == "getlasterrordescriptionsize")
-            {
-                ulong size = GetLastErrorDescriptionSize(vm);
-                vm.Processor.PushExternal(size, OperandSize.QWord);
-            }
-            else if (lowerCased == "getlasterrordescription")
-            {
-                ulong destination = vm.Processor.PopExternal(OperandSize.QWord);
-                GetLastErrorDescription(vm, destination);
-            }
-            else if (lowerCased == "gethardwaredevicedescriptionsize")
-            {
-                uint deviceId = (uint)vm.Processor.PopExternal(OperandSize.DWord);
-                GetHardwareDeviceDescriptionSize(vm, deviceId);
-            }
-            else if (lowerCased == "gethardwaredevicedescription")
-            {
-                uint deviceId = (uint)vm.Processor.PopExternal(OperandSize.DWord);
-                ulong destination = vm.Processor.PopExternal(OperandSize.QWord);
-                GetHardwareDeviceDescription(vm, deviceId, destination);
-            }
-            else if (lowerCased == "getallhardwaredevicedescriptionssize")
-            {
-                GetAllHardwareDeviceDescriptionsSize(vm);
-            }
-            else if (lowerCased == "getallhardwaredevicedescriptions")
-            {
-                ulong destination = vm.Processor.PopExternal(OperandSize.QWord);
-                GetAllHardwareDeviceDescriptions(vm, destination);
+                    UnregisterErrorHandler(vm, errorCode);
+
+                    break;
+                }
+                case "getlasterrordescriptionsize":
+                {
+                    ulong size = GetLastErrorDescriptionSize(vm);
+                    vm.Processor.PushExternal(size, OperandSize.QWord);
+
+                    break;
+                }
+                case "getlasterrordescription":
+                {
+                    ulong destination = vm.Processor.PopExternal(OperandSize.QWord);
+                    GetLastErrorDescription(vm, destination);
+
+                    break;
+                }
+                case "gethardwaredevicedescriptionsize":
+                {
+                    uint deviceId = (uint)vm.Processor.PopExternal(OperandSize.DWord);
+                    GetHardwareDeviceDescriptionSize(vm, deviceId);
+
+                    break;
+                }
+                case "gethardwaredevicedescription":
+                {
+                    uint deviceId = (uint)vm.Processor.PopExternal(OperandSize.DWord);
+                    ulong destination = vm.Processor.PopExternal(OperandSize.QWord);
+                    GetHardwareDeviceDescription(vm, deviceId, destination);
+
+                    break;
+                }
+                case "getallhardwaredevicedescriptionssize":
+                    GetAllHardwareDeviceDescriptionsSize(vm);
+
+                    break;
+                case "getallhardwaredevicedescriptions":
+                {
+                    ulong destination = vm.Processor.PopExternal(OperandSize.QWord);
+                    GetAllHardwareDeviceDescriptions(vm, destination);
+
+                    break;
+                }
             }
         }
 
-        private void RegisterInterruptHandler(VirtualMachine vm, uint deviceId, string interruptName, ulong handlerAddress)
+        private static void RegisterInterruptHandler(VirtualMachine vm, uint deviceId, string interruptName, ulong handlerAddress)
         {
             if (vm.Hardware.All(h => h.DeviceId != deviceId))
             {
@@ -121,7 +141,7 @@ namespace IronArc.Hardware
             vm.Processor.RegisterInterruptHandler(deviceId, interruptName, handlerAddress);
         }
 
-        private void UnregisterInterruptHandler(VirtualMachine vm, uint deviceId, string interruptName, byte handlerIndex)
+        private static void UnregisterInterruptHandler(VirtualMachine vm, uint deviceId, string interruptName, byte handlerIndex)
         {
             if (vm.Hardware.All(h => h.DeviceId != deviceId))
             {
@@ -134,34 +154,34 @@ namespace IronArc.Hardware
             vm.Processor.UnregisterInterruptHandler(deviceId, interruptName, handlerIndex);
         }
 
-        private void RaiseError(VirtualMachine vm, uint errorCode)
+        private static void RaiseError(VirtualMachine vm, uint errorCode)
         {
             vm.Processor.RaiseError(errorCode, null);
         }
 
-        private void RegisterErrorHandler(VirtualMachine vm, uint errorCode, ulong handlerAddress)
+        private static void RegisterErrorHandler(VirtualMachine vm, uint errorCode, ulong handlerAddress)
         {
             vm.Processor.RegisterErrorHandler(errorCode, handlerAddress);
         }
 
-        private void UnregisterErrorHandler(VirtualMachine vm, uint errorCode)
+        private static void UnregisterErrorHandler(VirtualMachine vm, uint errorCode)
         {
             vm.Processor.UnregisterErrorHandler(errorCode);
         }
 
-        private ulong GetLastErrorDescriptionSize(VirtualMachine vm) => vm.LastError.GetErrorDescriptionSize();
+        private static ulong GetLastErrorDescriptionSize(VirtualMachine vm) => vm.LastError.GetErrorDescriptionSize();
 
-        private void GetLastErrorDescription(VirtualMachine vm, ulong destination)
+        private static void GetLastErrorDescription(VirtualMachine vm, ulong destination)
         {
             var errorDescription = vm.LastError.GetErrorDescription(destination);
             vm.MemoryManager.Write(errorDescription, destination);
         }
 
-        private void GetHardwareDeviceDescriptionSize(VirtualMachine vm, uint deviceId)
+        private static void GetHardwareDeviceDescriptionSize(VirtualMachine vm, uint deviceId)
         {
             if (vm.Hardware.All(d => d.DeviceId != deviceId))
             {
-                vm.Processor.RaiseError(IronArc.Error.HardwareError, $"No device with ID {deviceId} exists.");
+                vm.Processor.RaiseError(Error.HardwareError, $"No device with ID {deviceId} exists.");
 
                 return;
             }
@@ -170,11 +190,11 @@ namespace IronArc.Hardware
             vm.Processor.PushExternal((ulong)description.Count(), OperandSize.QWord);
         }
 
-        private void GetHardwareDeviceDescription(VirtualMachine vm, uint deviceId, ulong destination)
+        private static void GetHardwareDeviceDescription(VirtualMachine vm, uint deviceId, ulong destination)
         {
             if (vm.Hardware.All(d => d.DeviceId != deviceId))
             {
-                vm.Processor.RaiseError(IronArc.Error.HardwareError, $"No device with ID {deviceId} exists.");
+                vm.Processor.RaiseError(Error.HardwareError, $"No device with ID {deviceId} exists.");
 
                 return;
             }
@@ -183,13 +203,13 @@ namespace IronArc.Hardware
             vm.MemoryManager.Write(description, destination);
         }
 
-        private void GetAllHardwareDeviceDescriptionsSize(VirtualMachine vm)
+        private static void GetAllHardwareDeviceDescriptionsSize(VirtualMachine vm)
         {
             var descriptions = vm.GetAllHardwareDescriptions(0UL);
             vm.Processor.PushExternal((ulong)descriptions.Length, OperandSize.QWord);
         }
 
-        private void GetAllHardwareDeviceDescriptions(VirtualMachine vm, ulong destination)
+        private static void GetAllHardwareDeviceDescriptions(VirtualMachine vm, ulong destination)
         {
             var descriptions = vm.GetAllHardwareDescriptions(destination);
             vm.MemoryManager.Write(descriptions, destination);

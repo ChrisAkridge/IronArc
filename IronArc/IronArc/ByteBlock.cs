@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 
@@ -25,7 +23,7 @@ namespace IronArc
 
         public byte[] ToByteArray()
         {
-            byte[] result = new byte[Length];
+            var result = new byte[Length];
 
             Marshal.Copy((IntPtr)pointer, result, 0, (int)Length);
 
@@ -62,7 +60,7 @@ namespace IronArc
                     $"Cannot read data at 0x{address:X2} of length {length}. Arguement(s) out of range.");
             }
 
-            byte[] result = new byte[length];
+            var result = new byte[length];
             for (ulong i = 0; i < length; i++)
             {
                 result[i] = *(pointer + address);
@@ -84,83 +82,48 @@ namespace IronArc
             Marshal.Copy(addressPointer, buffer, startIndex, length);
         }
 
-        public bool ReadBoolAt(ulong address)
-        {
-            if (address >= Length)
-            {
-                throw new ArgumentOutOfRangeException($"Cannot read bool at 0x{address:X2}. Argument out of range.");
-            }
+        public bool ReadBoolAt(ulong address) =>
+            address >= Length
+                ? throw new ArgumentOutOfRangeException($"Cannot read bool at 0x{address:X2}. Argument out of range.")
+                : *(pointer + address) != 0;
 
-            return *(pointer + address) != 0;
-        }
-
-        public byte ReadByteAt(ulong address)
-        {
-            if (address >= Length)
-            {
-                throw new ArgumentOutOfRangeException($"Cannot read byte at 0x{address:X2}. Argument out of range.");
-            }
-
-            return *(pointer + address);
-        }
+        public byte ReadByteAt(ulong address) =>
+            address >= Length
+                ? throw new ArgumentOutOfRangeException($"Cannot read byte at 0x{address:X2}. Argument out of range.")
+                : *(pointer + address);
 
         public sbyte ReadSByteAt(ulong address) => (sbyte)ReadByteAt(address);
 
-        public short ReadShortAt(ulong address)
-        {
-            if (address + 2 >= Length)
-            {
-                throw new ArgumentOutOfRangeException($"Cannot read short at 0x{address:X2}. Argument out of range.");
-            }
-
-            return *(short*)(pointer + address);
-        }
+        public short ReadShortAt(ulong address) =>
+            address + 2 >= Length
+                ? throw new ArgumentOutOfRangeException($"Cannot read short at 0x{address:X2}. Argument out of range.")
+                : *(short*)(pointer + address);
 
         public ushort ReadUShortAt(ulong address) => (ushort)ReadShortAt(address);
 
-        public int ReadIntAt(ulong address)
-        {
-            if (address + 4 >= Length)
-            {
-                throw new ArgumentOutOfRangeException($"Cannot read int at 0x{address:X2}. Argument out of range.");
-            }
-
-            return *(int*)(pointer + address);
-        }
+        public int ReadIntAt(ulong address) =>
+            address + 4 >= Length
+                ? throw new ArgumentOutOfRangeException($"Cannot read int at 0x{address:X2}. Argument out of range.")
+                : *(int*)(pointer + address);
 
         public uint ReadUIntAt(ulong address) => (uint)ReadIntAt(address);
 
-        public long ReadLongAt(ulong address)
-        {
-            if (address + 8 >= Length)
-            {
-                throw new ArgumentOutOfRangeException($"Cannot read long at 0x{address:X2}. Argument out of range.");
-            }
-
-            return *(long*)(pointer + address);
-        }
+        public long ReadLongAt(ulong address) =>
+            address + 8 >= Length
+                ? throw new ArgumentOutOfRangeException($"Cannot read long at 0x{address:X2}. Argument out of range.")
+                : *(long*)(pointer + address);
 
         public ulong ReadULongAt(ulong address) => (ulong)ReadLongAt(address);
 
-        public float ReadFloatAt(ulong address)
-        {
-            if (address + 4 >= Length)
-            {
-                throw new ArgumentOutOfRangeException($"Cannot read float at 0x{address:X2}. Argument out of range.");
-            }
+        public float ReadFloatAt(ulong address) =>
+            address + 4 >= Length
+                ? throw new ArgumentOutOfRangeException($"Cannot read float at 0x{address:X2}. Argument out of range.")
+                : *(float*)(pointer + address);
 
-            return *(float*)(pointer + address);
-        }
-
-        public double ReadDoubleAt(ulong address)
-        {
-            if (address + 8 >= Length)
-            {
-                throw new ArgumentOutOfRangeException($"Cannot read double at 0x{address:X2}. Argument out of range.");
-            }
-
-            return *(double*)(pointer + address);
-        }
+        public double ReadDoubleAt(ulong address) =>
+            address + 8 >= Length
+                ? throw new ArgumentOutOfRangeException($"Cannot read double at 0x{address:X2}. Argument out of range.")
+                : *(double*)(pointer + address);
 
         public char ReadCharAt(uint address) => (char)ReadShortAt(address);
 
@@ -174,7 +137,7 @@ namespace IronArc
                 throw new ArgumentOutOfRangeException($"Cannot read string at 0x{address:X2}. Argument out of range.");
             }
 
-            byte[] utf8 = new byte[stringLength];
+            var utf8 = new byte[stringLength];
             for (int i = 0; i < stringLength; i++)
             {
                 utf8[i] = *(pointer + address);
@@ -242,8 +205,8 @@ namespace IronArc
 
         public void WriteAt(ulong sourceAddress, ulong destAddress, uint length)
         {
-            byte* sourceStart = pointer + sourceAddress;
-            byte* destStart = pointer + destAddress;
+            var sourceStart = pointer + sourceAddress;
+            var destStart = pointer + destAddress;
 
             for (uint i = 0u; i < length; i++)
             {
@@ -333,7 +296,7 @@ namespace IronArc
 
         public void WriteStringAt(string value, ulong address)
         {
-            byte[] utf8 = Encoding.UTF8.GetBytes(value);
+            var utf8 = Encoding.UTF8.GetBytes(value);
             int stringLength = utf8.Length;
 
             if (address + 4UL + (ulong)stringLength >= Length)
@@ -375,11 +338,10 @@ namespace IronArc
 
         public void Dispose()
         {
-            if ((IntPtr)pointer != IntPtr.Zero)
-            {
-                Marshal.FreeHGlobal((IntPtr)pointer);
-                pointer = (byte*)0;
-            }
+            if ((IntPtr)pointer == IntPtr.Zero) { return; }
+
+            Marshal.FreeHGlobal((IntPtr)pointer);
+            pointer = (byte*)0;
         }
 
         public static ByteBlock FromLength(ulong length)

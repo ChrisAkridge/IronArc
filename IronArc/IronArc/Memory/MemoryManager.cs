@@ -1,9 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
-using PageTable = System.Collections.Generic.Dictionary<ulong, ulong>;
 
 namespace IronArc.Memory
 {
@@ -13,10 +9,7 @@ namespace IronArc.Memory
 
         public ulong SystemMemoryLength => systemMemory.Length;
 
-        public MemoryManager(ByteBlock systemMemory)
-        {
-            this.systemMemory = systemMemory;
-        }
+        public MemoryManager(ByteBlock systemMemory) => this.systemMemory = systemMemory;
 
         public byte[] Read(ulong address, ulong length) => systemMemory.ReadAt(address, length);
 
@@ -65,7 +58,7 @@ namespace IronArc.Memory
 
         public void Write(ulong source, ulong destination, ulong length)
         {
-            byte[] bytes = Read(source, length);
+            var bytes = Read(source, length);
             Write(bytes, destination);
         }
 
