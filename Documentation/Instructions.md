@@ -210,7 +210,7 @@
 - Mnemonic: `ctxcreate`
 - Arguments: `ctxcreate MEM_SIZE`
 	- `MEM_SIZE`: The amount of memory to allocate for the new context. Implicitly QWORD.
-- Description: Creates a new context with `MEM_SIZE` bytes of memory. The context is given the next available ID. If the last used context ID is `0xFFFFFFFF`, the next ID is `0x00000001`, skipping 0. If `0x00000001` happens to be in use, a VM error is raised and the developer is encouraged to consider why they have billions of active contexts at the same time. The context's new ID is pushed onto the stack and its saved set of registers are all initialized to 0.
+- Description: Creates a new context with `MEM_SIZE` bytes of memory. The context is given the next available ID. If the last used context ID is `0xFFFFFFFF`, the next ID is `0x00000002`, skipping 0. If `0x00000002` happens to be in use, a VM error is raised. The context's new ID is pushed onto the stack and its saved set of registers are all initialized to 0, except for ECC.
 - Errors:
   - Raises `MaybeJustKeepItToTheLowHundredMillionsOfContexts` if the new context's ID is already in use
   - Raises `UnauthorizedContextOperation` if `ECC` is not 0 (that is, we're not in the kernel context)
@@ -224,6 +224,7 @@
 - Description: Destroys the context with ID `CTX_ID` and frees its memory block.
 - Errors:
   - Raises `NoSuchContext` if the context ID is not in use.
+  - Raises `ProtectedContext` if the context ID is 0 or 1.
   - Raises `UnauthorizedContextOperation` if `ECC` is not 0 (that is, we're not in the kernel context)
   
 ## Context Switch

@@ -46,7 +46,11 @@ namespace IronArc
             Processor = new Processor(MemoryManager, loadAddress, (ulong)program.Length + HeaderSize,
                 stringsTableAddress, this);
             Processor.EIP += firstInstructionAddress;
-            Hardware = new List<HardwareDevice> { new SystemDevice(MachineId, nextHardwareDeviceId++) };
+
+            Hardware = new List<HardwareDevice>
+            {
+                new SystemDevice(MachineId, nextHardwareDeviceId++)
+            };
 
             foreach (var type in hardwareDeviceNames.Select(name => Type.GetType(name)))
             {

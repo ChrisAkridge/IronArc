@@ -7,24 +7,28 @@ namespace IronArcHost
     public sealed class MemoryManagerByteProvider : IByteProvider
     {
         private readonly MemoryManager manager;
-        
-        public uint ViewedPageTableId { get; set; }
+        private readonly int displayedContextID;
 
-        public MemoryManagerByteProvider(MemoryManager manager) => this.manager = manager;
+        public MemoryManagerByteProvider(MemoryManager manager, int displayedContextId)
+        {
+            this.manager = manager;
+            this.displayedContextID = displayedContextId;
+        }
 
         /// <summary>
         /// Reads a byte from the provider
         /// </summary>
         /// <param name="index">the index of the byte to read</param>
         /// <returns>the byte to read</returns>
-        public byte ReadByte(long index) => manager.ReadByte((ulong)index);
+        public byte ReadByte(long index) => manager.ReadByteInContext(displayedContextID, (ulong)index);
 
         /// <summary>
         /// Writes a byte into the provider
         /// </summary>
         /// <param name="index">the index of the byte to write</param>
         /// <param name="value">the byte to write</param>
-        public void WriteByte(long index, byte value) => manager.WriteByte(value, (ulong)index);
+        public void WriteByte(long index, byte value) =>
+            manager.WriteByteInContext(displayedContextID, value, (ulong)index);
 
         /// <summary>
         /// Inserts bytes into the provider
@@ -45,7 +49,7 @@ namespace IronArcHost
         /// <summary>
         /// Returns the total length of bytes the byte provider is providing.
         /// </summary>
-        public long Length => (long)manager.SystemMemoryLength;
+        public long Length => (long)manager.GetContextLength(displayedContextID);
 
         /// <summary>
         /// Occurs, when the Length property changed.

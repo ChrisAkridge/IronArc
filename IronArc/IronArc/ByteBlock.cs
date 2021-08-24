@@ -31,7 +31,7 @@ namespace IronArc
         }
 
         public UnmanagedMemoryStream CreateStream() => new UnmanagedMemoryStream(pointer, (long)Length);
-
+        
         /// <summary>
         /// Initializes a new instance of this <see cref="ByteBlock"/> class.
         /// </summary>
@@ -335,6 +335,21 @@ namespace IronArc
             }
         }
         #endregion
+
+        public void Transfer(ByteBlock that, ulong thisAddress, ulong thatAddress, uint count)
+        {
+            var thisPointer = pointer + thisAddress;
+            var thatPointer = pointer + thatAddress;
+
+            // TODO: replace with System.Buffer.MemoryCopy when we go to .NET 5
+            // https://docs.microsoft.com/en-us/dotnet/api/system.buffer.memorycopy
+            for (uint u = 0; u < count; u++)
+            {
+                *thatPointer = *thisPointer;
+                thisPointer += 1;
+                thatPointer += 1;
+            }
+        }
 
         public void Dispose()
         {

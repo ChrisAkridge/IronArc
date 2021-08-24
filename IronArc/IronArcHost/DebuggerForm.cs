@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Drawing;
 using System.Globalization;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Windows.Forms;
 using IronArc;
 using IronAssembler.DisassemblyWindows;
@@ -16,12 +17,14 @@ namespace IronArcHost
         private readonly DebugVM vm;
         private readonly DisassemblyWindow disassemblyWindow;
         private readonly ConcurrentQueue<IronArc.Message> messageQueue;
+        private readonly Regex contextNumberRegex;
         private bool isAnimating;
 
         public DebuggerForm(VirtualMachine vm)
         {
             messageQueue = new ConcurrentQueue<IronArc.Message>();
             this.vm = new DebugVM(vm, messageQueue);
+            contextNumberRegex = new Regex(@"#\d+");
 
             InitializeComponent();
 
@@ -30,16 +33,16 @@ namespace IronArcHost
 
             RefreshDisassemblyList();
 
-            HexMemory.ByteProvider = new VMMemoryByteProvider(this.vm);
+            HexMemory.ByteProvider = new MemoryManagerByteProvider(vm.MemoryManager, 0);
 
-            foreach (var memorySpaceName in this.vm.MemorySpaceNames)
+            foreach (var contextName in this.vm.ContextNames)
             {
-                ComboMemorySpace.Items.Add(memorySpaceName);
+                ComboContexts.Items.Add(contextName);
             }
 
             SubscribeRegisterLinkClickEvents();
             this.vm.DebugDisplayInvalidated += Vm_DebugDisplayInvalidated;
-            this.vm.MemorySpacesChanged += DebugVM_MemorySpacesChanged;
+            this.vm.ContextsChanged += DebugVmContextsChanged;
         }
 
         private void SubscribeRegisterLinkClickEvents()
@@ -66,8 +69,12 @@ namespace IronArcHost
             int numberOfItems = DisassemblyDisplayedItems;
             for (int i = 0; i < numberOfItems; i++)
             {
-                WindowInstruction instruction = disassemblyWindow.GetInstructionAtWindowPosition(i);
-                var lvi = new ListViewItem { Text = instruction.ToString() };
+                var instruction = disassemblyWindow.GetInstructionAtWindowPosition(i);
+
+                var lvi = new ListViewItem
+                {
+                    Text = instruction.ToString()
+                };
 
                 if (vm.AddressHasUserVisibleBreakpoint(instruction.Address))
                 {
@@ -268,29 +275,22 @@ namespace IronArcHost
             // also does changing memory in the hex editor actually do anything to the
             // memory? There's a Changed event that doesn't seem to be subscribed
             // to anywhere
-            string memorySpaceName = (string)ComboMemorySpace.SelectedItem;
-
-            if (memorySpaceName == "System Memory")
-            {
-                HexMemory.ByteProvider = new VMMemoryByteProvider(vm);
-            }
-            //else
-            //{
-            //    uint deviceId = uint.Parse(memorySpaceName.Split(' ')[1]);
-            //    HexMemory.ByteProvider = new ByteBlockByteProvider(vm.GetHardwareMemoryByteBlock(deviceId));
-            //}
+            var contextName = (string)ComboContexts.SelectedItem;
+            var contextIDString = contextNumberRegex.Match(contextName).Value;
+            var contextID = int.Parse(contextIDString.Substring(1));
+            
+            HexMemory.ByteProvider = new MemoryManagerByteProvider(vm.MemoryManager, contextID);
         }
 
-        private void DebugVM_MemorySpacesChanged(object sender, EventArgs e)
+        private void DebugVmContextsChanged(object sender, EventArgs e)
         {
-            string previouslySelectedMemorySpaceName = (string)ComboMemorySpace.SelectedItem;
-            ComboMemorySpace.Items.Clear();
-            ComboMemorySpace.Items.Add("System Memory");
-            ComboMemorySpace.Items.AddRange(vm.MemorySpaceNames.OfType<object>().ToArray());
+            string previouslySelectedMemorySpaceName = (string)ComboContexts.SelectedItem;
+            ComboContexts.Items.Clear();
+            ComboContexts.Items.AddRange(vm.ContextNames.OfType<object>().ToArray());
 
-            ComboMemorySpace.SelectedIndex =
-                vm.MemorySpaceNames.Any(n => n == previouslySelectedMemorySpaceName) 
-                    ? ComboMemorySpace.Items.IndexOf(previouslySelectedMemorySpaceName)
+            ComboContexts.SelectedIndex =
+                vm.ContextNames.Any(n => n == previouslySelectedMemorySpaceName) 
+                    ? ComboContexts.Items.IndexOf(previouslySelectedMemorySpaceName)
                     : 0;
         }
     }

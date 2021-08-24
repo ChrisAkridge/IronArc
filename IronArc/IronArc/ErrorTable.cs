@@ -16,14 +16,13 @@ namespace IronArc
         HeaderInvalid,
         StringIndexOutOfRange,
         StackUnderflow,
-        NoSuchPageTable,
-        CannotDestroyCurrentPageTable,
-        CrossPlaneAccess,
-        ReservedPlaneAccess,
-        CrossHardwareMemoryAccess,
-        NoHardwareMemoryHere,
-        OutOfVirtualMemory,
-        HardwareError
+        HardwareError,
+        RegisterReadOnly,
+        UnauthorizedContextOperation,
+        MaybeJustKeepItToTheLowHundredMillionsOfContexts,
+        ProtectedContext,
+        NoSuchContext,
+        CannotSwitchToHardwareContext
     }
 
     public sealed class ErrorDescription
@@ -75,15 +74,17 @@ namespace IronArc
                 case Error.HeaderInvalid: return "The loaded program has an invalid header.";
                 case Error.StringIndexOutOfRange: return "There is no string at the requested index.";
                 case Error.StackUnderflow: return "The stack has popped more items than it has.";
-                case Error.NoSuchPageTable: return "There is no page table with this ID.";
-                case Error.CannotDestroyCurrentPageTable:
-                    return "Attempted to destroy the page table that is currently in use.";
-                case Error.CrossPlaneAccess: return "A memory access crossed a plane boundary.";
-                case Error.ReservedPlaneAccess: return "A memory access occurred in a reserved plane.";
-                case Error.CrossHardwareMemoryAccess:
-                    return "A memory access occurred across two or more hardware device memory spaces.";
-                case Error.NoHardwareMemoryHere: return "Attempted to access hardware memory where none was mapped.";
-                case Error.OutOfVirtualMemory: return "A page fault could not allocate another page.";
+                case Error.HardwareError: return "A hardware device has encountered an error.";
+                case Error.RegisterReadOnly: return "This register is read-only and cannot be written to.";
+                case Error.UnauthorizedContextOperation:
+                    return "Cannot perform this operation from another context besides #0.";
+                case Error.MaybeJustKeepItToTheLowHundredMillionsOfContexts:
+                    return "Over 2.1 billion active contexts at the same time. Impressive. You do know you can destroy contexts, right?";
+                case Error.ProtectedContext: return "This context does not support this operation.";
+                case Error.NoSuchContext: return "No context has this ID.";
+                case Error.CannotSwitchToHardwareContext:
+                    return
+                        "Cannot switch to the hardware context. Please use the CTXMOV instruction to read/write hardware memory.";
                 default: return $"Attempted to raise non-existant error {(uint)error}. Congratulations.";
             }
         }
@@ -105,6 +106,7 @@ namespace IronArc
                 case 10UL: return "EIP";
                 case 11UL: return "EFLAGS";
                 case 12UL: return "ERP";
+                case 13UL: return "ECC";
                 default: return $"unknown register #{registerIndex}";
             }
         }

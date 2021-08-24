@@ -71,6 +71,7 @@
             this.TextECX = new System.Windows.Forms.TextBox();
             this.LinkEBX = new System.Windows.Forms.LinkLabel();
             this.GroupMemory = new System.Windows.Forms.GroupBox();
+            this.ComboContexts = new System.Windows.Forms.ComboBox();
             this.HexMemory = new Be.Windows.Forms.HexBox();
             this.GroupCallStackViewer = new System.Windows.Forms.GroupBox();
             this.ListCallStackViewer = new System.Windows.Forms.ListView();
@@ -78,7 +79,6 @@
             this.ColumnEBP = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.TmrQueueListener = new System.Windows.Forms.Timer(this.components);
             this.TimerAnimateExecution = new System.Windows.Forms.Timer(this.components);
-            this.ComboMemorySpace = new System.Windows.Forms.ComboBox();
             this.GroupBoxDisassembly.SuspendLayout();
             this.ToolStripDebugger.SuspendLayout();
             this.GroupRegisters.SuspendLayout();
@@ -511,7 +511,7 @@
             this.GroupMemory.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.GroupMemory.Controls.Add(this.ComboMemorySpace);
+            this.GroupMemory.Controls.Add(this.ComboContexts);
             this.GroupMemory.Controls.Add(this.HexMemory);
             this.GroupMemory.Location = new System.Drawing.Point(369, 32);
             this.GroupMemory.Name = "GroupMemory";
@@ -519,6 +519,15 @@
             this.GroupMemory.TabIndex = 3;
             this.GroupMemory.TabStop = false;
             this.GroupMemory.Text = "Memory";
+            // 
+            // ComboContexts
+            // 
+            this.ComboContexts.FormattingEnabled = true;
+            this.ComboContexts.Location = new System.Drawing.Point(10, 21);
+            this.ComboContexts.Name = "ComboContexts";
+            this.ComboContexts.Size = new System.Drawing.Size(363, 21);
+            this.ComboContexts.TabIndex = 1;
+            this.ComboContexts.SelectedIndexChanged += new System.EventHandler(this.ComboMemorySpace_SelectedIndexChanged);
             // 
             // HexMemory
             // 
@@ -581,15 +590,6 @@
             // TimerAnimateExecution
             // 
             this.TimerAnimateExecution.Tick += new System.EventHandler(this.TimerAnimateExecution_Tick);
-            // 
-            // ComboMemorySpace
-            // 
-            this.ComboMemorySpace.FormattingEnabled = true;
-            this.ComboMemorySpace.Location = new System.Drawing.Point(10, 21);
-            this.ComboMemorySpace.Name = "ComboMemorySpace";
-            this.ComboMemorySpace.Size = new System.Drawing.Size(363, 21);
-            this.ComboMemorySpace.TabIndex = 1;
-            this.ComboMemorySpace.SelectedIndexChanged += new System.EventHandler(this.ComboMemorySpace_SelectedIndexChanged);
             // 
             // DebuggerForm
             // 
@@ -668,6 +668,6 @@
 		private System.Windows.Forms.ListView ListDisassembly;
 		private System.Windows.Forms.Timer TmrQueueListener;
 		private System.Windows.Forms.Timer TimerAnimateExecution;
-		private System.Windows.Forms.ComboBox ComboMemorySpace;
+		private System.Windows.Forms.ComboBox ComboContexts;
 	}
 }

@@ -28,6 +28,7 @@ namespace IronArc
         public ulong EIP;
         public ulong EFLAGS;
         public ulong ERP;
+        public int ECC;
 
         public ulong stringsTableAddress;
 
@@ -163,6 +164,21 @@ namespace IronArc
                             case 0x05:
                                 ArrayWrite();
                                 break;
+                            case 0x06:
+                                CreateContext();
+                                break;
+                            case 0x07:
+                                DestroyContext();
+                                break;
+                            case 0x08:
+                                ContextSwitch();
+                                break;
+                            case 0x09:
+                                SetDestinationContext();
+                                break;
+                            case 0x0A:
+                                MoveMemoryToContext();
+                                break;
                             default: break;
                         }
 
@@ -203,6 +219,7 @@ namespace IronArc
                 case 10UL: return EIP;
                 case 11UL: return EFLAGS;
                 case 12UL: return ERP;
+                case 13UL: return (ulong)ECC;
                 default:
                     throw new ArgumentException($"There is no register numbered {registerNumber}. Please ensure you've masked out the high two bits.");
             }
@@ -226,6 +243,7 @@ namespace IronArc
                 case 10UL: EIP = value; break;
                 case 11UL: EFLAGS = value; break;
                 case 12UL: ERP = value; break;
+                case 13UL: RaiseError(Error.RegisterReadOnly, "Cannot write to ECC directly; please use ctxswitch."); break;
                 default:
                     throw new ArgumentException($"There is no register numbered {registerNumber}. Please ensure you've masked out the high two bits.");
             }
@@ -912,6 +930,139 @@ namespace IronArc
             ulong arrayIndexAddress = arrayStartAddress + (arrayIndex * elementSizeInBytes);
             memory.WriteData(ReadDataFromAddressBlock(dataBlock, size), arrayIndexAddress,
                 size);
+        }
+
+        private void CreateContext()
+        {
+            // ctxcreate <MEM_SIZE>
+            //  <MEM_SIZE>: (implicitly QWORD) The amount of memory to allocate
+            //  for the new context.
+            // Errors:
+            //  MaybeJustKeepItToTheLowHundredMillionsOfContexts if the new context's
+            //  ID is already in use.
+            //  UnauthorizedContextOperation if `ECC` is not 0 (that is, we're not
+            //  in the kernel context).
+            // Flags byte: Not used for this instruction.
+            
+            var sizeBlock = new AddressBlock(OperandSize.QWord, AddressType.NumericLiteral, memory, EIP);
+            EIP += 8;
+
+            var contextSize = sizeBlock.value;
+
+            try
+            {
+                var newContextID = memory.CreateContext(contextSize);
+                PushExternal((ulong)newContextID, OperandSize.DWord);
+            }
+            catch (UnauthorizedAccessException uaex)
+            {
+                RaiseError(Error.UnauthorizedContextOperation, uaex.Message);
+            }
+            catch (ArgumentOutOfRangeException aoorex)
+            {
+                RaiseError(Error.MaybeJustKeepItToTheLowHundredMillionsOfContexts, aoorex.Message);
+            }
+        }
+
+        private void DestroyContext()
+        {
+            // ctxdestroy <CTX_ID>
+            //  <CTX_ID>: (implicitly DWORD) The ID of the context to destroy.
+            // Errors:
+            //  NoSuchContext if the context ID is not in use.
+            //  ProtectedContext if the context ID is 0 or 1.
+            //  UnauthorizedContextOperation if ECC is not 0 (that is, we're not in the kernel context)
+            
+            var contextIDBlock = new AddressBlock(OperandSize.DWord, AddressType.NumericLiteral, memory, EIP);
+            EIP += 4;
+
+            var contextID = (int)contextIDBlock.value;
+
+            try
+            {
+                memory.DestroyContext(contextID);
+            }
+            catch (UnauthorizedAccessException uaex) { RaiseError(Error.UnauthorizedContextOperation, uaex.Message); }
+            catch (ArgumentOutOfRangeException aoorex) { RaiseError(Error.NoSuchContext, aoorex.Message); }
+            catch (ArgumentException aex) { RaiseError(Error.ProtectedContext, aex.Message); }
+        }
+
+        private void ContextSwitch()
+        {
+            // ctxswitch <CTX_ID>
+            //  <CTX_ID>: (implicitly DWORD) The ID of the context to switch to.
+            // Errors:
+            //  NoSuchContext if the context ID is not in use.
+            //  CannotSwitchToHardwareContext if CTX_ID is 1.
+
+            var contextIDBlock = new AddressBlock(OperandSize.DWord, AddressType.NumericLiteral, memory, EIP);
+            EIP += 4;
+
+            var contextID = (int)contextIDBlock.value;
+
+            try
+            {
+                memory.SaveRegisterSet(EAX, EBX, ECX, EDX, EEX, EFX, EGX, EHX, EBP, ESP, EFLAGS, ERP);
+                memory.CurrentContextIndex = contextID;
+                ECC = contextID;
+                memory.LoadRegisterSet(out EAX, out EBX, out ECX, out EDX, out EEX, out EFX, out EGX,
+                    out EHX, out EBP, out ESP, out EFLAGS, out ERP);
+            }
+            catch (ArgumentOutOfRangeException aoorex) { RaiseError(Error.NoSuchContext, aoorex.Message); }
+            catch (ArgumentException aex) { RaiseError(Error.CannotSwitchToHardwareContext, aex.Message); }
+        }
+
+        private void SetDestinationContext()
+        {
+            // ctxdest <CTX_ID>
+            //  <CTX_ID>: (implicitly DWORD) The ID of the context that should
+            //  be the destination of memory moves.
+            // Errors:
+            //  NoSuchContext if the context ID is not in use.
+
+            var contextIDBlock = new AddressBlock(OperandSize.DWord, AddressType.NumericLiteral, memory, EIP);
+            EIP += 4;
+
+            var contextID = (int)contextIDBlock.value;
+
+            try
+            {
+                memory.MoveDestinationContextID = contextID;
+            }
+            catch (ArgumentOutOfRangeException aoorex) { RaiseError(Error.NoSuchContext, aoorex.Message); }
+        }
+
+        private void MoveMemoryToContext()
+        {
+            // ctxmov <CA_SRC> <CB_DST> <COUNT>
+            //  <CA_SRC>: (implicitly QWORD) The address of the first byte in the
+            //  current context to move memory from.
+            //  <CB_DST>: (implicitly QWORD) The address of the first byte in the
+            //  destination context to move memory to.
+            //  <COUNT>: (implicitly DWORD) The number of bytes to move.
+            // Errors:
+            //  AddressOutOfRange if either CA_SRC, CB_DST, CA_SRC + COUNT, or CB_DST
+            //  + COUNT are out of range of the context's memory space.
+            
+            var sourceBlock = new AddressBlock(OperandSize.QWord, AddressType.NumericLiteral, memory, EIP);
+            EIP += 8;
+            var destinationBlock = new AddressBlock(OperandSize.QWord, AddressType.NumericLiteral, memory, EIP);
+            EIP += 8;
+            var countBlock = new AddressBlock(OperandSize.DWord, AddressType.NumericLiteral, memory, EIP);
+            EIP += 4;
+
+            var sourceAddress = sourceBlock.value;
+            var destinationAddress = destinationBlock.value;
+            var count = (uint)countBlock.value;
+
+            try
+            {
+                memory.MoveMemoryToContext(sourceAddress, destinationAddress, count);
+            }
+            catch (ArgumentOutOfRangeException aoorex)
+            {
+                RaiseError(Error.AddressOutOfRange, aoorex.Message);
+            }
         }
         #endregion
 

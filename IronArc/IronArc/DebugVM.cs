@@ -10,18 +10,18 @@ using IronArc.Memory;
 
 namespace IronArc
 {
-    public sealed class DebugVM
+    public sealed class DebugVM : IDisposable
     {
         private readonly VirtualMachine vm;
         private readonly List<Breakpoint> breakpoints;
         private readonly ConcurrentQueue<Message> uiMessageQueue;
-        private readonly List<string> memorySpaceNames;
+        private readonly List<string> contextNames;
         private DebugRunUntilType runUntilType = DebugRunUntilType.NotRunning;
 
         public event EventHandler CallOccurred;
         public event EventHandler ReturnOccurred;
         public event EventHandler DebugDisplayInvalidated;
-        public event EventHandler MemorySpacesChanged;
+        public event EventHandler<ContextsChangedEventArgs> ContextsChanged;
 
         public long SystemMemorySize => (long)vm.SystemMemory.Length;
         public IReadOnlyList<Breakpoint> Breakpoints => breakpoints.AsReadOnly();
@@ -30,7 +30,7 @@ namespace IronArc
         public Guid MachineID => vm.MachineId;
         public MemoryManager MemoryManager => vm.MemoryManager;
 
-        public IEnumerable<string> MemorySpaceNames => memorySpaceNames;
+        public IEnumerable<string> ContextNames => contextNames;
 
         public DebugVM(VirtualMachine vm, ConcurrentQueue<Message> uiMessageQueue)
         {
@@ -39,8 +39,27 @@ namespace IronArc
             breakpoints = new List<Breakpoint>();
             MessageQueue = new ConcurrentQueue<Message>();
 
-            memorySpaceNames = new List<string> { "System Memory" };
-            // memorySpaceNames.AddRange(vm.Hardware.Where(h => h.MemoryMapping != null).Select(h => $"{h.DeviceName} {h.DeviceId}"));
+            this.vm.MemoryManager.ContextsChanged += OnContextsChanged;
+
+            contextNames = new List<string>
+            {
+                "#0: Kernel Context",
+                "#1: Hardware Memory"
+            };
+        }
+
+        private void OnContextsChanged(object sender, ContextsChangedEventArgs args)
+        {
+            contextNames.Clear();
+            for (var i = 0; i <= args.HighestContextID; i++)
+            {
+                if (!args.DestroyedContextIDs.Contains(i))
+                {
+                    contextNames.Add($"#{i}{(i == 0 ? ": Kernel Context" : i == 1 ? ": Hardware Memory" : "")}");
+                }
+            }
+            
+            ContextsChanged?.Invoke(this, args);
         }
 
         #region Register Properties
@@ -124,8 +143,6 @@ namespace IronArc
         #endregion
 
         public UnmanagedMemoryStream CreateMemoryStream() => vm.SystemMemory.CreateStream();
-
-        public ByteBlock GetHardwareMemoryByteBlock(uint deviceId) => null;
 
         public CallStackFrame GetCallStackTop() => vm.Processor.callStack.Peek();
 
@@ -297,6 +314,11 @@ namespace IronArc
         }
 
         private void OnDebugDisplayInvalidated() => DebugDisplayInvalidated?.Invoke(this, new EventArgs());
-        private void OnMemorySpacesChanged() => MemorySpacesChanged?.Invoke(this, new EventArgs());
+
+        /// <summary>Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.</summary>
+        public void Dispose()
+        {
+            vm.MemoryManager.ContextsChanged -= OnContextsChanged;
+        }
     }
 }
