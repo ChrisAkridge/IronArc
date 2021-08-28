@@ -1,11 +1,8 @@
+globals: 0
+
 main:
 	mov QWORD 128 ebp
 	mov QWORD 128 esp
-	push QWORD str:0
-	hwcall str:1
+	push QWORD "Hello, world!"
+	hwcall "Terminal::WriteLine"
 	end
-	
-strings:
-	0: "Hello, world!"
-	1: "Terminal::WriteLine"
-	

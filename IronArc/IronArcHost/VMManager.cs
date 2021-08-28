@@ -35,12 +35,7 @@ namespace IronArcHost
         {
             var result = VirtualMachines.FirstOrDefault(vm => vm.MachineId == machineID);
 
-            if (result == null)
-            {
-                throw new ArgumentException($"No VM by the ID of {{{machineID}}} exists.");
-            }
-
-            return result;
+            return result ?? throw new ArgumentException($"No VM by the ID of {{{machineID}}} exists.");
         }
 
         public static void ResumeVM(Guid machineID)
@@ -51,8 +46,10 @@ namespace IronArcHost
             }
 
             var vm = Lookup(machineID);
-            Thread vmWorker = new Thread(vm.MainLoop);
-            vmWorker.Name = vm.MachineId.ToString();
+            var vmWorker = new Thread(vm.MainLoop)
+            {
+                Name = vm.MachineId.ToString()
+            };
             VMThreads.Add(machineID, vmWorker);
             vm.Resume();
 
@@ -72,6 +69,7 @@ namespace IronArcHost
         {
             // Always ensure we actually make hardware on the main thread so we don't accidentally
             // make forms on non-UI threads
+            // TODO: figure out the new device ID when adding to a VM
             var type = HardwareSearcher.LookupDeviceByName(hwDeviceTypeName);
             var device = (HardwareDevice)Activator.CreateInstance(type, machineID);
             var message = new Message(VMMessage.AddHardwareDevice, UIMessage.None, machineID, 0, 0L, device);
