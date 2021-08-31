@@ -122,6 +122,7 @@
     <Compile Include="InterruptHandlerKey.cs" />
     <Compile Include="Memory\Context.cs" />
     <Compile Include="Memory\ContextsChangedEventArgs.cs" />
+    <Compile Include="Memory\HardwareMemoryMapping.cs" />
     <Compile Include="Memory\MemoryManager.cs" />
     <Compile Include="Message.cs" />
     <Compile Include="Processor.cs" />

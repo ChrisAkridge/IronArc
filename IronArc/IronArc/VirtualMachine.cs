@@ -218,15 +218,13 @@ namespace IronArc
             var device = Hardware.FirstOrDefault(d => d.DeviceId == deviceId);
 
             var deviceIdBytes = BitConverter.GetBytes(deviceId);
-            //var memoryStart = BitConverter.GetBytes(device.MemoryMapping.StartAddress);
-            //var memoryEnd = BitConverter.GetBytes(device.MemoryMapping.EndAddress);
+            var memoryLength = BitConverter.GetBytes(device.MemoryMapping?.MemoryLength ?? 0);
             var nameBytes = device.DeviceName.ToLPString();
-            var namePointer = BitConverter.GetBytes(destination + 8UL + 4UL + 8UL + 8UL);
+            var namePointer = BitConverter.GetBytes(destination + 8UL + 4UL + 8UL + 8UL); // TODO: check this math
 
             return namePointer
                 .Concat(deviceIdBytes)
-                //.Concat(memoryStart)
-                //.Concat(memoryEnd)
+                .Concat(memoryLength)
                 .Concat(nameBytes);
         }
 
@@ -257,5 +255,14 @@ namespace IronArc
                 .Concat(hardwareDescriptions)
                 .ToArray();
         }
+
+        internal HardwareMemoryMapping CreateHardwareMemory(uint deviceID, ulong memoryLength) =>
+            new HardwareMemoryMapping
+            {
+                DeviceID = deviceID,
+                MachineID = MachineId,
+                MemoryLength = memoryLength,
+                Memory = ByteBlock.FromLength(memoryLength)
+            };
     }
 }

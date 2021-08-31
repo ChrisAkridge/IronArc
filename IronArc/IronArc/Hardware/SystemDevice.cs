@@ -27,6 +27,8 @@ namespace IronArc.Hardware
                     Generator.ParseHardwareCall("void hwcall System::GetHardwareDeviceDescription(uint32 deviceId, ptr destination)"),
                     Generator.ParseHardwareCall("uint64 hwcall System::GetAllHardwareDeviceDescriptionsSize()"),
                     Generator.ParseHardwareCall("void hwcall System::GetAllHardwareDeviceDescriptions(ptr destination)"),
+                    Generator.ParseHardwareCall("void hwcall System::ReadHardwareMemory(uint32 deviceId, ptr source, ptr destination, uint32 count)"),
+                    Generator.ParseHardwareCall("void hwcall System::WriteHardwareMemory(uint32 deviceId, ptr source, ptr destination, uint32 count)")
                 });
 
         public SystemDevice(Guid machineId, uint deviceId)
@@ -127,6 +129,26 @@ namespace IronArc.Hardware
 
                     break;
                 }
+                case "readhardwarememory":
+                {
+                    uint deviceId = (uint)vm.Processor.PopExternal(OperandSize.DWord);
+                    ulong source = vm.Processor.PopExternal(OperandSize.QWord);
+                    ulong destination = vm.Processor.PopExternal(OperandSize.QWord);
+                    uint length = (uint)vm.Processor.PopExternal(OperandSize.DWord);
+                    
+                    ReadHardwareMemory(vm, deviceId, source, destination, length);
+                    break;
+                }
+                case "writehardwarememory":
+                {
+                    uint deviceId = (uint)vm.Processor.PopExternal(OperandSize.DWord);
+                    ulong source = vm.Processor.PopExternal(OperandSize.QWord);
+                    ulong destination = vm.Processor.PopExternal(OperandSize.QWord);
+                    uint length = (uint)vm.Processor.PopExternal(OperandSize.DWord);
+
+                    WriteHardwareMemory(vm, deviceId, source, destination, length);
+                    break;
+                }
             }
         }
 
@@ -213,6 +235,54 @@ namespace IronArc.Hardware
         {
             var descriptions = vm.GetAllHardwareDescriptions(destination);
             vm.MemoryManager.Write(descriptions, destination);
+        }
+
+        private static void ReadHardwareMemory(VirtualMachine vm, uint deviceId, ulong source, ulong destination,
+            uint count)
+        {
+            var device = vm.Hardware.FirstOrDefault(hw => hw.DeviceId == deviceId);
+
+            ValidateMemoryAccessRanges(vm, device, source, destination, count);
+
+            var hwMemory = device.MemoryMapping.Memory;
+            vm.MemoryManager.TransferFrom(hwMemory, source, destination, count);
+        }
+
+        private static void WriteHardwareMemory(VirtualMachine vm, uint deviceId, ulong source, ulong destination,
+            uint count)
+        {
+            var device = vm.Hardware.FirstOrDefault(hw => hw.DeviceId == deviceId);
+            
+            ValidateMemoryAccessRanges(vm, device, source, destination, count);
+
+            var hwMemory = device.MemoryMapping.Memory;
+            vm.MemoryManager.TransferTo(hwMemory, source, destination, count);
+        }
+
+        private static void ValidateMemoryAccessRanges(VirtualMachine vm,
+            HardwareDevice device, ulong source, ulong destination,
+            uint count)
+        {
+            var deviceId = device.DeviceId;
+            
+            if (device == null) { throw new ArgumentException($"No hardware device has ID #{deviceId}.", nameof(deviceId)); }
+
+            if (device.MemoryMapping == null)
+            {
+                throw new ArgumentException($"Hardware device #{deviceId} ({device.GetType().Name}) has no mapped memory.");
+            }
+
+            if (source + count > device.MemoryMapping.MemoryLength)
+            {
+                throw new ArgumentOutOfRangeException(
+                    $"Hardware memory read out of range. Device #{deviceId} ({device.GetType().Name}) from 0x{source:X16} to 0x{(source + count):X16}.");
+            }
+
+            if ((long)(destination + count) > vm.MemoryManager.CurrentContextLength)
+            {
+                throw new ArgumentOutOfRangeException(
+                    $"Hardware memory read out of range. Machine {{{vm.MachineId}}}, context {vm.MemoryManager.CurrentContextIndex} from 0x{destination:X16} to 0x{(destination + count):X16}.");
+            }
         }
 
         /// <summary>Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.</summary>

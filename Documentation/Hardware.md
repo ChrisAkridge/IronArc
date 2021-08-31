@@ -187,6 +187,34 @@ All fields are contiguous in memory.
 - Parameters:
 	- `ptr destination`: The address to write the descriptions to.
 	
+#### ReadHardwareMemory
+
+```c
+void hwcall System::ReadHardwareMemory(uint32 deviceId, ptr source, ptr destination, uint32 length)
+```
+
+Reads `length` bytes from the hardware device with ID `deviceId` from `source` to `destination` in the current context.
+
+- Parameters:
+	- `uint32 deviceId`: The device from which to read memory.
+	- `ptr source`: The address in the hardware device's memory to read from.
+	- `ptr destination`: The address in the VM's current context to write to.
+	- `uint32 length`: The number of bytes to read.
+
+#### WriteHardwareMemory
+
+```c
+void hwcall System::WriteHardwareMemory(uint32 deviceId, ptr source, ptr destination, uint32 length)
+```
+
+Reads `length` bytes from the hardware device with ID `deviceId` from `source` to `destination` in the current context.
+
+- Parameters:
+	- `uint32 deviceId`: The device to which to write memory.
+	- `ptr source`: The address in the VM's current context to read from.
+	- `ptr destination`: The address in the hardware device's memory to write to.
+	- `uint32 length`: The number of bytes to write.
+	
 ### Interrupts
 
 ### HardwareDeviceAttached

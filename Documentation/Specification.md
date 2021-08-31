@@ -259,11 +259,9 @@ Hardware calls should be stylized in literature and documentation in the form `<
 
 ### Hardware Memory Mapping
 
-Hardware devices can map memory into the VM's memory space. All hardware memory is mapped into the context with the ID of 1 (henceforth, context 1). Each instance of a hardware device can map memory only once.
+Hardware devices can map memory into the host machine's memory space.
 
-Hardware devices can directly call a function in the implementation to map memory into context 1. When called, the function creates a buffer of the requested size, places it into context 1 after any other allocated memory, and returns the starting real address of the newly mapped memory, along with a pointer to the buffer, so the hardware device can directly read and write to its memory. Another implementation function can be used to free mapped memory and remove it from context 1.
-
-Hardware device memory is mapped contiguously into context 1, such that new memory is allocated immediately after the last. Freeing mapped memory does cause gaps in context 1, but I don't think we'll need compaction here.
+Hardware devices can directly call a function in the implementation to map memory. When called, the function creates a buffer of the requested size and returns a pointer to the buffer, so the hardware device can read and write to its memory directly. The VM can then use the `ReadHardwareMemory` and `WriteHardwareMemory` to access the hardware memory. Another implementation function can be used to free mapped memory.
 
 The hardware calls `void hwcall System::GetHardwareDeviceDescription(ptr destination)` and `void hwcall System::GetAllHardwareDeviceDescriptions(ptr destination)` can be used by an IronArc program to find out what hardware devices are on the system and where their memory, if any, is mapped. A single device description looks like the following structure, with each field stored sequentially:
 
@@ -272,13 +270,12 @@ struct HardwareDescription
 {
 	lpstring* NamePointer;
 	uint32 DeviceIndex;
-	uint64 MemoryStart;
-	uint64 MemoryEnd;
+	uint64 MemoryLength;
 	lpstring Name;
 }
 ```
 
-`MemoryStart` and `MemoryEnd` are both `0` if the device maps no memory. `NamePointer` always points to `Name`.
+`MemoryLength` is `0` if the device maps no memory. `NamePointer` always points to `Name`.
 
 The result of `GetAllHardwareDeviceDescriptions` looks like the following struct:
 

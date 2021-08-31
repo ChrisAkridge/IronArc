@@ -25,15 +25,11 @@ namespace IronArc.Memory
                 {
                     throw new ArgumentOutOfRangeException(nameof(value), $"No context has ID #{value}.");
                 }
-                
-                if (value == 1)
-                {
-                    throw new ArgumentException("Cannot switch directly to hardware memory (context #1).", nameof(value));
-                }
 
                 currentContextIndex = value;
                 // ReSharper disable once PossibleInvalidOperationException
                 currentContextMemory = contexts[value].Memory;
+                OnCurrentContextChanged();
             }
         }
 
@@ -100,7 +96,7 @@ namespace IronArc.Memory
         {
             InContext0OrThrow();
             
-            if (contextID == 0 || contextID == 1)
+            if (contextID == 0)
             {
                 throw new ArgumentException($"Cannot destroy context #{contextID}.", nameof(contextID));
             }
@@ -273,6 +269,12 @@ namespace IronArc.Memory
                     throw new ArgumentException($"Implementation error: Invalid operand size {size}");
             }
         }
+
+        public void TransferTo(ByteBlock dest, ulong sourceAddress, ulong destAddress, uint count) =>
+            currentContextMemory.Transfer(dest, sourceAddress, destAddress, count);
+
+        public void TransferFrom(ByteBlock source, ulong sourceAddress, ulong destAddress, uint count) =>
+            source.Transfer(currentContextMemory, sourceAddress, destAddress, count);
 
         private void InContext0OrThrow()
         {
