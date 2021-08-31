@@ -106,9 +106,9 @@
     <Compile Include="Extensions.cs" />
     <Compile Include="HardwareDefinitionGenerator\DefaultDataTypes.cs" />
     <Compile Include="HardwareDefinitionGenerator\Generator.cs" />
-    <Compile Include="HardwareDefinitionGenerator\Models\HardwareCall.cs" />
-    <Compile Include="HardwareDefinitionGenerator\Models\HardwareCallDataType.cs" />
-    <Compile Include="HardwareDefinitionGenerator\Models\HardwareCallParameter.cs" />
+    <Compile Include="HardwareDefinitionGenerator\Models\HardwareMethod.cs" />
+    <Compile Include="HardwareDefinitionGenerator\Models\HardwareMethodDataType.cs" />
+    <Compile Include="HardwareDefinitionGenerator\Models\HardwareMethodParameter.cs" />
     <Compile Include="HardwareDefinitionGenerator\Models\HardwareDefinition.cs" />
     <Compile Include="HardwareDefinitionGenerator\Models\HardwareDevice.cs" />
     <Compile Include="HardwareDevice.cs" />

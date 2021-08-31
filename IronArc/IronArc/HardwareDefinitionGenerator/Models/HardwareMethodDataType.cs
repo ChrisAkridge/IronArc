@@ -1,11 +1,11 @@
 ﻿namespace IronArc.HardwareDefinitionGenerator.Models
 {
-    public sealed class HardwareCallDataType
+    public sealed class HardwareMethodDataType
     {
         public string TypeName { get; }
         public int PointerLevel { get; }
 
-        public HardwareCallDataType(string typeName, int pointerLevel)
+        public HardwareMethodDataType(string typeName, int pointerLevel)
         {
             TypeName = typeName;
             PointerLevel = pointerLevel;

@@ -27,6 +27,12 @@ namespace IronArc
         Finalized
     }
 
+    public enum HardwareMethodType
+    {
+        HardwareCall,
+        Interrupt
+    }
+
     public enum OperandSize
     {
         Byte,

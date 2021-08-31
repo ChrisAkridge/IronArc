@@ -90,7 +90,7 @@ namespace IronArc
         public void AddHardwareDevice(HardwareDevice device)
         {
             Hardware.Add(device);
-            MessageQueue.Enqueue(new Message(VMMessage.HardwareInterrupt, UIMessage.None, MachineId, 0, 0L, new Interrupt(0, "HardwareDeviceAttached")));
+            MessageQueue.Enqueue(new Message(VMMessage.HardwareInterrupt, UIMessage.None, MachineId, 0, 0L, new Interrupt(0, "HardwareDeviceAttached", device.DeviceId)));
         }
 
         public bool RemoveHardwareDevice(Type hardwareDeviceType)
@@ -100,7 +100,7 @@ namespace IronArc
 
             device.Dispose();
             Hardware.Remove(device);
-            MessageQueue.Enqueue(new Message(VMMessage.HardwareInterrupt, UIMessage.None, MachineId, 0, 0L, new Interrupt(0, "HardwareDeviceRemoved")));
+            MessageQueue.Enqueue(new Message(VMMessage.HardwareInterrupt, UIMessage.None, MachineId, 0, 0L, new Interrupt(0, "HardwareDeviceRemoved", device.DeviceId)));
             return true;
         }
 
@@ -264,5 +264,10 @@ namespace IronArc
                 MemoryLength = memoryLength,
                 Memory = ByteBlock.FromLength(memoryLength)
             };
+
+        internal void VerifyInterrupt(uint deviceId, string interruptName)
+        {
+            
+        }
     }
 }

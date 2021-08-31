@@ -10,16 +10,20 @@ namespace IronArc.Hardware
     {
         public override string DeviceName => "Debugger";
 
-        public override HardwareDeviceStatus Status =>
-            (System.Diagnostics.Debugger.IsAttached)
-                ? HardwareDeviceStatus.Active
-                : HardwareDeviceStatus.Inactive;
+        public override HardwareDeviceStatus Status
+        {
+            get =>
+                (System.Diagnostics.Debugger.IsAttached)
+                    ? HardwareDeviceStatus.Active
+                    : HardwareDeviceStatus.Inactive;
+            protected set => throw new InvalidOperationException();
+        }
 
         internal override DefinitionDevice Definition =>
             new DefinitionDevice(nameof(Debugger),
-                new List<HardwareCall>
+                new List<HardwareMethod>
                 {
-                    new HardwareCall(null, "Break", new List<HardwareCallParameter>())
+                    new HardwareMethod(HardwareMethodType.HardwareCall, null, "Break", new List<HardwareMethodParameter>())
                 });
 
         public Debugger(Guid machineId, uint deviceId)

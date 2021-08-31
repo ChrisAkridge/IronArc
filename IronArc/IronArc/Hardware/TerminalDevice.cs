@@ -13,26 +13,30 @@ namespace IronArc.Hardware
 
         public override string DeviceName => "Terminal";
 
-        public override HardwareDeviceStatus Status => HardwareDeviceStatus.Active;
+        public override HardwareDeviceStatus Status
+        {
+            get => HardwareDeviceStatus.Active;
+            protected set => throw new InvalidOperationException();
+        }
 
         internal override DefinitionDevice Definition =>
             new DefinitionDevice(nameof(TerminalDevice),
-                new List<HardwareCall>
+                new List<HardwareMethod>
                 {
-                    new HardwareCall(null, "Write",
-                        new List<HardwareCallParameter>
+                    new HardwareMethod(HardwareMethodType.HardwareCall, null, "Write",
+                        new List<HardwareMethodParameter>
                         {
-                            new HardwareCallParameter("text", DefaultDataTypes.LpStringPointer)
+                            new HardwareMethodParameter("text", DefaultDataTypes.LpStringPointer)
                         }),
-                    new HardwareCall(null, "WriteLine",
-                        new List<HardwareCallParameter>
+                    new HardwareMethod(HardwareMethodType.HardwareCall, null, "WriteLine",
+                        new List<HardwareMethodParameter>
                         {
-                            new HardwareCallParameter("text", DefaultDataTypes.LpStringPointer)
+                            new HardwareMethodParameter("text", DefaultDataTypes.LpStringPointer)
                         }),
-                    new HardwareCall(DefaultDataTypes.UInt16, "Read", new List<HardwareCallParameter> { }),
-                    new HardwareCall(null, "ReadLine", new List<HardwareCallParameter>
+                    new HardwareMethod(HardwareMethodType.HardwareCall, DefaultDataTypes.UInt16, "Read", new List<HardwareMethodParameter> { }),
+                    new HardwareMethod(HardwareMethodType.HardwareCall, null, "ReadLine", new List<HardwareMethodParameter>
                     {
-                        new HardwareCallParameter("destination", DefaultDataTypes.Pointer)
+                        new HardwareMethodParameter("destination", DefaultDataTypes.Pointer)
                     })
                 });
 

@@ -4,17 +4,15 @@ namespace IronArc.HardwareDefinitionGenerator.Models
 {
     public sealed class HardwareDevice
     {
-        private readonly List<HardwareCall> hardwareCalls;
+        private readonly List<HardwareMethod> hardwareMethods;
 
         public string DeviceName { get; }
-        public IReadOnlyList<HardwareCall> HardwareCalls => hardwareCalls.AsReadOnly();
-        
-        // TODO: add Interrupts to this, and also to Cix so we can have a more type-safe way to register interrupt handlers
+        public IReadOnlyList<HardwareMethod> HardwareMethods => hardwareMethods.AsReadOnly();
 
-        public HardwareDevice(string deviceName, IList<HardwareCall> hardwareCalls)
+        public HardwareDevice(string deviceName, IList<HardwareMethod> hardwareCalls)
         {
             DeviceName = deviceName;
-            this.hardwareCalls = (List<HardwareCall>)hardwareCalls;
+            hardwareMethods = (List<HardwareMethod>)hardwareCalls;
         }
     }
 }

@@ -19,7 +19,7 @@ namespace IronArc.HardwareDefinitionGenerator
                 devices.Select(d => d.Definition);
             var definition = new HardwareDefinition(version, deviceDefinitions.ToList());
 
-            foreach (HardwareDevice device in devices)
+            foreach (var device in devices)
             {
                 device.Dispose();
             }
@@ -27,11 +27,11 @@ namespace IronArc.HardwareDefinitionGenerator
             return JsonConvert.SerializeObject(definition);
         }
 
-        internal static HardwareCall ParseHardwareCall(string callDescription)
+        internal static HardwareMethod ParseHardwareMethod(string methodDescription)
         {
-            int argumentsStart = callDescription.IndexOf('(');
+            int argumentsStart = methodDescription.IndexOf('(');
 
-            var parameterListText = callDescription
+            var parameterListText = methodDescription
                 .Substring(argumentsStart);
 
             var parameters = (parameterListText != "()")
@@ -40,34 +40,42 @@ namespace IronArc.HardwareDefinitionGenerator
                     .TrimEnd(')')
                     .Split(',')
                     .Select(param => param.Trim().Split(' '))
-                    .Select(param => new HardwareCallParameter(
+                    .Select(param => new HardwareMethodParameter(
                         param[1],
                         MapHardwareCallTypeToCixType(param[0].TrimEnd('*'), param[0].Count(c => c == '*'))
                     ))
                     .ToList()
-                : new List<HardwareCallParameter>();
+                : new List<HardwareMethodParameter>();
             
-            var typeAndName = callDescription
+            var typeAndName = methodDescription
                 .Substring(0, argumentsStart)
                 .Split(' ');
 
             var returnType = typeAndName[0];
+            var methodType = typeAndName[1] == "hwcall"
+                ? HardwareMethodType.HardwareCall
+                : HardwareMethodType.Interrupt;
             var deviceAndCallName = typeAndName[2]
                 .Split(new[]
                 {
                     "::"
                 }, StringSplitOptions.None);
             var callName = deviceAndCallName[1];
+
+            if (methodType == HardwareMethodType.Interrupt && returnType != "void")
+            {
+                throw new ArgumentException($"Interrupts cannot return values. Description: \"{methodDescription}\"");
+            }
             
-            return new HardwareCall(MapHardwareCallTypeToCixType(returnType, 0),
+            return new HardwareMethod(methodType, MapHardwareCallTypeToCixType(returnType, 0),
                 callName,
                 parameters);
         }
 
-        private static HardwareCallDataType MapHardwareCallTypeToCixType(string typeName, int pointerLevel) =>
+        private static HardwareMethodDataType MapHardwareCallTypeToCixType(string typeName, int pointerLevel) =>
             typeName == "ptr"
                 ? DefaultDataTypes.Pointer
-                : new HardwareCallDataType(MapHardwareCallTypeNameToCixTypeName(typeName), pointerLevel);
+                : new HardwareMethodDataType(MapHardwareCallTypeNameToCixTypeName(typeName), pointerLevel);
 
         private static string MapHardwareCallTypeNameToCixTypeName(string typeName)
         {

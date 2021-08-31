@@ -9,26 +9,33 @@ namespace IronArc.Hardware
     public sealed class SystemDevice : HardwareDevice
     {
         public override string DeviceName => "System";
-        public override HardwareDeviceStatus Status => HardwareDeviceStatus.Active;
+
+        public override HardwareDeviceStatus Status
+        {
+            get => HardwareDeviceStatus.Active;
+            protected set => throw new InvalidOperationException();
+        }
 
         internal override HardwareDefinitionGenerator.Models.HardwareDevice Definition =>
             new HardwareDefinitionGenerator.Models.HardwareDevice("System",
-                new List<HardwareCall>
+                new List<HardwareMethod>
                 {
-                    Generator.ParseHardwareCall("uint8 hwcall System::RegisterInterruptHandler(uint32 deviceId, lpstring* interruptName, ptr handlerAddress)"),
-                    Generator.ParseHardwareCall("void hwcall System::UnregisterInterruptHandler(uint32 deviceId, lpstring* interruptName, uint8 handlerIndex)"),
-                    Generator.ParseHardwareCall("void hwcall System::RaiseError(uint32 errorCode)"),
-                    Generator.ParseHardwareCall("void hwcall System::RegisterErrorHandler(uint32 errorCode, ptr handlerAddress)"),
-                    Generator.ParseHardwareCall("void hwcall System::UnregisterErrorHandler(uint32 errorCode)"),
-                    Generator.ParseHardwareCall("uint64 hwcall System::GetLastErrorDescriptionSize()"),
-                    Generator.ParseHardwareCall("void hwcall System::GetLastErrorDescription(ptr destination)"),
-                    Generator.ParseHardwareCall("int32 hwcall System::GetHardwareDeviceCount()"),
-                    Generator.ParseHardwareCall("uint64 hwcall System::GetHardwareDeviceDescriptionSize(uint32 deviceId)"),
-                    Generator.ParseHardwareCall("void hwcall System::GetHardwareDeviceDescription(uint32 deviceId, ptr destination)"),
-                    Generator.ParseHardwareCall("uint64 hwcall System::GetAllHardwareDeviceDescriptionsSize()"),
-                    Generator.ParseHardwareCall("void hwcall System::GetAllHardwareDeviceDescriptions(ptr destination)"),
-                    Generator.ParseHardwareCall("void hwcall System::ReadHardwareMemory(uint32 deviceId, ptr source, ptr destination, uint32 count)"),
-                    Generator.ParseHardwareCall("void hwcall System::WriteHardwareMemory(uint32 deviceId, ptr source, ptr destination, uint32 count)")
+                    Generator.ParseHardwareMethod("uint8 hwcall System::RegisterInterruptHandler(uint32 deviceId, lpstring* interruptName, ptr handlerAddress)"),
+                    Generator.ParseHardwareMethod("void hwcall System::UnregisterInterruptHandler(uint32 deviceId, lpstring* interruptName, uint8 handlerIndex)"),
+                    Generator.ParseHardwareMethod("void hwcall System::RaiseError(uint32 errorCode)"),
+                    Generator.ParseHardwareMethod("void hwcall System::RegisterErrorHandler(uint32 errorCode, ptr handlerAddress)"),
+                    Generator.ParseHardwareMethod("void hwcall System::UnregisterErrorHandler(uint32 errorCode)"),
+                    Generator.ParseHardwareMethod("uint64 hwcall System::GetLastErrorDescriptionSize()"),
+                    Generator.ParseHardwareMethod("void hwcall System::GetLastErrorDescription(ptr destination)"),
+                    Generator.ParseHardwareMethod("int32 hwcall System::GetHardwareDeviceCount()"),
+                    Generator.ParseHardwareMethod("uint64 hwcall System::GetHardwareDeviceDescriptionSize(uint32 deviceId)"),
+                    Generator.ParseHardwareMethod("void hwcall System::GetHardwareDeviceDescription(uint32 deviceId, ptr destination)"),
+                    Generator.ParseHardwareMethod("uint64 hwcall System::GetAllHardwareDeviceDescriptionsSize()"),
+                    Generator.ParseHardwareMethod("void hwcall System::GetAllHardwareDeviceDescriptions(ptr destination)"),
+                    Generator.ParseHardwareMethod("void hwcall System::ReadHardwareMemory(uint32 deviceId, ptr source, ptr destination, uint32 count)"),
+                    Generator.ParseHardwareMethod("void hwcall System::WriteHardwareMemory(uint32 deviceId, ptr source, ptr destination, uint32 count)"),
+                    Generator.ParseHardwareMethod("void interrupt System::HardwareDeviceAttached(uint32 deviceId)"),
+                    Generator.ParseHardwareMethod("void interrupt System::HardwareDeviceRemoved(uint32 deviceId)")
                 });
 
         public SystemDevice(Guid machineId, uint deviceId)

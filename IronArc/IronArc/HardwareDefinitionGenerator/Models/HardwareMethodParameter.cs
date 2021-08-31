@@ -1,11 +1,11 @@
 ﻿namespace IronArc.HardwareDefinitionGenerator.Models
 {
-    public sealed class HardwareCallParameter
+    public sealed class HardwareMethodParameter
     {
         public string ParameterName { get; }
-        public HardwareCallDataType Type { get; }
+        public HardwareMethodDataType Type { get; }
 
-        public HardwareCallParameter(string parameterName, HardwareCallDataType type)
+        public HardwareMethodParameter(string parameterName, HardwareMethodDataType type)
         {
             ParameterName = parameterName;
             Type = type;
