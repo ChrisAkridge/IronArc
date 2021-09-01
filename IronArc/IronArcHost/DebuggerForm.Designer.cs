@@ -79,6 +79,8 @@
             this.ColumnEBP = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.TmrQueueListener = new System.Windows.Forms.Timer(this.components);
             this.TimerAnimateExecution = new System.Windows.Forms.Timer(this.components);
+            this.TextECC = new System.Windows.Forms.TextBox();
+            this.LinkECC = new System.Windows.Forms.LinkLabel();
             this.GroupBoxDisassembly.SuspendLayout();
             this.ToolStripDebugger.SuspendLayout();
             this.GroupRegisters.SuspendLayout();
@@ -213,6 +215,8 @@
             // 
             // GroupRegisters
             // 
+            this.GroupRegisters.Controls.Add(this.TextECC);
+            this.GroupRegisters.Controls.Add(this.LinkECC);
             this.GroupRegisters.Controls.Add(this.TextERP);
             this.GroupRegisters.Controls.Add(this.TextESP);
             this.GroupRegisters.Controls.Add(this.TextEHX);
@@ -591,6 +595,26 @@
             // 
             this.TimerAnimateExecution.Tick += new System.EventHandler(this.TimerAnimateExecution_Tick);
             // 
+            // TextECC
+            // 
+            this.TextECC.Font = new System.Drawing.Font("Consolas", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.TextECC.Location = new System.Drawing.Point(199, 176);
+            this.TextECC.Name = "TextECC";
+            this.TextECC.ReadOnly = true;
+            this.TextECC.Size = new System.Drawing.Size(56, 20);
+            this.TextECC.TabIndex = 30;
+            this.TextECC.Text = "00000000";
+            // 
+            // LinkECC
+            // 
+            this.LinkECC.AutoSize = true;
+            this.LinkECC.Location = new System.Drawing.Point(168, 178);
+            this.LinkECC.Name = "LinkECC";
+            this.LinkECC.Size = new System.Drawing.Size(27, 13);
+            this.LinkECC.TabIndex = 29;
+            this.LinkECC.TabStop = true;
+            this.LinkECC.Text = "ECC";
+            // 
             // DebuggerForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -669,5 +693,7 @@
 		private System.Windows.Forms.Timer TmrQueueListener;
 		private System.Windows.Forms.Timer TimerAnimateExecution;
 		private System.Windows.Forms.ComboBox ComboContexts;
-	}
+        private System.Windows.Forms.TextBox TextECC;
+        private System.Windows.Forms.LinkLabel LinkECC;
+    }
 }

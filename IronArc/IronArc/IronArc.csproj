@@ -119,6 +119,7 @@
     <Compile Include="Hardware\TerminalDevice.cs" />
     <Compile Include="Hardware\Debugger.cs" />
     <Compile Include="ICoreHardwareProvider.cs" />
+    <Compile Include="InterruptAndHandler.cs" />
     <Compile Include="InterruptHandlerKey.cs" />
     <Compile Include="Memory\Context.cs" />
     <Compile Include="Memory\ContextsChangedEventArgs.cs" />

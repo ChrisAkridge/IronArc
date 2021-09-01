@@ -60,6 +60,7 @@ namespace IronArcHost
             LinkEIP.Click += (sender, e) => EditRegister(vm.EIP, v => vm.EIP = v);
             LinkERP.Click += (sender, e) => EditRegister(vm.ERP, v => vm.ERP = v);
             LinkEFLAGS.Click += (sender, e) => EditRegister(vm.EFLAGS, v => vm.EFLAGS = v);
+            LinkECC.Click += (sender, e) => EditDwordRegister(vm.ECC, v => vm.ECC = v);
         }
 
         private void RefreshDisassemblyList()
@@ -100,6 +101,7 @@ namespace IronArcHost
             TextEIP.Text = vm.EIP.ToString("X16");
             TextERP.Text = vm.ERP.ToString("X16");
             TextEFLAGS.Text = vm.EFLAGS.ToString("X16");
+            TextECC.Text = vm.ECC.ToString("X8");
         }
 
         private void EditRegister(ulong registerValue, Action<ulong> writeRegisterAction)
@@ -110,6 +112,18 @@ namespace IronArcHost
                 writeRegisterAction(editor.RegisterValue);
             }
 
+            UpdateRegisterDisplay();
+        }
+
+        private void EditDwordRegister(int registerValue, Action<int> writeRegisterAction)
+        {
+            var editor = new RegisterEditor(registerValue);
+
+            if (editor.ShowDialog() == DialogResult.OK)
+            {
+                writeRegisterAction((int)editor.RegisterValue);
+            }
+            
             UpdateRegisterDisplay();
         }
 
@@ -138,6 +152,7 @@ namespace IronArcHost
             LinkERP.Enabled = vmPaused;
             LinkEIP.Enabled = vmPaused;
             LinkEFLAGS.Enabled = vmPaused;
+            LinkECC.Enabled = vmPaused;
 
             TSBPause.Enabled = !vmPaused;
         }
@@ -163,7 +178,7 @@ namespace IronArcHost
             string addressText = lvi.Text.Substring(2, 16);
             ulong address = ulong.Parse(addressText, NumberStyles.AllowHexSpecifier);
 
-            vm.AddBreakpoint(address, isUserVisible: true);
+            vm.AddBreakpoint(address, vm.ECC, isUserVisible: true);
             lvi.ForeColor = Color.Red;
         }
 
@@ -175,9 +190,9 @@ namespace IronArcHost
             string addressText = lvi.Text.Substring(2, 16);
             ulong address = ulong.Parse(addressText, NumberStyles.HexNumber);
 
-            if (vm.AddressHasUserVisibleBreakpoint(address))
+            if (vm.AddressHasUserVisibleBreakpoint(address, vm.ECC))
             {
-                vm.RemoveBreakpoint(address);
+                vm.RemoveBreakpoint(address, vm.ECC);
                 lvi.ForeColor = Color.Black;
             }
         }

@@ -140,6 +140,12 @@ namespace IronArc
             get => vm.Processor.EFLAGS;
             set => vm.Processor.EFLAGS = value;
         }
+
+        public int ECC
+        {
+            get => vm.Processor.ECC;
+            set => vm.Processor.ECC = value;
+        }
         #endregion
 
         public UnmanagedMemoryStream CreateMemoryStream() => vm.SystemMemory.CreateStream();
@@ -151,14 +157,14 @@ namespace IronArc
         public byte ReadByte(long address) => vm.SystemMemory.ReadByteAt((ulong)address);
         public void WriteByte(long address, byte value) => vm.SystemMemory.WriteByteAt(value, (ulong)address);
 
-        public void AddBreakpoint(ulong address, bool isUserVisible) =>
-            breakpoints.Add(new Breakpoint(address, isUserVisible));
+        public void AddBreakpoint(ulong address, int context, bool isUserVisible) =>
+            breakpoints.Add(new Breakpoint(address, context, isUserVisible));
 
-        public bool RemoveBreakpoint(ulong address) =>
-            breakpoints.RemoveAll(b => b.Address == address) > 0;
+        public bool RemoveBreakpoint(ulong address, int context) =>
+            breakpoints.RemoveAll(b => b.Address == address && b.Context == context) > 0;
 
-        public bool AddressHasUserVisibleBreakpoint(ulong address) =>
-            (breakpoints.Where(b => b.Address == address)
+        public bool AddressHasUserVisibleBreakpoint(ulong address, int context) =>
+            (breakpoints.Where(b => b.Address == address && b.Context == context)
                 .Select(b => b.IsUserVisible)).FirstOrDefault();
 
         private void StartInstructionLoopThread()
@@ -269,7 +275,7 @@ namespace IronArc
                 }
                 else { throw new InvalidDataException($"Found a call instruction at 0x{EIP:X16} that had bad flags/operands."); }
 
-                breakpoints.Add(new Breakpoint(EIP + (ulong)callInstructionLength, false));
+                breakpoints.Add(new Breakpoint(EIP + (ulong)callInstructionLength, ECC, false));
                 StartInstructionLoopThread();
             }
         }
@@ -282,7 +288,10 @@ namespace IronArc
                 (int)VMState.Running, 0L, null);
             uiMessageQueue.Enqueue(uiMessage);
 
-            var worker = new Thread(StepOutInstructionLoop) { Name = $"Step Out {{{vm.MachineId}}}" };
+            var worker = new Thread(StepOutInstructionLoop)
+            {
+                Name = $"Step Out {{{vm.MachineId}}}"
+            };
             worker.Start();
         }
 

@@ -9,7 +9,8 @@ namespace IronArcHost
 {
     public partial class RegisterEditor : Form
     {
-        private bool withinSetValuesCall = false;
+        private bool withinSetValuesCall;
+        private readonly bool registerIsDword;
 
         public ulong RegisterValue { get; private set; }
 
@@ -25,6 +26,22 @@ namespace IronArcHost
             SetFloatingPoint(registerValue);
         }
 
+        public RegisterEditor(int registerValue)
+        {
+            var valueAsQword = (ulong)registerValue;
+            
+            InitializeComponent();
+            RegisterValue = valueAsQword;
+
+            SetValue(valueAsQword);
+            SetBigEndianValue(valueAsQword);
+            SetSigned(valueAsQword);
+            SetUnsigned(valueAsQword);
+            SetFloatingPoint(valueAsQword);
+
+            registerIsDword = true;
+        }
+
         private void SetValuesOfOtherTextboxes(RegisterEditorTextBoxes textBox)
         {
             withinSetValuesCall = true;
@@ -32,7 +49,7 @@ namespace IronArcHost
             {
                 case RegisterEditorTextBoxes.Value:
                     if (!ulong.TryParse(TextValue.Text, NumberStyles.HexNumber, null, out var value)) { goto cleanup; }
-                    RegisterValue = value;
+                    RegisterValue = (!registerIsDword) ? value : (ulong)(int)value;
 
                     SetBigEndianValue(value);
                     SetSigned(value);
@@ -41,7 +58,7 @@ namespace IronArcHost
                     break;
                 case RegisterEditorTextBoxes.BigEndianValue:
                     if (!ulong.TryParse(BigEndianToLittleEndian(TextAsBigEndian.Text.PadLeft(16, '0')), NumberStyles.HexNumber, null, out var valueBigEndian)) { goto cleanup; }
-                    RegisterValue = valueBigEndian;
+                    RegisterValue = (!registerIsDword) ? valueBigEndian : (ulong)(int)valueBigEndian;
 
                     SetValue(valueBigEndian);
                     SetSigned(valueBigEndian);
@@ -50,7 +67,9 @@ namespace IronArcHost
                     break;
                 case RegisterEditorTextBoxes.Signed:
                     if (!long.TryParse(TextSigned.Text, out var valueSigned)) { goto cleanup; }
-                    RegisterValue = unchecked((ulong)valueSigned);
+                    RegisterValue = (!registerIsDword)
+                        ? unchecked((ulong)valueSigned)
+                        : (ulong)(int)unchecked((ulong)valueSigned);
 
                     unchecked
                     {
@@ -62,7 +81,7 @@ namespace IronArcHost
                     break;
                 case RegisterEditorTextBoxes.Unsigned:
                     if (!ulong.TryParse(TextUnsigned.Text, out var valueUnsigned)) { goto cleanup; }
-                    RegisterValue = valueUnsigned;
+                    RegisterValue = (!registerIsDword) ? valueUnsigned : (ulong)(int)valueUnsigned;
 
                     SetValue(valueUnsigned);
                     SetBigEndianValue(valueUnsigned);
@@ -72,7 +91,7 @@ namespace IronArcHost
                 case RegisterEditorTextBoxes.Floating:
                     if (!double.TryParse(TextFloatingPoint.Text, out var valueFloating)) { goto cleanup; }
                     ulong valueFloatingAsULong = unchecked((ulong)BitConverter.DoubleToInt64Bits(valueFloating));
-                    RegisterValue = valueFloatingAsULong;
+                    RegisterValue = (!registerIsDword) ? valueFloatingAsULong : (ulong)(int)valueFloatingAsULong;
 
                     SetValue(valueFloatingAsULong);
                     SetBigEndianValue(valueFloatingAsULong);

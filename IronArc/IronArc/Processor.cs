@@ -35,6 +35,9 @@ namespace IronArc
         public Dictionary<InterruptHandlerKey, ulong?[]> interruptTable;
         public Dictionary<uint, ulong> errorTable;
         public Stack<CallStackFrame> callStack;
+        
+        private int? contextBeforeInterrupt;
+        private Queue<InterruptAndHandler> remainingInterruptHandlers = new Queue<InterruptAndHandler>();
 
         public Processor(MemoryManager memory, ulong firstInstructionAddress, ulong programSize,
             ulong stringsTableAddress, VirtualMachine vm)
@@ -440,6 +443,15 @@ namespace IronArc
 
         private void ReturnImpl()
         {
+            if (!CallNextInterruptHandler())
+            {
+                contextBeforeInterrupt = null;
+            }
+            else
+            {
+                return;
+            }
+            
             if (!callStack.Any())
             {
                 RaiseError(Error.CallStackUnderflow);
@@ -547,11 +559,74 @@ namespace IronArc
 
             if (!interruptTable.ContainsKey(handlerKey)) { return; }
 
-            for (int i = 0; i < 256; i++)
+            remainingInterruptHandlers.EnqueueRange(interruptTable[handlerKey]
+                .Where(address => address.HasValue)
+                .Select(address => new InterruptAndHandler(address.Value, interrupt)));
+
+            CallNextInterruptHandler();
+        }
+
+        private void PushInterruptArguments(Interrupt interrupt)
+        {
+            foreach (var argument in interrupt.Arguments)
             {
-                var callAddress = interruptTable[handlerKey][i];
-                if (callAddress.HasValue) { CallImpl(callAddress.Value); }
+                switch (argument)
+                {
+                    case byte b:
+                        PushExternal(b, OperandSize.Byte);
+
+                        break;
+                    case sbyte sb:
+                        PushExternal((ulong)sb, OperandSize.Byte);
+
+                        break;
+                    case ushort us:
+                        PushExternal(us, OperandSize.Word);
+
+                        break;
+                    case short s:
+                        PushExternal((ulong)s, OperandSize.Word);
+
+                        break;
+                    case uint ui:
+                        PushExternal(ui, OperandSize.DWord);
+
+                        break;
+                    case int i:
+                        PushExternal((ulong)i, OperandSize.DWord);
+
+                        break;
+                    case ulong ul:
+                        PushExternal(ul, OperandSize.QWord);
+
+                        break;
+                    case long l:
+                        PushExternal((ulong)l, OperandSize.QWord);
+
+                        break;
+                    default:
+                        throw new ArgumentException(
+                            $"Hardware call argument type {argument.GetType().Name} was not recognized.");
+                }
             }
+        }
+
+        private bool CallNextInterruptHandler()
+        {
+            if (remainingInterruptHandlers.Any())
+            {
+                var firstCallAddress = remainingInterruptHandlers.Dequeue();
+
+                contextBeforeInterrupt = ECC;
+                ContextSwitchImpl(0);
+                PushInterruptArguments(firstCallAddress.Interrupt);
+                // ReSharper disable once PossibleInvalidOperationException
+                CallImpl(firstCallAddress.CallAddress);
+
+                return true;
+            }
+
+            return false;
         }
         
         internal void RegisterErrorHandler(uint errorCode, ulong handlerAddress) => errorTable[errorCode] = handlerAddress;
@@ -1000,11 +1075,18 @@ namespace IronArc
 
             var contextID = (int)contextIDBlock.value;
 
+            ContextSwitchImpl(contextID);
+        }
+
+        private void ContextSwitchImpl(int contextID)
+        {
             try
             {
-                memory.SaveRegisterSet(EAX, EBX, ECX, EDX, EEX, EFX, EGX, EHX, EBP, ESP, EFLAGS, ERP);
+                memory.SaveRegisterSet(EAX, EBX, ECX, EDX, EEX, EFX, EGX,
+                    EHX, EBP, ESP, EFLAGS, ERP);
                 memory.CurrentContextIndex = contextID;
                 ECC = contextID;
+
                 memory.LoadRegisterSet(out EAX, out EBX, out ECX, out EDX, out EEX, out EFX, out EGX,
                     out EHX, out EBP, out ESP, out EFLAGS, out ERP);
             }
