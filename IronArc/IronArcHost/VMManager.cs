@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using IronArc;
+using IronArc.Hardware.Configuration;
 
 namespace IronArcHost
 {
@@ -22,10 +23,10 @@ namespace IronArcHost
         }
 
         public static Guid CreateVM(string programPath, ulong memorySize, ulong loadAddress,
-            IEnumerable<string> hardwareDeviceNames)
+            IEnumerable<NewVMHardwareSelection> hardwareSelections)
         {
             var vm = new VirtualMachine(memorySize, programPath, loadAddress,
-                hardwareDeviceNames);
+                hardwareSelections.Select(s => new HardwareSelection(s.DeviceTypeName, s.Configuration)));
             VirtualMachines.Add(vm);
 
             return vm.MachineId;
@@ -65,16 +66,20 @@ namespace IronArcHost
             vm.MessageQueue.Enqueue(message);
         }
 
-        internal static void AddHardwareToVM(Guid machineID, string hwDeviceTypeName)
+        internal static void AddHardwareToVM(Guid machineID, string hwDeviceTypeName,
+            HardwareConfiguration configuration)
         {
             // Always ensure we actually make hardware on the main thread so we don't accidentally
             // make forms on non-UI threads
-            // TODO: figure out the new device ID when adding to a VM
+            var vm = Lookup(machineID);
             var type = HardwareSearcher.LookupDeviceByName(hwDeviceTypeName);
-            var device = (HardwareDevice)Activator.CreateInstance(type, machineID);
+            var deviceID = vm.GetNextHardwareDeviceID();
+            var device = (HardwareDevice)Activator.CreateInstance(type, machineID, deviceID);
             var message = new Message(VMMessage.AddHardwareDevice, UIMessage.None, machineID, 0, 0L, device);
 
-            Lookup(machineID).MessageQueue.Enqueue(message);
+            device.Configure(configuration);
+
+            vm.MessageQueue.Enqueue(message);
         }
 
         internal static void RemoveHardwareFromVM(Guid machineID, string hwDeviceTypeName)

@@ -43,7 +43,7 @@ namespace IronArcHost
             if (newVMForm.ShowDialog() != DialogResult.OK) { return; }
 
             var newMachineID = VMManager.CreateVM(newVMForm.ProgramPath, newVMForm.MemorySize, newVMForm.ProgramLoadAddress,
-                newVMForm.HardwareDeviceNames);
+                newVMForm.HardwareSelections);
 
             var vm = VMManager.Lookup(newMachineID);
             var lvi = new ListViewItem(vm.MachineId.ToString());

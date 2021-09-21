@@ -30,7 +30,7 @@ namespace IronArc
         public ulong InstructionExecutedCount { get; private set; }
 
         public VirtualMachine(ulong memorySize, string programPath, ulong loadAddress,
-            IEnumerable<string> hardwareDeviceNames)
+            IEnumerable<HardwareSelection> hardwareSelections)
         {
             var program = File.ReadAllBytes(programPath);
             ParseHeader(program);
@@ -52,9 +52,9 @@ namespace IronArc
                 new SystemDevice(MachineId, nextHardwareDeviceId++)
             };
 
-            foreach (var type in hardwareDeviceNames.Select(name => Type.GetType(name)))
+            foreach (var selection in hardwareSelections)
             {
-                AddHardwareDevice(type);
+                AddHardwareDevice(selection);
             }
 
             State = VMState.Paused;
@@ -82,9 +82,12 @@ namespace IronArc
             stringsTableAddress = BitConverter.ToUInt64(program, 20);
         }
 
-        public void AddHardwareDevice(Type hardwareDeviceType)
+        public void AddHardwareDevice(HardwareSelection selection)
         {
-            AddHardwareDevice((HardwareDevice)Activator.CreateInstance(hardwareDeviceType, MachineId, ++nextHardwareDeviceId));
+            var deviceType = Type.GetType(selection.DeviceTypeName);
+            var hardwareDevice = (HardwareDevice)Activator.CreateInstance(deviceType, MachineId, ++nextHardwareDeviceId);
+            hardwareDevice.Configure(selection.Configuration);
+            AddHardwareDevice(hardwareDevice);
         }
 
         public void AddHardwareDevice(HardwareDevice device)
@@ -256,6 +259,11 @@ namespace IronArc
                 .ToArray();
         }
 
+        public uint GetNextHardwareDeviceID()
+        {
+            return ++nextHardwareDeviceId;
+        }
+
         internal HardwareMemoryMapping CreateHardwareMemory(uint deviceID, ulong memoryLength) =>
             new HardwareMemoryMapping
             {
@@ -267,7 +275,7 @@ namespace IronArc
 
         internal void VerifyInterrupt(uint deviceId, string interruptName)
         {
-            
+            // did... did I mean to write something here?
         }
     }
 }

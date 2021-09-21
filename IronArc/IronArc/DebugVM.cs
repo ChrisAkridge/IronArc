@@ -163,6 +163,11 @@ namespace IronArc
         public bool RemoveBreakpoint(ulong address, int context) =>
             breakpoints.RemoveAll(b => b.Address == address && b.Context == context) > 0;
 
+        public bool AddressHasUserVisibleBreakpoint(ulong address) =>
+            breakpoints.Where(b => b.Address == address && b.Context == vm.MemoryManager.CurrentContextIndex)
+                .Select(b => b.IsUserVisible)
+                .FirstOrDefault();
+        
         public bool AddressHasUserVisibleBreakpoint(ulong address, int context) =>
             (breakpoints.Where(b => b.Address == address && b.Context == context)
                 .Select(b => b.IsUserVisible)).FirstOrDefault();

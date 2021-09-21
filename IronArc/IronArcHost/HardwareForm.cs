@@ -43,7 +43,12 @@ namespace IronArcHost
             int deviceIndex = ListAvailableDevices.SelectedIndex;
             string hwDeviceTypeName = (string)ListAvailableDevices.Items[deviceIndex];
 
-            VMManager.AddHardwareToVM(machineId, hwDeviceTypeName);
+            if (!HardwareSearcher.InquireForHardwareConfiguration(hwDeviceTypeName, out var configuration))
+            {
+                return;
+            }
+            
+            VMManager.AddHardwareToVM(machineId, hwDeviceTypeName, configuration);
 
             // TODO: we need to add a message to indicate that a hardware device addition was
             // sucessful. Then we need to run the below code when we get the message.

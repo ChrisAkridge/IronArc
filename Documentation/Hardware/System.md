@@ -1,14 +1,10 @@
-# IronArc Hardware Devices
+# `System`
 
-All IronArc implementations should include the following devices:
-
-## System
-
-### Hardware Calls
+## Hardware Calls
 
 The `System` device has the following hardware calls:
 
-#### RegisterInterruptHandler
+### RegisterInterruptHandler
 
 ```c
 uint8 hwcall System::RegisterInterruptHandler(uint32 deviceId, lpstring* interruptName, ptr handlerAddress)
@@ -26,7 +22,7 @@ Registers a pointer that will be jumped to when a hardware device with a given i
 	- If the interrupt name isn't one of the interrupts the device raises
 	- If there wasn't an index available for a handler
 
-#### UnregisterInterruptHandler
+### UnregisterInterruptHandler
 
 ```c
 void hwcall System::UnregisterInterruptHandler(uint32 deviceId, lpstring* interruptName, uint8 handlerIndex)
@@ -43,7 +39,7 @@ Unregisters a handler for a given interrupt on a given hardware device with a gi
 	- If the interrupt name isn't one of the interrupts the device raises
 	- If the handler index isn't used by any interrupt handler
 
-#### RaiseError
+### RaiseError
 
 ```c
 void hwcall System::RaiseError(uint32 errorCode)
@@ -54,7 +50,7 @@ Raises an error, given its error code.
 - Parameters:
 	- `uint32 errorCode`: The code of the error to raise.	
 
-#### RegisterErrorHandler
+### RegisterErrorHandler
 
 ```c
 void hwcall System::RegisterErrorHandler(uint32 errorCode, ptr handlerAddress)
@@ -66,7 +62,7 @@ Registers a pointer that will be jumped to when a given error code is raised. Ov
 	- `uint32 errorCode`: The error code that, when raised, will cause the VM to jump to `handlerAddress`.
 	- `ptr handlerAddress`: The pointer to jump to when this error is raised.
 
-#### UnregisterErrorHandler
+### UnregisterErrorHandler
 
 ```c
 void hwcall System::UnregisterErrorHandler(uint32 errorCode)
@@ -79,7 +75,7 @@ Unregisters the pointer that would be jumped to when a given error code is raise
 - Errors:
 	- If the error code did not already have a handler registered for it.
 	
-#### GetLastErrorDescriptionSize
+### GetLastErrorDescriptionSize
 
 ```c
 uint64 hwcall System::GetLastErrorDescriptionSize()
@@ -87,7 +83,7 @@ uint64 hwcall System::GetLastErrorDescriptionSize()
 
 - Return value: The size, in bytes, that will be written by a call to `System::GetLastErrorDescription`.
 
-#### GetLastErrorDescription
+### GetLastErrorDescription
 
 ```c
 void hwcall System::GetLastErrorDescription(ptr destination)
@@ -108,7 +104,7 @@ All fields are stored contiguously. `MessagePointer` always points to `Message`.
 - Parameters:
 	- `ptr destination`: The address to write the description to.
 
-#### GetHardwareDeviceCount
+### GetHardwareDeviceCount
 
 ```c
 int32 hwcall System::GetHardwareDeviceCount()
@@ -116,7 +112,7 @@ int32 hwcall System::GetHardwareDeviceCount()
 
 - Return value: The number of hardware devices attached to the VM.
 
-#### GetHardwareDeviceDescriptionSize
+### GetHardwareDeviceDescriptionSize
 
 ```c
 uint64 hwcall System::GetHardwareDeviceDescriptionSize(uint32 deviceId)
@@ -128,7 +124,7 @@ uint64 hwcall System::GetHardwareDeviceDescriptionSize(uint32 deviceId)
 - Errors:
 	- If the device index isn't used by any device
 
-#### GetHardwareDeviceDescription
+### GetHardwareDeviceDescription
 
 ```c
 void hwcall System::GetHardwareDeviceDescription(uint32 deviceId, ptr destination)
@@ -154,7 +150,7 @@ All fields are contiguous in memory. `MemoryStart` and `MemoryEnd` are both `0` 
 - Errors:
 	- If the device index isn't used by any device
 
-#### GetAllHardwareDeviceDescriptionSize
+### GetAllHardwareDeviceDescriptionSize
 
 ```c
 uint64 hwcall System::GetAllHardwareDeviceDescriptionsSize()
@@ -162,7 +158,7 @@ uint64 hwcall System::GetAllHardwareDeviceDescriptionsSize()
 
 - Return value: The size, in bytes, that will be written by a call to `System::GetAllHardwareDeviceDescriptions`.
 
-#### GetAllHardwareDeviceDescriptions
+### GetAllHardwareDeviceDescriptions
 
 ```c
 void hwcall System::GetAllHardwareDeviceDescriptions(ptr destination)
@@ -187,7 +183,7 @@ All fields are contiguous in memory.
 - Parameters:
 	- `ptr destination`: The address to write the descriptions to.
 	
-#### ReadHardwareMemory
+### ReadHardwareMemory
 
 ```c
 void hwcall System::ReadHardwareMemory(uint32 deviceId, ptr source, ptr destination, uint32 length)
@@ -201,7 +197,7 @@ Reads `length` bytes from the hardware device with ID `deviceId` from `source` t
 	- `ptr destination`: The address in the VM's current context to write to.
 	- `uint32 length`: The number of bytes to read.
 
-#### WriteHardwareMemory
+### WriteHardwareMemory
 
 ```c
 void hwcall System::WriteHardwareMemory(uint32 deviceId, ptr source, ptr destination, uint32 length)
@@ -215,7 +211,7 @@ Reads `length` bytes from the hardware device with ID `deviceId` from `source` t
 	- `ptr destination`: The address in the hardware device's memory to write to.
 	- `uint32 length`: The number of bytes to write.
 	
-### Interrupts
+## Interrupts
 
 ### HardwareDeviceAttached
 
@@ -238,62 +234,3 @@ Raised when a hardware device is removed.
 
 - Parameters:
 	- `uint32 deviceId`: The device ID of the newly removed deviced.
-
-## Terminal
-
-### Hardware Calls
-
-#### Write
-
-```c
-void hwcall Terminal::Write(lpstring* text)
-```
-
-Writes the string at the pointer to the terminal.
-
-- Parameters:
-	- `lpstring* text`: A pointer to the text to write.
-
-#### WriteLine
-
-```c
-void hwcall Terminal::WriteLine(lpstring* text)
-```
-
-Writes the string at the pointer, followed by a line break, to the terminal.
-
-- Parameters:
-	- `lpstring* text`: A pointer to the text to write.
-
-#### Read
-
-```c
-uint16 hwcall Terminal::Read()
-```
-
-Reads one UTF-16 character from the terminal.
-
-- Return value: The character that was read.
-
-#### ReadLine
-
-```c
-void hwcall Terminal::ReadLine(ptr destination)
-```
-
-Reads a line from the terminal, then writes it to the destination pointer.
-
-- Parameters:
-	- `ptr destination`: The pointer to write the string to.
-
-## Debugger
-
-### Hardware Calls
-
-#### Break
-
-```c
-void hwcall Debugger:Break()
-```
-
-If a debugger is attached to the IronArc host process, calling this hardware call causes the debugger to break immediately.

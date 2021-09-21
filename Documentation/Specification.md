@@ -240,6 +240,10 @@ Hardware calls should be stylized in literature and documentation in the form `<
 - void: Used in return types, this indicates a hardware call that returns no value.
 - ptr: A pointer to a memory address.
 
+#### Hardware Call Errors
+
+If an error occurs during a hardware call, a HardwareError error is raised (see Error Handling below). Hardware devices can use whichever error code and message they wish to signify the error.
+
 #### Interrupts
 An interrupt is a named event with optional information raised by a hardware device. Interrupts can be used to notify the virtual machine that an event has occurred, and provide information about the event itself.
 

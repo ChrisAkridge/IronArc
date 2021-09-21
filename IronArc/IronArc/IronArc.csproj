@@ -104,6 +104,7 @@
     <Compile Include="Enums.cs" />
     <Compile Include="ErrorTable.cs" />
     <Compile Include="Extensions.cs" />
+    <Compile Include="HardwareConfigurationTypeAttribute.cs" />
     <Compile Include="HardwareDefinitionGenerator\DefaultDataTypes.cs" />
     <Compile Include="HardwareDefinitionGenerator\Generator.cs" />
     <Compile Include="HardwareDefinitionGenerator\Models\HardwareMethod.cs" />
@@ -113,6 +114,9 @@
     <Compile Include="HardwareDefinitionGenerator\Models\HardwareDevice.cs" />
     <Compile Include="HardwareDevice.cs" />
     <Compile Include="HardwareProvider.cs" />
+    <Compile Include="HardwareSelection.cs" />
+    <Compile Include="Hardware\Configuration\HardwareConfiguration.cs" />
+    <Compile Include="Hardware\Configuration\NullConfiguration.cs" />
     <Compile Include="Interrupt.cs" />
     <Compile Include="Hardware\ITerminal.cs" />
     <Compile Include="Hardware\SystemDevice.cs" />

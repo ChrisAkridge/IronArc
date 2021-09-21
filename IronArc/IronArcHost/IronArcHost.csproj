@@ -96,6 +96,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AddHardwareConfigurationForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="AddHardwareConfigurationForm.Designer.cs">
+      <DependentUpon>AddHardwareConfigurationForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="ByteBlockByteProvider.cs" />
     <Compile Include="CoreHardwareProvider.cs" />
     <Compile Include="DebuggerForm.cs">
@@ -130,6 +136,7 @@
     <Compile Include="NewVMForm.Designer.cs">
       <DependentUpon>NewVMForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="NewVMHardwareSelection.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RegisterEditor.cs">
@@ -146,6 +153,9 @@
     </Compile>
     <Compile Include="VMManager.cs" />
     <Compile Include="VMMemoryByteProvider.cs" />
+    <EmbeddedResource Include="AddHardwareConfigurationForm.resx">
+      <DependentUpon>AddHardwareConfigurationForm.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="DebuggerForm.resx">
       <DependentUpon>DebuggerForm.cs</DependentUpon>
     </EmbeddedResource>

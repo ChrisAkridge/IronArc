@@ -7,10 +7,13 @@ namespace IronArcHost
 {
     public partial class NewVMForm : Form
     {
+        private bool inItemCheckHandler;
+        
         public string ProgramPath { get; private set; }
         public ulong MemorySize { get; private set; }
         public ulong ProgramLoadAddress { get; private set; }
-        public List<string> HardwareDeviceNames { get; private set; }
+        public List<NewVMHardwareSelection> HardwareSelections { get; } =
+            new List<NewVMHardwareSelection>();
         public bool StartInDebugger => CheckStartInDebugger.Checked;
 
         public NewVMForm()
@@ -53,15 +56,6 @@ namespace IronArcHost
             MemorySize = (ulong)systemMemorySize;
             ProgramLoadAddress = (ulong)loadAddress;
 
-            HardwareDeviceNames = new List<string>();
-            for (int i = 0; i < CLBInitialHardwareDevices.Items.Count; i++)
-            {
-                if (CLBInitialHardwareDevices.GetItemCheckState(i) == CheckState.Checked)
-                {
-                    HardwareDeviceNames.Add((string)CLBInitialHardwareDevices.Items[i]);
-                }
-            }
-
             DialogResult = DialogResult.OK;
         }
 
@@ -77,6 +71,30 @@ namespace IronArcHost
                 string filePath = OFDInitialProgram.FileName;
                 TextBoxInitialProgram.Text = filePath;
             }
+        }
+
+        private void CLBInitialHardwareDevices_ItemCheck(object sender, ItemCheckEventArgs e)
+        {
+            if (inItemCheckHandler) { return; }
+            
+            inItemCheckHandler = true;
+            var hwDeviceTypeName = (string)CLBInitialHardwareDevices.Items[e.Index];
+            
+            if (e.NewValue != CheckState.Checked)
+            {
+                HardwareSelections.RemoveAll(s => s.DeviceTypeName == hwDeviceTypeName);
+                return;
+            }
+            
+            if (!HardwareSearcher.InquireForHardwareConfiguration(hwDeviceTypeName, out var configuration))
+            {
+                CLBInitialHardwareDevices.SetItemCheckState(e.Index, CheckState.Unchecked);
+                return;
+            }
+
+            HardwareSelections.Add(new NewVMHardwareSelection(hwDeviceTypeName, configuration));
+            
+            inItemCheckHandler = false;
         }
     }
 }
