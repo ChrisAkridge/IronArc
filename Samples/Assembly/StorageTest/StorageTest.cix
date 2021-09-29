@@ -1,0 +1,14 @@
+// StorageTest.cix
+// Reads from a storage device and writes the first 4,096 bytes
+// to the terminal.
+
+void main()
+{
+	uint streamID = HW_Storage_OpenStream(0, 4096);
+	int i = 0;
+	byte* bytes = (byte*)((&i) + 1024);	// odd pointer math because no malloc
+	
+	HW_Storage_Read(streamID, bytes, 4096);
+	*((int*)(bytes - 4)) = 4096;
+	HW_TerminalDevice_Write(bytes - 4);
+}

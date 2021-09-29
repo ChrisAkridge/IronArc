@@ -1,0 +1,420 @@
+globals: 0
+jmp main
+main:
+mov QWORD eax ebp
+mov QWORD eax esp
+
+# __globals_init();
+push QWORD __globals_init
+pop QWORD eax
+call eax
+
+# uint streamID = HW_Storage_OpenStream(0, 4096);
+push QWORD 0
+push QWORD 4096
+push QWORD HW_Storage_OpenStream
+pop QWORD eax
+call eax
+
+# int i = 0;
+push DWORD 0
+
+# byte* bytes = (byte*)(&(i) + 1024);
+push QWORD ebp
+push QWORD 4
+add QWORD
+push DWORD 1024
+mov QWORD 0 ecx
+pop DWORD ecx
+push DWORD ecx
+push DWORD 4
+mult DWORD
+mov QWORD 0 ecx
+pop DWORD ecx
+push QWORD ecx
+add QWORD
+
+# HW_Storage_Read(streamID, bytes, 4096);
+push QWORD ebp
+push QWORD 0
+add QWORD
+pop QWORD eax
+push DWORD *eax
+push QWORD ebp
+push QWORD 8
+add QWORD
+pop QWORD eax
+push QWORD *eax
+push QWORD 4096
+push QWORD HW_Storage_Read
+pop QWORD eax
+call eax
+
+# *((int*)(bytes - 4)) = 4096;
+push QWORD ebp
+push QWORD 8
+add QWORD
+pop QWORD eax
+push QWORD *eax
+push DWORD 4
+mov QWORD 0 ecx
+pop DWORD ecx
+push DWORD ecx
+push DWORD 1
+mult DWORD
+mov QWORD 0 ecx
+pop DWORD ecx
+push QWORD ecx
+sub QWORD
+push DWORD 4096
+mov QWORD 0 ecx
+pop DWORD ecx
+push DWORD ecx
+mov QWORD *ebp+16 eax
+mov DWORD *ebp+24 *eax
+mov DWORD *ebp+24 *ebp+16
+subl QWORD esp 8 esp
+subl QWORD esp 4 esp
+
+# HW_TerminalDevice_Write(bytes - 4);
+push QWORD ebp
+push QWORD 8
+add QWORD
+pop QWORD eax
+push QWORD *eax
+push DWORD 4
+mov QWORD 0 ecx
+pop DWORD ecx
+push DWORD ecx
+push DWORD 1
+mult DWORD
+mov QWORD 0 ecx
+pop DWORD ecx
+push QWORD ecx
+sub QWORD
+push QWORD HW_TerminalDevice_Write
+pop QWORD eax
+call eax
+
+# /* end of program */
+end
+
+HW_Storage_OpenStream:
+subl QWORD ebp 16 ebp
+
+# return 0 /* hardware call: Storage::OpenStream */;
+push QWORD *ebp
+push QWORD *ebp+8
+hwcall "Storage::OpenStream"
+mov QWORD 0 eax
+pop DWORD eax
+mov QWORD ebp esp
+push DWORD eax
+ret
+
+HW_Storage_CloseStream:
+subl QWORD ebp 4 ebp
+
+# /* hardware call: Storage::CloseStream */;
+push DWORD *ebp
+hwcall "Storage::CloseStream"
+
+# return;
+mov QWORD ebp esp
+ret
+
+HW_Storage_GetStreamLength:
+subl QWORD ebp 4 ebp
+
+# return 0 /* hardware call: Storage::GetStreamLength */;
+push DWORD *ebp
+hwcall "Storage::GetStreamLength"
+mov QWORD 0 eax
+pop QWORD eax
+mov QWORD ebp esp
+push QWORD eax
+ret
+
+HW_Storage_Seek:
+subl QWORD ebp 12 ebp
+
+# /* hardware call: Storage::Seek */;
+push DWORD *ebp
+push QWORD *ebp+4
+hwcall "Storage::Seek"
+
+# return;
+mov QWORD ebp esp
+ret
+
+HW_Storage_Read:
+subl QWORD ebp 20 ebp
+
+# /* hardware call: Storage::Read */;
+push DWORD *ebp
+push QWORD *ebp+4
+push QWORD *ebp+12
+hwcall "Storage::Read"
+
+# return;
+mov QWORD ebp esp
+ret
+
+HW_Storage_Write:
+subl QWORD ebp 20 ebp
+
+# /* hardware call: Storage::Write */;
+push DWORD *ebp
+push QWORD *ebp+4
+push QWORD *ebp+12
+hwcall "Storage::Write"
+
+# return;
+mov QWORD ebp esp
+ret
+
+HW_System_RegisterInterruptHandler:
+subl QWORD ebp 20 ebp
+
+# return 0 /* hardware call: System::RegisterInterruptHandler */;
+push DWORD *ebp
+push QWORD *ebp+4
+push QWORD *ebp+12
+hwcall "System::RegisterInterruptHandler"
+mov QWORD 0 eax
+pop BYTE eax
+mov QWORD ebp esp
+push BYTE eax
+ret
+
+HW_System_UnregisterInterruptHandler:
+subl QWORD ebp 13 ebp
+
+# /* hardware call: System::UnregisterInterruptHandler */;
+push DWORD *ebp
+push QWORD *ebp+4
+push BYTE *ebp+12
+hwcall "System::UnregisterInterruptHandler"
+
+# return;
+mov QWORD ebp esp
+ret
+
+HW_System_RaiseError:
+subl QWORD ebp 4 ebp
+
+# /* hardware call: System::RaiseError */;
+push DWORD *ebp
+hwcall "System::RaiseError"
+
+# return;
+mov QWORD ebp esp
+ret
+
+HW_System_RegisterErrorHandler:
+subl QWORD ebp 12 ebp
+
+# /* hardware call: System::RegisterErrorHandler */;
+push DWORD *ebp
+push QWORD *ebp+4
+hwcall "System::RegisterErrorHandler"
+
+# return;
+mov QWORD ebp esp
+ret
+
+HW_System_UnregisterErrorHandler:
+subl QWORD ebp 4 ebp
+
+# /* hardware call: System::UnregisterErrorHandler */;
+push DWORD *ebp
+hwcall "System::UnregisterErrorHandler"
+
+# return;
+mov QWORD ebp esp
+ret
+
+HW_System_GetLastErrorDescriptionSize:
+
+# return 0 /* hardware call: System::GetLastErrorDescriptionSize */;
+hwcall "System::GetLastErrorDescriptionSize"
+mov QWORD 0 eax
+pop QWORD eax
+mov QWORD ebp esp
+push QWORD eax
+ret
+
+HW_System_GetLastErrorDescription:
+subl QWORD ebp 8 ebp
+
+# /* hardware call: System::GetLastErrorDescription */;
+push QWORD *ebp
+hwcall "System::GetLastErrorDescription"
+
+# return;
+mov QWORD ebp esp
+ret
+
+HW_System_GetHardwareDeviceCount:
+
+# return 0 /* hardware call: System::GetHardwareDeviceCount */;
+hwcall "System::GetHardwareDeviceCount"
+mov QWORD 0 eax
+pop DWORD eax
+mov QWORD ebp esp
+push DWORD eax
+ret
+
+HW_System_GetHardwareDeviceDescriptionSize:
+subl QWORD ebp 4 ebp
+
+# return 0 /* hardware call: System::GetHardwareDeviceDescriptionSize */;
+push DWORD *ebp
+hwcall "System::GetHardwareDeviceDescriptionSize"
+mov QWORD 0 eax
+pop QWORD eax
+mov QWORD ebp esp
+push QWORD eax
+ret
+
+HW_System_GetHardwareDeviceDescription:
+subl QWORD ebp 12 ebp
+
+# /* hardware call: System::GetHardwareDeviceDescription */;
+push DWORD *ebp
+push QWORD *ebp+4
+hwcall "System::GetHardwareDeviceDescription"
+
+# return;
+mov QWORD ebp esp
+ret
+
+HW_System_GetAllHardwareDeviceDescriptionsSize:
+
+# return 0 /* hardware call: System::GetAllHardwareDeviceDescriptionsSize */;
+hwcall "System::GetAllHardwareDeviceDescriptionsSize"
+mov QWORD 0 eax
+pop QWORD eax
+mov QWORD ebp esp
+push QWORD eax
+ret
+
+HW_System_GetAllHardwareDeviceDescriptions:
+subl QWORD ebp 8 ebp
+
+# /* hardware call: System::GetAllHardwareDeviceDescriptions */;
+push QWORD *ebp
+hwcall "System::GetAllHardwareDeviceDescriptions"
+
+# return;
+mov QWORD ebp esp
+ret
+
+HW_System_ReadHardwareMemory:
+subl QWORD ebp 24 ebp
+
+# /* hardware call: System::ReadHardwareMemory */;
+push DWORD *ebp
+push QWORD *ebp+4
+push QWORD *ebp+12
+push DWORD *ebp+20
+hwcall "System::ReadHardwareMemory"
+
+# return;
+mov QWORD ebp esp
+ret
+
+HW_System_WriteHardwareMemory:
+subl QWORD ebp 24 ebp
+
+# /* hardware call: System::WriteHardwareMemory */;
+push DWORD *ebp
+push QWORD *ebp+4
+push QWORD *ebp+12
+push DWORD *ebp+20
+hwcall "System::WriteHardwareMemory"
+
+# return;
+mov QWORD ebp esp
+ret
+
+HW_System_HardwareDeviceAttached:
+subl QWORD ebp 4 ebp
+
+# /* hardware call: System::HardwareDeviceAttached */;
+push DWORD *ebp
+hwcall "System::HardwareDeviceAttached"
+
+# return;
+mov QWORD ebp esp
+ret
+
+HW_System_HardwareDeviceRemoved:
+subl QWORD ebp 4 ebp
+
+# /* hardware call: System::HardwareDeviceRemoved */;
+push DWORD *ebp
+hwcall "System::HardwareDeviceRemoved"
+
+# return;
+mov QWORD ebp esp
+ret
+
+HW_TerminalDevice_Write:
+subl QWORD ebp 8 ebp
+
+# /* hardware call: TerminalDevice::Write */;
+push QWORD *ebp
+hwcall "TerminalDevice::Write"
+
+# return;
+mov QWORD ebp esp
+ret
+
+HW_TerminalDevice_WriteLine:
+subl QWORD ebp 8 ebp
+
+# /* hardware call: TerminalDevice::WriteLine */;
+push QWORD *ebp
+hwcall "TerminalDevice::WriteLine"
+
+# return;
+mov QWORD ebp esp
+ret
+
+HW_TerminalDevice_Read:
+
+# return 0 /* hardware call: TerminalDevice::Read */;
+hwcall "TerminalDevice::Read"
+mov QWORD 0 eax
+pop WORD eax
+mov QWORD ebp esp
+push WORD eax
+ret
+
+HW_TerminalDevice_ReadLine:
+subl QWORD ebp 8 ebp
+
+# /* hardware call: TerminalDevice::ReadLine */;
+push QWORD *ebp
+hwcall "TerminalDevice::ReadLine"
+
+# return;
+mov QWORD ebp esp
+ret
+
+HW_Debugger_Break:
+
+# /* hardware call: Debugger::Break */;
+hwcall "Debugger::Break"
+
+# return;
+mov QWORD ebp esp
+ret
+
+__globals_init:
+
+# return;
+mov QWORD ebp esp
+ret
+

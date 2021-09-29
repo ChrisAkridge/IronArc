@@ -1,0 +1,151 @@
+
+
+void main()
+{
+    uint streamID = HW_Storage_OpenStream(0, 4096);
+    int i = 0;
+    byte* bytes = (byte*)(&(i) + 1024);
+    HW_Storage_Read(streamID, bytes, 4096);
+    *((int*)(bytes - 4)) = 4096;
+    HW_TerminalDevice_Write(bytes - 4);
+}
+
+uint HW_Storage_OpenStream(long startPosition, long length)
+{
+    return 0 /* hardware call: Storage::OpenStream */;
+}
+
+void HW_Storage_CloseStream(uint streamID)
+{
+    /* hardware call: Storage::CloseStream */;
+}
+
+long HW_Storage_GetStreamLength(uint streamID)
+{
+    return 0 /* hardware call: Storage::GetStreamLength */;
+}
+
+void HW_Storage_Seek(uint streamID, long newPosition)
+{
+    /* hardware call: Storage::Seek */;
+}
+
+void HW_Storage_Read(uint streamID, void* destination, long length)
+{
+    /* hardware call: Storage::Read */;
+}
+
+void HW_Storage_Write(uint streamID, void* source, long length)
+{
+    /* hardware call: Storage::Write */;
+}
+
+byte HW_System_RegisterInterruptHandler(uint deviceId, byte* interruptName, void* handlerAddress)
+{
+    return 0 /* hardware call: System::RegisterInterruptHandler */;
+}
+
+void HW_System_UnregisterInterruptHandler(uint deviceId, byte* interruptName, byte handlerIndex)
+{
+    /* hardware call: System::UnregisterInterruptHandler */;
+}
+
+void HW_System_RaiseError(uint errorCode)
+{
+    /* hardware call: System::RaiseError */;
+}
+
+void HW_System_RegisterErrorHandler(uint errorCode, void* handlerAddress)
+{
+    /* hardware call: System::RegisterErrorHandler */;
+}
+
+void HW_System_UnregisterErrorHandler(uint errorCode)
+{
+    /* hardware call: System::UnregisterErrorHandler */;
+}
+
+ulong HW_System_GetLastErrorDescriptionSize()
+{
+    return 0 /* hardware call: System::GetLastErrorDescriptionSize */;
+}
+
+void HW_System_GetLastErrorDescription(void* destination)
+{
+    /* hardware call: System::GetLastErrorDescription */;
+}
+
+int HW_System_GetHardwareDeviceCount()
+{
+    return 0 /* hardware call: System::GetHardwareDeviceCount */;
+}
+
+ulong HW_System_GetHardwareDeviceDescriptionSize(uint deviceId)
+{
+    return 0 /* hardware call: System::GetHardwareDeviceDescriptionSize */;
+}
+
+void HW_System_GetHardwareDeviceDescription(uint deviceId, void* destination)
+{
+    /* hardware call: System::GetHardwareDeviceDescription */;
+}
+
+ulong HW_System_GetAllHardwareDeviceDescriptionsSize()
+{
+    return 0 /* hardware call: System::GetAllHardwareDeviceDescriptionsSize */;
+}
+
+void HW_System_GetAllHardwareDeviceDescriptions(void* destination)
+{
+    /* hardware call: System::GetAllHardwareDeviceDescriptions */;
+}
+
+void HW_System_ReadHardwareMemory(uint deviceId, void* source, void* destination, uint count)
+{
+    /* hardware call: System::ReadHardwareMemory */;
+}
+
+void HW_System_WriteHardwareMemory(uint deviceId, void* source, void* destination, uint count)
+{
+    /* hardware call: System::WriteHardwareMemory */;
+}
+
+void HW_System_HardwareDeviceAttached(uint deviceId)
+{
+    /* hardware call: System::HardwareDeviceAttached */;
+}
+
+void HW_System_HardwareDeviceRemoved(uint deviceId)
+{
+    /* hardware call: System::HardwareDeviceRemoved */;
+}
+
+void HW_TerminalDevice_Write(byte* text)
+{
+    /* hardware call: TerminalDevice::Write */;
+}
+
+void HW_TerminalDevice_WriteLine(byte* text)
+{
+    /* hardware call: TerminalDevice::WriteLine */;
+}
+
+ushort HW_TerminalDevice_Read()
+{
+    return 0 /* hardware call: TerminalDevice::Read */;
+}
+
+void HW_TerminalDevice_ReadLine(void* destination)
+{
+    /* hardware call: TerminalDevice::ReadLine */;
+}
+
+void HW_Debugger_Break()
+{
+    /* hardware call: Debugger::Break */;
+}
+
+void __globals_init()
+{
+}
+

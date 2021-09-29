@@ -37,7 +37,7 @@ namespace IronArc
         public Stack<CallStackFrame> callStack;
         
         private int? contextBeforeInterrupt;
-        private Queue<InterruptAndHandler> remainingInterruptHandlers = new Queue<InterruptAndHandler>();
+        private readonly Queue<InterruptAndHandler> remainingInterruptHandlers = new Queue<InterruptAndHandler>();
 
         public Processor(MemoryManager memory, ulong firstInstructionAddress, ulong programSize,
             ulong stringsTableAddress, VirtualMachine vm)

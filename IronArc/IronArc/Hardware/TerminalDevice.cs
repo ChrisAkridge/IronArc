@@ -11,7 +11,7 @@ namespace IronArc.Hardware
         // The first hardware device, created on December 1, 2017.
         private readonly ITerminal terminal;
 
-        public override string DeviceName => "Terminal";
+        public override string DeviceName => "TerminalDevice";
 
         public override HardwareDeviceStatus Status
         {

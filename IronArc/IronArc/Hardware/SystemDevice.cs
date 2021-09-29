@@ -20,8 +20,8 @@ namespace IronArc.Hardware
             new HardwareDefinitionGenerator.Models.HardwareDevice("System",
                 new List<HardwareMethod>
                 {
-                    Generator.ParseHardwareMethod("uint8 hwcall System::RegisterInterruptHandler(uint32 deviceId, lpstring* interruptName, ptr handlerAddress)"),
-                    Generator.ParseHardwareMethod("void hwcall System::UnregisterInterruptHandler(uint32 deviceId, lpstring* interruptName, uint8 handlerIndex)"),
+                    Generator.ParseHardwareMethod("uint8 hwcall System::RegisterInterruptHandler(uint32 deviceId, byte* interruptName, ptr handlerAddress)"),
+                    Generator.ParseHardwareMethod("void hwcall System::UnregisterInterruptHandler(uint32 deviceId, byte* interruptName, uint8 handlerIndex)"),
                     Generator.ParseHardwareMethod("void hwcall System::RaiseError(uint32 errorCode)"),
                     Generator.ParseHardwareMethod("void hwcall System::RegisterErrorHandler(uint32 errorCode, ptr handlerAddress)"),
                     Generator.ParseHardwareMethod("void hwcall System::UnregisterErrorHandler(uint32 errorCode)"),

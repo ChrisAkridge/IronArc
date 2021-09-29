@@ -77,7 +77,6 @@ namespace IronArcHost
             this.Name = "AddHardwareConfigurationForm";
             this.ShowIcon = false;
             this.Text = "Configure {{Device Name}}";
-            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.AddHardwareConfigurationForm_FormClosing);
             this.ResumeLayout(false);
 
         }

@@ -21,11 +21,8 @@ namespace IronArcHost
 
             Configuration = configuration;
             PropertyHardware.SelectedObject = configuration;
-        }
 
-        private void AddHardwareConfigurationForm_FormClosing(object sender, FormClosingEventArgs e)
-        {
-            DialogResult = DialogResult.Cancel;
+            Text = $"Configure {configuration.GetType().Name}";
         }
 
         private void ButtonCancel_Click(object sender, EventArgs e)

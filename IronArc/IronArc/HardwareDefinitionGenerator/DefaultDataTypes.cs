@@ -8,7 +8,7 @@ namespace IronArc.HardwareDefinitionGenerator
         public static HardwareMethodDataType UInt8 => new HardwareMethodDataType("byte", 0);
         public static HardwareMethodDataType UInt16 => new HardwareMethodDataType("ushort", 0);
         public static HardwareMethodDataType UInt32 => new HardwareMethodDataType("uint", 0);
-        public static HardwareMethodDataType LpString => new HardwareMethodDataType("lpstring", 0);
-        public static HardwareMethodDataType LpStringPointer => new HardwareMethodDataType("lpstring", 1);
+        public static HardwareMethodDataType LpString => new HardwareMethodDataType("byte", 0);
+        public static HardwareMethodDataType LpStringPointer => new HardwareMethodDataType("byte", 1);
     }
 }

@@ -75,9 +75,9 @@ namespace IronArcHost
             var type = HardwareSearcher.LookupDeviceByName(hwDeviceTypeName);
             var deviceID = vm.GetNextHardwareDeviceID();
             var device = (HardwareDevice)Activator.CreateInstance(type, machineID, deviceID);
-            var message = new Message(VMMessage.AddHardwareDevice, UIMessage.None, machineID, 0, 0L, device);
-
             device.Configure(configuration);
+            
+            var message = new Message(VMMessage.AddHardwareDevice, UIMessage.None, machineID, 0, 0L, device);
 
             vm.MessageQueue.Enqueue(message);
         }

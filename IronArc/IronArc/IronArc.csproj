@@ -117,6 +117,9 @@
     <Compile Include="HardwareSelection.cs" />
     <Compile Include="Hardware\Configuration\HardwareConfiguration.cs" />
     <Compile Include="Hardware\Configuration\NullConfiguration.cs" />
+    <Compile Include="Hardware\Configuration\StorageDeviceConfiguration.cs" />
+    <Compile Include="Hardware\StorageDevice.cs" />
+    <Compile Include="Hardware\Storage\StorageStream.cs" />
     <Compile Include="Interrupt.cs" />
     <Compile Include="Hardware\ITerminal.cs" />
     <Compile Include="Hardware\SystemDevice.cs" />
