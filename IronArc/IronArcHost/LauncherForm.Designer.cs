@@ -51,6 +51,7 @@
             this.TSMITools = new System.Windows.Forms.ToolStripMenuItem();
             this.TSMISaveHardwareDefinition = new System.Windows.Forms.ToolStripMenuItem();
             this.SFDHardwareDefinition = new System.Windows.Forms.SaveFileDialog();
+            this.TSMIPartitionManager = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStrip1.SuspendLayout();
             this.MenuStrip.SuspendLayout();
             this.SuspendLayout();
@@ -205,7 +206,8 @@
             // TSMITools
             // 
             this.TSMITools.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.TSMISaveHardwareDefinition});
+            this.TSMISaveHardwareDefinition,
+            this.TSMIPartitionManager});
             this.TSMITools.Name = "TSMITools";
             this.TSMITools.Size = new System.Drawing.Size(46, 20);
             this.TSMITools.Text = "&Tools";
@@ -222,6 +224,12 @@
             this.SFDHardwareDefinition.DefaultExt = "json";
             this.SFDHardwareDefinition.Filter = "JSON Files (*.json)|*.json|All files|*.*";
             this.SFDHardwareDefinition.Title = "IronArc Host - Save Hardware Definition";
+            // 
+            // TSMIPartitionManager
+            // 
+            this.TSMIPartitionManager.Name = "TSMIPartitionManager";
+            this.TSMIPartitionManager.Size = new System.Drawing.Size(251, 22);
+            this.TSMIPartitionManager.Text = "Partition Manager";
             // 
             // LauncherForm
             // 
@@ -268,5 +276,6 @@
 		private System.Windows.Forms.ToolStripMenuItem TSMITools;
 		private System.Windows.Forms.ToolStripMenuItem TSMISaveHardwareDefinition;
 		private System.Windows.Forms.SaveFileDialog SFDHardwareDefinition;
-	}
+        private System.Windows.Forms.ToolStripMenuItem TSMIPartitionManager;
+    }
 }

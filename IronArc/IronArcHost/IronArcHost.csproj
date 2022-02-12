@@ -137,6 +137,12 @@
       <DependentUpon>NewVMForm.cs</DependentUpon>
     </Compile>
     <Compile Include="NewVMHardwareSelection.cs" />
+    <Compile Include="PartitionManager.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="PartitionManager.Designer.cs">
+      <DependentUpon>PartitionManager.cs</DependentUpon>
+    </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RegisterEditor.cs">
@@ -171,6 +177,9 @@
     <EmbeddedResource Include="NewVMForm.resx">
       <DependentUpon>NewVMForm.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="PartitionManager.resx">
+      <DependentUpon>PartitionManager.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
@@ -201,6 +210,10 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\IronArc.OSDebug\IronArc.OSDebug.csproj">
+      <Project>{21f0d1f7-8559-4662-b357-d55fc3235200}</Project>
+      <Name>IronArc.OSDebug</Name>
+    </ProjectReference>
     <ProjectReference Include="..\IronArc\IronArc.csproj">
       <Project>{8ce75941-a5de-4155-ab10-de82afe001fb}</Project>
       <Name>IronArc</Name>
