@@ -116,6 +116,12 @@
     <Compile Include="DebugTerminalInputForm.Designer.cs">
       <DependentUpon>DebugTerminalInputForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="FormatStorageFileOptions.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FormatStorageFileOptions.Designer.cs">
+      <DependentUpon>FormatStorageFileOptions.cs</DependentUpon>
+    </Compile>
     <Compile Include="HardwareForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -151,6 +157,12 @@
     <Compile Include="RegisterEditor.Designer.cs">
       <DependentUpon>RegisterEditor.cs</DependentUpon>
     </Compile>
+    <Compile Include="ResizePartitionOptionsForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ResizePartitionOptionsForm.Designer.cs">
+      <DependentUpon>ResizePartitionOptionsForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="TerminalForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -167,6 +179,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="DebugTerminalInputForm.resx">
       <DependentUpon>DebugTerminalInputForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FormatStorageFileOptions.resx">
+      <DependentUpon>FormatStorageFileOptions.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="HardwareForm.resx">
       <DependentUpon>HardwareForm.cs</DependentUpon>
@@ -192,6 +207,9 @@
     </Compile>
     <EmbeddedResource Include="RegisterEditor.resx">
       <DependentUpon>RegisterEditor.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ResizePartitionOptionsForm.resx">
+      <DependentUpon>ResizePartitionOptionsForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="TerminalForm.resx">
       <DependentUpon>TerminalForm.cs</DependentUpon>

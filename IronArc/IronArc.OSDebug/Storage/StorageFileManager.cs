@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using IronArc.OSDebug.Extensions;
 using IronArc.OSDebug.Storage.Model;
 
 namespace IronArc.OSDebug.Storage
@@ -12,12 +13,14 @@ namespace IronArc.OSDebug.Storage
     {
         private readonly FileStream stream;
         private readonly PartitionTableHeader tableHeader;
-        private readonly List<StorageFileDivision> divisions;
+        private List<StorageFileDivision> divisions;
         
         public string FilePath { get; }
         public IReadOnlyList<StorageFileDivision> Divisions => divisions.AsReadOnly();
         public int SectorSize => tableHeader?.SectorSize ?? throw new InvalidOperationException();
         public long FileSize => stream.Length;
+
+        public event EventHandler DivisionListUpdated;
 
         public StorageFileManager(string storageFilePath)
         {
@@ -27,13 +30,40 @@ namespace IronArc.OSDebug.Storage
             tableHeader = ParsePartitionTableHeader();
             divisions = DetermineAllocatedSpace();
         }
+
+        public static StorageFileManager CreateAndFormatNewFile(string filePath, long fileSize, int sectorSize)
+        {
+            if (!sectorSize.IsValidSectorSize())
+            {
+                throw new ArgumentException($"Tried to create a file with an invalid sector size of {sectorSize} bytes; must be a power of 2 that is at least 32 bytes.",
+                    nameof(sectorSize));
+            }
+            
+            var newTableHeader = new PartitionTableHeader(new List<Partition>())
+            {
+                MagicNumber = PartitionTableHeader.PartitionTableMagicNumber,
+                PartitionCount = 0,
+                SectorSize = sectorSize
+            };
+
+            // https://stackoverflow.com/a/8417606/2709212
+            using (var fileStream =
+                new FileStream(filePath, FileMode.CreateNew, FileAccess.ReadWrite, FileShare.None))
+            {
+                fileStream.SetLength(fileSize);
+                fileStream.Position = 0L;
+                newTableHeader.Write(new BinaryWriter(fileStream));
+            }
+            
+            return new StorageFileManager(filePath);
+        }
         
         /// <summary>Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.</summary>
         public void Dispose()
         {
             stream?.Dispose();
         }
-
+        
         private PartitionTableHeader ParsePartitionTableHeader()
         {
             var reader = new BinaryReader(stream, Encoding.ASCII, leaveOpen: true);
@@ -47,7 +77,7 @@ namespace IronArc.OSDebug.Storage
 
             var sectorSize = reader.ReadInt32();
             var partitionCount = reader.ReadInt32();
-            var partitions = new Partition[partitionCount];
+            var partitions = new List<Partition>(partitionCount);
 
             if (partitionCount <= 0)
             {
@@ -170,5 +200,156 @@ namespace IronArc.OSDebug.Storage
                 .Select(t => t.Item1)
                 .ToList();
         }
+
+        private void WritePartitionTable()
+        {
+            using (var writer = new BinaryWriter(stream)) { tableHeader.Write(writer); }
+        }
+
+        public void FormatEntireFile(int sectorSize, bool eraseSectors, IProgress<long> progress)
+        {
+            if (!sectorSize.IsValidSectorSize())
+            {
+                throw new ArgumentException($"Sector size must be a power of two which is at least 32 bytes. Got {sectorSize} bytes, instead.",
+                    nameof(sectorSize));
+            }
+
+            divisions.Clear();
+            tableHeader.ClearPartitions();
+            stream.Position = 0L;
+
+            WritePartitionTable();
+
+            if (!eraseSectors) { return; }
+
+            long writtenBytes = 0L;
+            while (stream.Position < stream.Length - 1)
+            {
+                stream.WriteByte(0);
+                writtenBytes += 1L;
+
+                if (writtenBytes % sectorSize == 0)
+                {
+                    progress.Report(writtenBytes / sectorSize);
+                }
+            }
+        }
+
+        public void AllocateUnallocatedSpace(int divisionIndex, string name, bool isBootable, long osBootProgramPartitionAddress,
+            int osBootProgramLength)
+        {
+            if (divisionIndex < 0 || divisionIndex >= divisions.Count)
+            {
+                throw new ArgumentOutOfRangeException(nameof(divisionIndex),
+                    $"Tried to allocate storage division #{divisionIndex + 1}, but there are only {divisions.Count} divisions.");
+            }
+
+            var division = divisions[divisionIndex];
+
+            if (division is Partition existingPartition)
+            {
+                throw new ArgumentException($"Tried to allocate storage division #{divisionIndex + 1}, but it was already allocated as {existingPartition.Name}");
+            }
+
+            var unallocatedSpace = division as UnallocatedSpace;
+            var nameByteCount = Encoding.UTF8.GetByteCount(name);
+
+            if (nameByteCount > 64)
+            {
+                throw new ArgumentOutOfRangeException($"IronArc partition names can only be 64 bytes or less; received a name that was {nameByteCount} bytes.");
+            }
+            
+            var newPartition = new Partition
+            {
+                AbsoluteStartAddress = unallocatedSpace.AbsoluteStartAddress,
+                Length = unallocatedSpace.Length,
+                IsBootable = isBootable,
+                Name = name,
+                OSBootProgramPartitionAddress = osBootProgramPartitionAddress,
+                OSBootProgramLength = osBootProgramLength
+            };
+            
+            tableHeader.InsertPartitionAtAddress(newPartition);
+            WritePartitionTable();
+            
+            divisions = DetermineAllocatedSpace();
+            OnDivisionListUpdated();
+        }
+
+        public void RemovePartition(int divisionIndex)
+        {
+            if (divisionIndex < 0 || divisionIndex >= divisions.Count)
+            {
+                throw new ArgumentOutOfRangeException(nameof(divisionIndex),
+                    $"Tried to remove partition in storage division #{divisionIndex + 1}, but there are only {divisions.Count} divisions.");
+            }
+
+            var division = divisions[divisionIndex];
+
+            if (division is UnallocatedSpace)
+            {
+                throw new ArgumentException(
+                    $"Tried to delete partition in storage division #{divisionIndex + 1}, but it already not allocated.");
+            }
+            
+            tableHeader.RemovePartition(division as Partition);
+            WritePartitionTable();
+            
+            divisions = DetermineAllocatedSpace();
+            OnDivisionListUpdated();
+        }
+
+        public void ResizePartition(int divisionIndex, long newSize)
+        {
+            if (newSize % SectorSize != 0)
+            {
+                throw new ArgumentException($"Tried to resize sector to {newSize} bytes, which was not evenly divisble by the sector size of {SectorSize} bytes.");
+            }
+            
+            if (divisionIndex < 0 || divisionIndex >= divisions.Count)
+            {
+                throw new ArgumentOutOfRangeException(nameof(divisionIndex),
+                    $"Tried to resize partition in storage division #{divisionIndex + 1}, but there are only {divisions.Count} divisions.");
+            }
+
+            var division = divisions[divisionIndex];
+
+            if (division is UnallocatedSpace)
+            {
+                throw new ArgumentException(
+                    $"Tried to resize partition in storage division #{divisionIndex + 1}, but it already not allocated.");
+            }
+
+            var existingPartition = division as Partition;
+            var nextPartition = tableHeader.GetPartitionOrNull(existingPartition.ImplicitId + 1);
+
+            if (nextPartition != null
+                && existingPartition.AbsoluteStartAddress + newSize > nextPartition.AbsoluteStartAddress)
+            {
+                throw new ArgumentOutOfRangeException(nameof(newSize),
+                    $"Cannot resize partition #{existingPartition.ImplicitId} to {newSize} bytes - overlaps next partition.");
+            }
+            
+            tableHeader.RemovePartition(existingPartition);
+            
+            var newPartition = new Partition
+            {
+                AbsoluteStartAddress = existingPartition.AbsoluteStartAddress,
+                IsBootable = existingPartition.IsBootable,
+                Length = newSize,
+                Name = existingPartition.Name,
+                OSBootProgramLength = existingPartition.OSBootProgramLength,
+                OSBootProgramPartitionAddress = existingPartition.OSBootProgramPartitionAddress
+            };
+            
+            tableHeader.InsertPartitionAtAddress(newPartition);
+            
+            WritePartitionTable();
+
+            divisions = DetermineAllocatedSpace();
+            OnDivisionListUpdated();
+        }
+
+        private void OnDivisionListUpdated() => DivisionListUpdated?.Invoke(this, new EventArgs());
     }
 }

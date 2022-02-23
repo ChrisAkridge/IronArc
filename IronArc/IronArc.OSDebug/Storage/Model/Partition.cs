@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -17,5 +18,19 @@ namespace IronArc.OSDebug.Storage.Model
         
         public int ImplicitId { get; set; }
         public long AbsoluteEndAddress => AbsoluteStartAddress + Length;
+
+        public void Write(BinaryWriter writer)
+        {
+            writer.Write(AbsoluteStartAddress);
+            writer.Write(Length);
+
+            var nameBytes = Encoding.UTF8.GetBytes(Name);
+            var nameBuffer = new byte[64];
+            Array.Copy(nameBytes, nameBuffer, 64);
+            writer.Write(nameBuffer);
+            writer.Write(IsBootable ? (byte)1 : (byte)0);
+            writer.Write(OSBootProgramPartitionAddress);
+            writer.Write(OSBootProgramLength);
+        }
     }
 }
