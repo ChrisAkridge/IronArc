@@ -9,6 +9,8 @@ namespace IronArc
         ConcurrentQueue<Message> UIMessageQueue { get; }
 
         ITerminal CreateTerminal();
+        IDynamicTerminal CreateDynamicTerminal();
         void DestroyTerminal(ITerminal terminal);
+        void DestroyDynamicTerminal(IDynamicTerminal dynamicTerminal);
     }
 }

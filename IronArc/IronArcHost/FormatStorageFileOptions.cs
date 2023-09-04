@@ -21,7 +21,7 @@ namespace IronArcHost
             InitializeComponent();
         }
 
-        private async Task ButtonOK_Click(object sender, EventArgs e)
+        private async void ButtonOK_Click(object sender, EventArgs e)
         {
             DialogResult = DialogResult.OK;
             ButtonOK.Enabled = false;

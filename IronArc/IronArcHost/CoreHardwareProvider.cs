@@ -8,6 +8,7 @@ namespace IronArcHost
     public sealed class CoreHardwareProvider : ICoreHardwareProvider
     {
         public List<TerminalForm> Terminals { get; } = new List<TerminalForm>();
+        public List<DynamicTerminalForm> DynamicTerminals { get; } = new List<DynamicTerminalForm>();
 
         public ConcurrentQueue<Message> UIMessageQueue => VMManager.UIMessageQueue;
 
@@ -26,6 +27,15 @@ namespace IronArcHost
             return terminalForm;
         }
 
+        public IDynamicTerminal CreateDynamicTerminal()
+        {
+            var dynamicTerminalForm = new DynamicTerminalForm();
+            _ = dynamicTerminalForm.Handle;
+
+            DynamicTerminals.Add(dynamicTerminalForm);
+            return dynamicTerminalForm;
+        }
+
         public void DestroyTerminal(ITerminal terminal)
         {
             var terminalForm = (TerminalForm)terminal;
@@ -37,5 +47,17 @@ namespace IronArcHost
 
             Terminals.Remove(terminalForm);
         }
+
+        public void DestroyDynamicTerminal(IDynamicTerminal dynamicTerminal)
+		{
+			var dynamicTerminalForm = (DynamicTerminalForm)dynamicTerminal;
+			dynamicTerminalForm.Invoke((System.Windows.Forms.MethodInvoker)delegate
+            {
+				dynamicTerminalForm.Close();
+				dynamicTerminalForm.Dispose();
+			});
+
+			DynamicTerminals.Remove(dynamicTerminalForm);
+		}
     }
 }

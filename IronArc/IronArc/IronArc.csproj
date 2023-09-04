@@ -1,155 +1,33 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <TargetFramework>net7.0-windows</TargetFramework>
     <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
-    <ProductVersion>8.0.30703</ProductVersion>
-    <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{8CE75941-A5DE-4155-AB10-DE82AFE001FB}</ProjectGuid>
     <OutputType>Library</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>IronArc</RootNamespace>
-    <AssemblyName>IronArc</AssemblyName>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
-    <TargetFrameworkProfile>
-    </TargetFrameworkProfile>
-    <FileAlignment>512</FileAlignment>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <UseWindowsForms>true</UseWindowsForms>
+    <ImportWindowsDesktopTargets>true</ImportWindowsDesktopTargets>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
-    <PlatformTarget>x86</PlatformTarget>
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <Prefer32Bit>false</Prefer32Bit>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
-    <PlatformTarget>x86</PlatformTarget>
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup>
     <StartupObject />
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
-    <DebugSymbols>true</DebugSymbols>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <DebugType>full</DebugType>
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <ErrorReport>prompt</ErrorReport>
-    <CodeAnalysisRuleSet>ManagedMinimumRules.ruleset</CodeAnalysisRuleSet>
-    <Prefer32Bit>false</Prefer32Bit>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'">
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <Optimize>true</Optimize>
-    <DebugType>pdbonly</DebugType>
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <ErrorReport>prompt</ErrorReport>
-    <CodeAnalysisRuleSet>ManagedMinimumRules.ruleset</CodeAnalysisRuleSet>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <Prefer32Bit>false</Prefer32Bit>
-  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
-    <DebugSymbols>true</DebugSymbols>
     <OutputPath>bin\x64\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <DebugType>full</DebugType>
-    <PlatformTarget>x64</PlatformTarget>
-    <LangVersion>7.3</LangVersion>
-    <ErrorReport>prompt</ErrorReport>
     <CodeAnalysisRuleSet>ManagedMinimumRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
     <OutputPath>bin\x64\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <Optimize>true</Optimize>
-    <DebugType>pdbonly</DebugType>
-    <PlatformTarget>x64</PlatformTarget>
-    <LangVersion>7.3</LangVersion>
-    <ErrorReport>prompt</ErrorReport>
     <CodeAnalysisRuleSet>ManagedMinimumRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Newtonsoft.Json, Version=12.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <HintPath>..\packages\Newtonsoft.Json.12.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
-    </Reference>
-    <Reference Include="System" />
-    <Reference Include="System.Drawing" />
-    <Reference Include="System.Numerics" />
-    <Reference Include="System.Windows.Forms" />
-    <Reference Include="System.Xml.Linq" />
+    <Compile Remove="VMHardwareState.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AddressBlock.cs" />
-    <Compile Include="Breakpoint.cs" />
-    <Compile Include="ByteBlock.cs" />
-    <Compile Include="CallStackFrame.cs" />
-    <Compile Include="DebugVM.cs" />
-    <Compile Include="EFlags.cs" />
-    <Compile Include="Enums.cs" />
-    <Compile Include="ErrorTable.cs" />
-    <Compile Include="Extensions.cs" />
-    <Compile Include="HardwareConfigurationTypeAttribute.cs" />
-    <Compile Include="HardwareDefinitionGenerator\DefaultDataTypes.cs" />
-    <Compile Include="HardwareDefinitionGenerator\Generator.cs" />
-    <Compile Include="HardwareDefinitionGenerator\Models\HardwareMethod.cs" />
-    <Compile Include="HardwareDefinitionGenerator\Models\HardwareMethodDataType.cs" />
-    <Compile Include="HardwareDefinitionGenerator\Models\HardwareMethodParameter.cs" />
-    <Compile Include="HardwareDefinitionGenerator\Models\HardwareDefinition.cs" />
-    <Compile Include="HardwareDefinitionGenerator\Models\HardwareDevice.cs" />
-    <Compile Include="HardwareDevice.cs" />
-    <Compile Include="HardwareProvider.cs" />
-    <Compile Include="HardwareSelection.cs" />
-    <Compile Include="Hardware\Configuration\HardwareConfiguration.cs" />
-    <Compile Include="Hardware\Configuration\NullConfiguration.cs" />
-    <Compile Include="Hardware\Configuration\StorageDeviceConfiguration.cs" />
-    <Compile Include="Hardware\StorageDevice.cs" />
-    <Compile Include="Hardware\Storage\StorageStream.cs" />
-    <Compile Include="Interrupt.cs" />
-    <Compile Include="Hardware\ITerminal.cs" />
-    <Compile Include="Hardware\SystemDevice.cs" />
-    <Compile Include="Hardware\TerminalDevice.cs" />
-    <Compile Include="Hardware\Debugger.cs" />
-    <Compile Include="ICoreHardwareProvider.cs" />
-    <Compile Include="InterruptAndHandler.cs" />
-    <Compile Include="InterruptHandlerKey.cs" />
-    <Compile Include="Memory\Context.cs" />
-    <Compile Include="Memory\ContextsChangedEventArgs.cs" />
-    <Compile Include="Memory\HardwareMemoryMapping.cs" />
-    <Compile Include="Memory\MemoryManager.cs" />
-    <Compile Include="Message.cs" />
-    <Compile Include="Processor.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="VirtualMachine.cs" />
-    <Compile Include="VMErrorException.cs" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
   </ItemGroup>
-  <ItemGroup>
-    <None Include="packages.config" />
-  </ItemGroup>
-  <ItemGroup />
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <!-- <Import Project="$(ProgramFiles)\MSBuild\StyleCop\v4.7\StyleCop.targets" />
-  -->
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
-       Other similar extension points exist, see Microsoft.Common.targets.
-  <Target Name="BeforeBuild">
-  </Target>
-  <Target Name="AfterBuild">
-  </Target>
-  -->
 </Project>
