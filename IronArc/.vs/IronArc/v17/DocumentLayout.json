@@ -1,0 +1,138 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\Users\\cakri\\Documents\\GitHub\\IronArc\\IronArc\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{7632530B-84C0-4927-942F-0EAEB3724EBF}|IronArcHost\\IronArcHost.csproj|c:\\users\\cakri\\documents\\github\\ironarc\\ironarc\\ironarchost\\debuggerform.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{7632530B-84C0-4927-942F-0EAEB3724EBF}|IronArcHost\\IronArcHost.csproj|solutionrelative:ironarchost\\debuggerform.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{8CE75941-A5DE-4155-AB10-DE82AFE001FB}|IronArc\\IronArc.csproj|c:\\users\\cakri\\documents\\github\\ironarc\\ironarc\\ironarc\\ironarc.csproj||{04B8AB82-A572-4FEF-95CE-5222444B6B64}|",
+      "RelativeMoniker": "D:0:0:{8CE75941-A5DE-4155-AB10-DE82AFE001FB}|IronArc\\IronArc.csproj|solutionrelative:ironarc\\ironarc.csproj||{04B8AB82-A572-4FEF-95CE-5222444B6B64}|"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{8CE75941-A5DE-4155-AB10-DE82AFE001FB}|IronArc\\IronArc.csproj|c:\\users\\cakri\\documents\\github\\ironarc\\ironarc\\ironarc\\hardware\\dynamicterminaldevice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{8CE75941-A5DE-4155-AB10-DE82AFE001FB}|IronArc\\IronArc.csproj|solutionrelative:ironarc\\hardware\\dynamicterminaldevice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{26C5F25F-B450-4CAF-AD8B-B8D11AE73457}|Be.Windows.Forms.HexBox\\Be.Windows.Forms.HexBox.csproj|c:\\users\\cakri\\documents\\github\\ironarc\\ironarc\\be.windows.forms.hexbox\\be.windows.forms.hexbox.csproj||{04B8AB82-A572-4FEF-95CE-5222444B6B64}|",
+      "RelativeMoniker": "D:0:0:{26C5F25F-B450-4CAF-AD8B-B8D11AE73457}|Be.Windows.Forms.HexBox\\Be.Windows.Forms.HexBox.csproj|solutionrelative:be.windows.forms.hexbox\\be.windows.forms.hexbox.csproj||{04B8AB82-A572-4FEF-95CE-5222444B6B64}|"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{7632530B-84C0-4927-942F-0EAEB3724EBF}|IronArcHost\\IronArcHost.csproj|c:\\users\\cakri\\documents\\github\\ironarc\\ironarc\\ironarchost\\ironarchost.csproj||{04B8AB82-A572-4FEF-95CE-5222444B6B64}|",
+      "RelativeMoniker": "D:0:0:{7632530B-84C0-4927-942F-0EAEB3724EBF}|IronArcHost\\IronArcHost.csproj|solutionrelative:ironarchost\\ironarchost.csproj||{04B8AB82-A572-4FEF-95CE-5222444B6B64}|"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{21F0D1F7-8559-4662-B357-D55FC3235200}|IronArc.OSDebug\\IronArc.OSDebug.csproj|c:\\users\\cakri\\documents\\github\\ironarc\\ironarc\\ironarc.osdebug\\ironarc.osdebug.csproj||{04B8AB82-A572-4FEF-95CE-5222444B6B64}|",
+      "RelativeMoniker": "D:0:0:{21F0D1F7-8559-4662-B357-D55FC3235200}|IronArc.OSDebug\\IronArc.OSDebug.csproj|solutionrelative:ironarc.osdebug\\ironarc.osdebug.csproj||{04B8AB82-A572-4FEF-95CE-5222444B6B64}|"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 4,
+          "Children": [
+            {
+              "$type": "Bookmark",
+              "Name": "ST:3:0:{57d563b6-44a5-47df-85be-f4199ad6b651}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:6:0:{57d563b6-44a5-47df-85be-f4199ad6b651}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:12:0:{57d563b6-44a5-47df-85be-f4199ad6b651}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:9:0:{57d563b6-44a5-47df-85be-f4199ad6b651}"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "DebuggerForm.cs",
+              "DocumentMoniker": "C:\\Users\\cakri\\Documents\\GitHub\\IronArc\\IronArc\\IronArcHost\\DebuggerForm.cs",
+              "RelativeDocumentMoniker": "IronArcHost\\DebuggerForm.cs",
+              "ToolTip": "C:\\Users\\cakri\\Documents\\GitHub\\IronArc\\IronArc\\IronArcHost\\DebuggerForm.cs",
+              "RelativeToolTip": "IronArcHost\\DebuggerForm.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAgAAAAGAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-11-30T22:03:45.479Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "DynamicTerminalDevice.cs",
+              "DocumentMoniker": "C:\\Users\\cakri\\Documents\\GitHub\\IronArc\\IronArc\\IronArc\\Hardware\\DynamicTerminalDevice.cs",
+              "RelativeDocumentMoniker": "IronArc\\Hardware\\DynamicTerminalDevice.cs",
+              "ToolTip": "C:\\Users\\cakri\\Documents\\GitHub\\IronArc\\IronArc\\IronArc\\Hardware\\DynamicTerminalDevice.cs",
+              "RelativeToolTip": "IronArc\\Hardware\\DynamicTerminalDevice.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAQAAAAdAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-11-30T22:03:23.772Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "Be.Windows.Forms.HexBox",
+              "DocumentMoniker": "C:\\Users\\cakri\\Documents\\GitHub\\IronArc\\IronArc\\Be.Windows.Forms.HexBox\\Be.Windows.Forms.HexBox.csproj",
+              "RelativeDocumentMoniker": "Be.Windows.Forms.HexBox\\Be.Windows.Forms.HexBox.csproj",
+              "ToolTip": "C:\\Users\\cakri\\Documents\\GitHub\\IronArc\\IronArc\\Be.Windows.Forms.HexBox\\Be.Windows.Forms.HexBox.csproj",
+              "RelativeToolTip": "Be.Windows.Forms.HexBox\\Be.Windows.Forms.HexBox.csproj",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
+              "WhenOpened": "2024-11-30T22:03:00.522Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "IronArcHost",
+              "DocumentMoniker": "C:\\Users\\cakri\\Documents\\GitHub\\IronArc\\IronArc\\IronArcHost\\IronArcHost.csproj",
+              "RelativeDocumentMoniker": "IronArcHost\\IronArcHost.csproj",
+              "ToolTip": "C:\\Users\\cakri\\Documents\\GitHub\\IronArc\\IronArc\\IronArcHost\\IronArcHost.csproj",
+              "RelativeToolTip": "IronArcHost\\IronArcHost.csproj",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
+              "WhenOpened": "2024-11-30T22:02:49.558Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "IronArc.OSDebug",
+              "DocumentMoniker": "C:\\Users\\cakri\\Documents\\GitHub\\IronArc\\IronArc\\IronArc.OSDebug\\IronArc.OSDebug.csproj",
+              "RelativeDocumentMoniker": "IronArc.OSDebug\\IronArc.OSDebug.csproj",
+              "ToolTip": "C:\\Users\\cakri\\Documents\\GitHub\\IronArc\\IronArc\\IronArc.OSDebug\\IronArc.OSDebug.csproj",
+              "RelativeToolTip": "IronArc.OSDebug\\IronArc.OSDebug.csproj",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
+              "WhenOpened": "2024-11-30T22:02:42.008Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "IronArc",
+              "DocumentMoniker": "C:\\Users\\cakri\\Documents\\GitHub\\IronArc\\IronArc\\IronArc\\IronArc.csproj",
+              "RelativeDocumentMoniker": "IronArc\\IronArc.csproj",
+              "ToolTip": "C:\\Users\\cakri\\Documents\\GitHub\\IronArc\\IronArc\\IronArc\\IronArc.csproj",
+              "RelativeToolTip": "IronArc\\IronArc.csproj",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
+              "WhenOpened": "2024-11-30T22:02:28.096Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{aa2115a1-9712-457b-9047-dbb71ca2cdd2}"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
